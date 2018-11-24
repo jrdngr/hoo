@@ -1,6 +1,6 @@
 type AnyError = Box<dyn std::error::Error>;
 
-use hoo::api::ApiConnection;
+use hoo::api::{ApiConnection, Light};
 
 fn main() -> Result<(), AnyError> {
     dotenv::dotenv().ok();
@@ -10,6 +10,15 @@ fn main() -> Result<(), AnyError> {
 
     let connection = ApiConnection::new(&base_uri, &user_id);
 
+    let uri = format!("{}/{}/lights/1", base_uri, user_id);
+
+    let response = connection.client.get(uri.as_str())
+        .send()?
+        .text()?;
+
+    let light: Light = serde_json::from_str(&response)?;
+
+    println!("{:?}", light);
 
     Ok(())
 }

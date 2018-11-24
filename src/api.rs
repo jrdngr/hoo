@@ -32,23 +32,25 @@ pub struct LightState {
     pub ct: u16,
     pub effect: LightEffect,
     pub alert: LightAlert,
-    pub transitiontime: u16,
-    pub bri_inc: i16,
-    pub sat_inc: i16,
-    pub hue_inc: i32,
-    pub ct_inc: i32,
-    pub xy_inc: (f32, f32),
+    pub transitiontime: Option<u16>,
+    pub bri_inc: Option<i16>,
+    pub sat_inc: Option<i16>,
+    pub hue_inc: Option<i32>,
+    pub ct_inc: Option<i32>,
+    pub xy_inc: Option<(f32, f32)>,
     pub colormode: LightColorMode,
     pub reachable: bool,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all="lowercase")]
 pub enum LightEffect {
     None,
     ColorLoop,
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all="lowercase")]
 pub enum LightAlert {
     None,
     Select,
@@ -56,6 +58,7 @@ pub enum LightAlert {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all="lowercase")]
 pub enum LightColorMode {
     HS,
     XY,
