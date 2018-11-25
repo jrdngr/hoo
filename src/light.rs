@@ -125,7 +125,7 @@ impl LightState {
         self
     }
 
-    pub fn color(mut self, color: Color) -> LightState {
+    pub fn color(mut self, color: &Color) -> LightState {
         self.hue(color.h()).sat(color.s()).bri(color.v())
     }
 }
