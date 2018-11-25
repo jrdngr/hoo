@@ -1,66 +1,54 @@
 use serde_derive::Deserialize;
+use reqwest::Client;
+
+use crate::AnyError;
 
 pub struct ApiConnection {
     pub client: reqwest::Client,
     base_uri: String,
-    user_id: String,
 }
 
 impl ApiConnection {
     pub fn new(base_uri: &str, user_id: &str) -> Self {
+        let base_uri = format!("{}/api/{}", base_uri, user_id);
         Self { 
             client: reqwest::Client::new(),
             base_uri: base_uri.to_string(),
-            user_id: user_id.to_string(),
         }
+    }
+
+    pub fn base(&self) -> String {
+        self.base_uri.clone()
     }
 }
 
-#[derive(Debug, Deserialize)]
-pub struct Light {
-    pub name: String,
-    pub state: LightState,
+
+pub fn on(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
+    let body = r#"{"on": true}"#;
+
+    let uri = format!("{}/lights/{}/state", connection.base(), light_number);
+
+    println!("{}", uri);
+
+    let response = connection.client.put(&uri)
+        .body(body)
+        .send()?
+        .text()?;
+
+        println!("{}", &response);
+
+    Ok(response)
 }
 
-#[derive(Debug, Deserialize)]
-pub struct LightState {
-    pub on: bool,
-    pub bri: u8,
-    pub hue: u16,
-    pub sat: u8,
-    pub xy: (f32, f32),
-    pub ct: u16,
-    pub effect: LightEffect,
-    pub alert: LightAlert,
-    pub transitiontime: Option<u16>,
-    pub bri_inc: Option<i16>,
-    pub sat_inc: Option<i16>,
-    pub hue_inc: Option<i32>,
-    pub ct_inc: Option<i32>,
-    pub xy_inc: Option<(f32, f32)>,
-    pub colormode: LightColorMode,
-    pub reachable: bool,
-}
+pub fn off(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
+    let body = r#"{"on": false}"#;
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all="lowercase")]
-pub enum LightEffect {
-    None,
-    ColorLoop,
-}
+    let uri = format!("{}/lights/{}/state", connection.base(), light_number);
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all="lowercase")]
-pub enum LightAlert {
-    None,
-    Select,
-    Lselect,
-}
+    let response = connection.client.put(&uri)
+        .body(body)
+        .send()?
+        .text()?;
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all="lowercase")]
-pub enum LightColorMode {
-    HS,
-    XY,
-    CT,
+    Ok(response)
 }

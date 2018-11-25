@@ -1,8 +1,7 @@
 pub mod api;
+pub mod light;
 
-
-
-
+pub type AnyError = Box<dyn std::error::Error>;
 
 
 #[cfg(test)]
