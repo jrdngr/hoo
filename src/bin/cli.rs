@@ -89,7 +89,6 @@ fn main() -> Result<(), AnyError> {
             },
             Command::Invalid => println!("Invalid command"),
             Command::Quit => break,
-            _ => println!("oops"),
         }
     }
 
