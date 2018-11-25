@@ -1,22 +1,14 @@
 use std::fmt::Display;
 
 pub struct Color {
-    hue: f64,
-    saturation: f64,
-    value: f64,
+    hue: u16,
+    saturation: u8,
+    value: u8,
 }
 
 impl Color {
-    pub fn from_hsv(hue: f64, saturation: f64, value: f64) -> Self {
-        let h = hue.min(1.0).max(0.0);
-        let s = saturation.min(1.0).max(0.0);
-        let v = value.min(1.0).max(0.0);
-
-        Self { 
-            hue: h, 
-            saturation: s, 
-            value: v, 
-        }
+    pub fn from_hsv(hue: u16, saturation: u8, value: u8) -> Self {
+        Self { hue, saturation, value }
     }
 
     pub fn from_rgb(red: f64, green: f64, blue: f64) -> Self {
@@ -28,51 +20,64 @@ impl Color {
         let cmin = r.min(g).min(b);
         let delta = cmax - cmin;
 
-        let hue = match delta {
-            delta if cmax == r => 60.0 * (((g - b) / delta) % 60.0),
-            delta if cmax == g => 60.0 * (((b - r) / delta) + 2.0),
-            delta if cmax == b => 60.0 * (((r - g) / delta) + 4.0),
+        let mut hue = match cmax {
+            cmax if cmax == r => 60.0 * ((g - b) / delta),
+            cmax if cmax == g => 60.0 * (((b - r) / delta) + 2.0),
+            cmax if cmax == b => 60.0 * (((r - g) / delta) + 4.0),
             _ => 0.0,
         };
 
-        let saturation = if cmax == 0.0 { 0.0 } else { cmax / delta };
+        if hue < 0.0 {
+            hue += 360.0;
+        }
+
+        let saturation = if cmax == 0.0 || cmin == 1.0 { 0.0 } else { delta / cmax };
 
         let value = cmax;
 
-        Color::from_hsv(hue, saturation, value)
+        let h = ((hue / 360.0) * std::u16::MAX as f64) as u16;
+        let s = (saturation * std::u8::MAX as f64) as u8;
+        let v = (value * std::u8::MAX as f64) as u8;
+
+        Color::from_hsv(h, s, v)
     }
 
-    pub fn h(&self) -> f64 {
+    pub fn h(&self) -> u16 {
         self.hue
     }
 
-    pub fn s(&self) -> f64 {
+    pub fn s(&self) -> u8 {
         self.saturation
     }
 
-    pub fn v(&self) -> f64 {
+    pub fn v(&self) -> u8 {
         self.value
     }
 
-    pub fn hsv(&self) -> (f64, f64, f64) {
+    pub fn hsv(&self) -> (u16, u8, u8) {
         (self.hue, self.saturation, self.value)
     }
 
     pub fn rgb(&self) -> (f64, f64, f64) {
-        let c = self.value * self.saturation;
-        let x = c * (1.0 - (((self.hue / 60.0) % 2.0) + 1.0).abs());
-        let m = self.value - c;
+        let h = (self.hue as f64 / std::u16::MAX as f64) * 360.0;
+        let s = (self.saturation as f64 / std::u8::MAX as f64);
+        let v = (self.value as f64 / std::u8::MAX as f64);
 
-        let hue = (self.hue * 360.0) as u16;
+        let c = v * s;
+        let hp = h / 60.0;
+        let x = c * (1.0 - ((hp % 2.0) - 1.0).abs());
 
-        let (r, g, b) = match hue {
-            hue if hue >= 0 && hue < 60 => (c, x, 0.0),
-            hue if hue >= 60 && hue < 120 => (x, c, 0.0),
-            hue if hue >= 120 && hue < 180 => (0.0, c, x),
-            hue if hue >= 180 && hue < 240 => (0.0, x, c),
-            hue if hue >= 240 && hue < 300 => (x, 0.0, c),
-            _ => (c, 0.0, x),
+        let (r, g, b) = match hp {
+            hp if hp >= 0.0 && hp <= 1.0 => (c, x, 0.0),
+            hp if hp > 1.0 && hp <= 2.0  => (x, c, 0.0),
+            hp if hp > 2.0 && hp <= 3.0  => (0.0, c, x),
+            hp if hp > 3.0 && hp <= 4.0  => (0.0, x, c),
+            hp if hp > 4.0 && hp <= 5.0  => (x, 0.0, c),
+            hp if hp > 5.0 && hp <= 6.0  => (c, 0.0, x),
+            _ => (0.0, 0.0, 0.0)
         };
+   
+        let m = v - c;
 
         (r + m, g + m, b + m)
     }

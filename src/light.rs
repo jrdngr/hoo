@@ -13,11 +13,7 @@ impl Light {
         if let Some(hue) = self.state.hue {
             if let Some(saturation) = self.state.sat {
                 if let Some(value) = self.state.bri {
-                    let h = hue as f64 / std::u16::MAX as f64;
-                    let s = saturation as f64 * std::u8::MAX as f64;
-                    let v = value as f64 * std::u8::MAX as f64;
-
-                    return Some(Color::from_hsv(h, s, v));
+                    return Some(Color::from_hsv(hue, saturation, value));
                 }
             }
         }
@@ -130,11 +126,7 @@ impl LightState {
     }
 
     pub fn color(mut self, color: Color) -> LightState {
-        let hue = (color.h() * std::u16::MAX as f64) as u16;
-        let saturation = (color.s() * std::u8::MAX as f64) as u8;
-        let value = (color.v() * std::u8::MAX as f64) as u8;
-
-        self.hue(hue).sat(saturation).bri(value)
+        self.hue(color.h()).sat(color.s()).bri(color.v())
     }
 }
 

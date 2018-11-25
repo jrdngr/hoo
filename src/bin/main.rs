@@ -24,7 +24,7 @@ fn main() -> Result<(), AnyError> {
         stdin().read_line(&mut buffer).expect("Failed to read line");
         buffer = buffer.trim().to_string();
 
-        if buffer == "quit".to_string() {
+        if buffer == "quit".to_string() || buffer == "q".to_string() {
             break;
         }
 
@@ -42,21 +42,46 @@ fn main() -> Result<(), AnyError> {
             let value = value as f64 / std::u8::MAX as f64;
 
             if let Some(color) = light.color() {
-                println!("{}", color);
                 let (_, g, b) = color.rgb();
                 let state = LightState::new().color(Color::from_rgb(value, g, b));
                 api::set_state(&connection, light_num, &state);
             } else {
-
+                let state = LightState::new().color(Color::from_rgb(value, 0.0, 0.0));
             }
-
-
-
-            
         } else if command == "green".to_string() {
-            
+            let value = split[2].parse::<u8>()?;
+            let value = value as f64 / std::u8::MAX as f64;
+
+            if let Some(color) = light.color() {
+                let (r, _, b) = color.rgb();
+                let state = LightState::new().color(Color::from_rgb(r, value, b));
+                api::set_state(&connection, light_num, &state);
+            } else {
+                let state = LightState::new().color(Color::from_rgb(0.0, value, 0.0));
+            }
         } else if command == "blue".to_string() {
-            
+            let value = split[2].parse::<u8>()?;
+            let value = value as f64 / std::u8::MAX as f64;
+
+            if let Some(color) = light.color() {
+                let (r, g, _) = color.rgb();
+                let state = LightState::new().color(Color::from_rgb(r, g, value));
+                api::set_state(&connection, light_num, &state);
+            } else {
+                let state = LightState::new().color(Color::from_rgb(0.0, 0.0, value));
+            }
+        } else if command == "color".to_string() {
+            let r = split[2].parse::<u8>()?;
+            let r = r as f64 / std::u8::MAX as f64;
+
+            let g = split[3].parse::<u8>()?;
+            let g = g as f64 / std::u8::MAX as f64;
+
+            let b = split[4].parse::<u8>()?;
+            let b = b as f64 / std::u8::MAX as f64;
+
+            let state = LightState::new().color(Color::from_rgb(r, g, b));
+            api::set_state(&connection, light_num, &state);
         } else {
             println!("Unknown command");
         }
