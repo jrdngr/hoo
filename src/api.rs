@@ -2,6 +2,7 @@ use serde_derive::Deserialize;
 use reqwest::Client;
 
 use crate::AnyError;
+use crate::light::{Light, LightState};
 
 pub struct ApiConnection {
     pub client: reqwest::Client,
@@ -22,33 +23,38 @@ impl ApiConnection {
     }
 }
 
+pub fn get_light(connection: &ApiConnection, light_number: u8) -> Result<Light, AnyError> {
+    let uri = format!("{}/lights/{}", connection.base(), light_number);
 
-pub fn on(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
-    let body = r#"{"on": true}"#;
+    let response = connection.client.get(&uri)
+        .send()?
+        .text()?;
+
+    let light = serde_json::from_str(&response)?;
+
+    Ok(light)
+}
+
+pub fn set_state(connection: &ApiConnection, light_number: u8, state: &LightState) -> Result<String, AnyError> {
+    let body = serde_json::to_string(state)?;
 
     let uri = format!("{}/lights/{}/state", connection.base(), light_number);
-
-    println!("{}", uri);
 
     let response = connection.client.put(&uri)
         .body(body)
         .send()?
         .text()?;
-
-        println!("{}", &response);
 
     Ok(response)
 }
 
+
+pub fn on(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
+    let state = LightState::new().on(true);
+    set_state(connection, light_number, &state)
+}
+
 pub fn off(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
-    let body = r#"{"on": false}"#;
-
-    let uri = format!("{}/lights/{}/state", connection.base(), light_number);
-
-    let response = connection.client.put(&uri)
-        .body(body)
-        .send()?
-        .text()?;
-
-    Ok(response)
+    let state = LightState::new().on(false);
+    set_state(connection, light_number, &state)
 }

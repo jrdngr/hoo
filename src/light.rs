@@ -1,39 +1,151 @@
-use serde_derive::Deserialize;
+use serde_derive::{Serialize, Deserialize};
 
-#[derive(Debug, Deserialize)]
+use crate::color::Color;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Light {
     pub name: String,
     pub state: LightState,
 }
 
-#[derive(Debug, Deserialize)]
+impl Light {
+    pub fn color(&self) -> Option<Color> {
+        if let Some(hue) = self.state.hue {
+            if let Some(saturation) = self.state.sat {
+                if let Some(value) = self.state.bri {
+                    let h = hue as f64 / std::u16::MAX as f64;
+                    let s = saturation as f64 * std::u8::MAX as f64;
+                    let v = value as f64 * std::u8::MAX as f64;
+
+                    return Some(Color::from_hsv(h, s, v));
+                }
+            }
+        }
+
+        None
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LightState {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub on: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bri: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hue: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sat: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub xy: Option<(f32, f32)>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ct: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub effect: Option<LightEffect>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub alert: Option<LightAlert>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub transitiontime: Option<u16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub bri_inc: Option<i16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sat_inc: Option<i16>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hue_inc: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ct_inc: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub xy_inc: Option<(f32, f32)>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub colormode: Option<LightColorMode>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub reachable: Option<bool>,
 }
 
-#[derive(Debug, Deserialize)]
+impl LightState {
+    pub fn new() -> Self {
+        Self {
+            on: None,
+            bri: None,
+            hue: None,
+            sat: None,
+            xy: None,
+            ct: None,
+            effect: None,
+            alert: None,
+            transitiontime: None,
+            bri_inc: None,
+            sat_inc: None,
+            hue_inc: None,
+            ct_inc: None,
+            xy_inc: None,
+            colormode: None,
+            reachable: None,
+        }
+    }
+
+    pub fn on(mut self, is_on: bool) -> LightState {
+        self.on = Some(is_on);
+        self
+    }
+
+    pub fn bri(mut self, brightness: u8) -> LightState {
+        self.bri = Some(brightness);
+        self
+    }
+
+    pub fn hue(mut self, hue: u16) -> LightState {
+        self.hue = Some(hue);
+        self
+    }
+
+    pub fn sat(mut self, saturation: u8) -> LightState {
+        self.sat = Some(saturation);
+        self
+    }
+
+    pub fn xy(mut self, x: f32, y: f32) -> LightState {
+        self.xy = Some((x, y));
+        self
+    }
+
+    pub fn ct(mut self, color_temp: u16) -> LightState {
+        self.ct = Some(color_temp);
+        self
+    }
+
+    pub fn effect(mut self, effect: LightEffect) -> LightState {
+        self.effect = Some(effect);
+        self
+    }
+
+    pub fn alert(mut self, alert: LightAlert) -> LightState {
+        self.alert = Some(alert);
+        self
+    }
+
+    pub fn transitiontime(mut self, transition_time: u16) -> LightState {
+        self.transitiontime = Some(transition_time);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> LightState {
+        let hue = (color.h() * std::u16::MAX as f64) as u16;
+        let saturation = (color.s() * std::u8::MAX as f64) as u8;
+        let value = (color.v() * std::u8::MAX as f64) as u8;
+
+        self.hue(hue).sat(saturation).bri(value)
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all="lowercase")]
 pub enum LightEffect {
     None,
     ColorLoop,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all="lowercase")]
 pub enum LightAlert {
     None,
@@ -41,7 +153,7 @@ pub enum LightAlert {
     Lselect,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all="lowercase")]
 pub enum LightColorMode {
     HS,
