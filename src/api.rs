@@ -2,7 +2,7 @@ use serde_derive::Deserialize;
 use reqwest::Client;
 
 use crate::AnyError;
-use crate::light::{Light, LightState};
+use crate::light::{Light, LightState, LightEffect};
 
 pub struct ApiConnection {
     pub client: reqwest::Client,
@@ -56,5 +56,16 @@ pub fn on(connection: &ApiConnection, light_number: u8) -> Result<String, AnyErr
 
 pub fn off(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
     let state = LightState::new().on(false);
+    set_state(connection, light_number, &state)
+}
+
+pub fn colorloop(connection: &ApiConnection, light_number: u8, enabled: bool) -> Result<String, AnyError> {
+    let effect = if enabled { LightEffect::ColorLoop }  else { LightEffect::None };
+    let state = LightState::new().effect(effect);
+    set_state(connection, light_number, &state)
+}
+
+pub fn transition_time(connection: &ApiConnection, light_number: u8, transition_time: u16) -> Result<String, AnyError> {
+    let state = LightState::new().transitiontime(transition_time);
     set_state(connection, light_number, &state)
 }

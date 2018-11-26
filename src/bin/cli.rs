@@ -2,7 +2,7 @@ use std::io::stdin;
 use std::str::FromStr;
 
 use hoo::AnyError;
-use hoo::light::LightState;
+use hoo::light::{LightState, LightEffect};
 use hoo::api;
 use hoo::color::Color;
 
@@ -87,6 +87,12 @@ fn main() -> Result<(), AnyError> {
                 let state = LightState::new().color(&current_color);
                 api::set_state(&connection, l, &state)?;
             },
+            Command::ColorLoop(l, e) => {
+                api::colorloop(&connection, l, e)?;
+            },
+            Command::TransitionTime(l, t) => {
+                api::transition_time(&connection, l, t)?;
+            },
             Command::Invalid => println!("Invalid command"),
             Command::Quit => break,
         }
@@ -106,6 +112,8 @@ enum Command {
     Saturation(LightNumber, SaturationValue),
     Brightness(LightNumber, BrightnessValue),
     HsvColor(LightNumber, HueValue, SaturationValue, BrightnessValue),
+    ColorLoop(LightNumber, bool),
+    TransitionTime(LightNumber, u16),
     Quit,
     Invalid,
 }
@@ -193,6 +201,16 @@ impl FromStr for Command {
                 let value = (v * std::u8::MAX as f64) as u8;
 
                 Ok(Command::HsvColor(light_num, hue, saturation, value))
+            },
+            "colorloop" => {
+                let enabled = split[2].parse::<bool>()?;
+
+                Ok(Command::ColorLoop(light_num, enabled))
+            },
+            "tt" => {
+                let time = split[2].parse::<u16>()?;
+
+                Ok(Command::TransitionTime(light_num, time))
             },
             _ => Ok(Command::Invalid),
         }
