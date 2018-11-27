@@ -1,6 +1,7 @@
 pub mod api;
 pub mod light;
 pub mod color;
+pub mod animation;
 
 pub type AnyError = Box<dyn std::error::Error>;
 

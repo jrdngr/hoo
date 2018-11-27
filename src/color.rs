@@ -60,8 +60,8 @@ impl Color {
 
     pub fn rgb(&self) -> (f64, f64, f64) {
         let h = (self.hue as f64 / std::u16::MAX as f64) * 360.0;
-        let s = (self.saturation as f64 / std::u8::MAX as f64);
-        let v = (self.value as f64 / std::u8::MAX as f64);
+        let s = self.saturation as f64 / std::u8::MAX as f64;
+        let v = self.value as f64 / std::u8::MAX as f64;
 
         let c = v * s;
         let hp = h / 60.0;

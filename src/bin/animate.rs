@@ -1,16 +1,10 @@
-use std::time::{Instant, Duration};
-use std::thread::sleep;
+use std::time::Duration;
 
 use hoo::AnyError;
 use hoo::light::LightState;
+use hoo::animation::{Animation, AnimationFrame};
 use hoo::api;
 use hoo::color::Color;
-
-type LightNumber = u8;
-type RgbValue = f64;
-type HueValue = u16;
-type SaturationValue = u8;
-type BrightnessValue = u8;
 
 fn main() -> Result<(), AnyError> {
     dotenv::dotenv().ok();
@@ -20,42 +14,43 @@ fn main() -> Result<(), AnyError> {
 
     let connection = hoo::api::ApiConnection::new(&base_uri, &user_id);
 
-    let transitions = vec![
-        TransitionState { 
-            color: Color::from_rgb(0.0, 0.0, 1.0),
-            hold_time: 1,
-            transition_time: 10,
+    let light_number: u8 = 2;
+
+    api::on(&connection, light_number)?;
+
+    let hold = Duration::from_secs(0);
+    let transition = Duration::from_secs(10);
+
+    let frames = vec![
+        AnimationFrame {
+            light_number,
+            hold_time: hold.clone(),
+            transition_time: transition.clone(),
+            state: LightState::new().color(&Color::from_hsv(50210, 222, 127)),
         },
-        TransitionState { 
-            color: Color::from_rgb(0.0, 1.0, 1.0),
-            hold_time: 1,
-            transition_time: 10,
+        AnimationFrame {
+            light_number,
+            hold_time: hold.clone(),
+            transition_time: transition.clone(),
+            state: LightState::new().color(&Color::from_hsv(46973, 217, 127)),
         },
-        TransitionState { 
-            color: Color::from_rgb(0.0, 1.0, 0.0),
-            hold_time: 1,
-            transition_time: 10,
+        AnimationFrame {
+            light_number,
+            hold_time: hold.clone(),
+            transition_time: transition.clone(),
+            state: LightState::new().color(&Color::from_hsv(46014, 254, 127)),
+        },
+        AnimationFrame {
+            light_number,
+            hold_time: hold.clone(),
+            transition_time: transition.clone(),
+            state: LightState::new().color(&Color::from_hsv(46973, 217, 127)),
         },
     ];
 
-    api::on(&connection, 1);
+    let animation = Animation::new().with_frames(frames);
 
-    let state = LightState::new().transitiontime(0);
-    api::set_state(&connection, 1, &state)?;
+    animation.play(&connection)?;
 
-    loop {
-        for transition in &transitions {
-            let state = LightState::new()
-                .color(&transition.color)
-                .transitiontime(transition.transition_time * 10);
-            api::set_state(&connection, 1, &state);
-            sleep(Duration::from_secs(transition.transition_time as u64 + transition.hold_time));
-        }
-    }
-}
-
-struct TransitionState {
-    pub color: Color,
-    pub hold_time: u64,
-    pub transition_time: u16,
+    Ok(())
 }

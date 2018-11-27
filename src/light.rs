@@ -125,8 +125,18 @@ impl LightState {
         self
     }
 
-    pub fn color(mut self, color: &Color) -> LightState {
-        self.hue(color.h()).sat(color.s()).bri(color.v())
+    pub fn color(self, color: &Color) -> LightState {
+        self.hue(color.h())
+            .sat(color.s())
+            .bri(color.v())
+    }
+
+    pub fn get_color(&self) -> Option<Color> {
+        if self.hue.is_some() && self.sat.is_some() && self.bri.is_some() {
+            return Some(Color::from_hsv(self.hue.unwrap(), self.sat.unwrap(), self.bri.unwrap()));
+        } else {
+            None
+        }
     }
 }
 
