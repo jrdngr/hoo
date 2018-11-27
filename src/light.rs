@@ -2,6 +2,8 @@ use serde_derive::{Serialize, Deserialize};
 
 use crate::color::Color;
 
+pub type LightNumber = u8;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Light {
     pub name: String,
