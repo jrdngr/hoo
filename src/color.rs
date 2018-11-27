@@ -89,3 +89,8 @@ impl Display for Color {
         write!(f, "Color(h: {}, s: {}, v: {}, r: {}, g: {}, b: {})", self.h(), self.s(), self.v(), r, g, b)
     }
 }
+
+pub fn deg_to_u16(deg: f64) -> u16 {
+    let multiplier = deg / 360.0;
+    (multiplier * std::u16::MAX) as u16
+}
