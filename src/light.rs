@@ -1,8 +1,13 @@
+use std::collections::HashMap;
+
 use serde_derive::{Serialize, Deserialize};
 
 use crate::color::Color;
 
 pub type LightNumber = u8;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LightCollection(pub HashMap<u8, Light>);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Light {
@@ -131,6 +136,20 @@ impl LightState {
         self.hue(color.h())
             .sat(color.s())
             .bri(color.v())
+    }
+
+    pub fn is_on(&self) -> bool {
+        match self.on {
+            Some(is_on) => is_on,
+            None => false,
+        }
+    }
+
+    pub fn is_reachable(&self) -> bool {
+        match self.reachable {
+            Some(is_reachable) => is_reachable,
+            None => false,
+        }
     }
 
     pub fn get_color(&self) -> Option<Color> {

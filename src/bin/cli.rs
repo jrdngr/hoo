@@ -1,16 +1,20 @@
 use std::io::stdin;
 use std::str::FromStr;
+use std::time::Duration;
 
 use hoo::AnyError;
-use hoo::light::{LightState, LightEffect};
+use hoo::light::LightState;
 use hoo::api;
 use hoo::color::Color;
+use hoo::animation;
 
 type LightNumber = u8;
 type RgbValue = f64;
 type HueValue = u16;
 type SaturationValue = u8;
 type BrightnessValue = u8;
+type TransitionTime = u16;
+type HoldTime = u16;
 
 fn main() -> Result<(), AnyError> {
     dotenv::dotenv().ok();
@@ -93,6 +97,12 @@ fn main() -> Result<(), AnyError> {
             Command::TransitionTime(l, t) => {
                 api::transition_time(&connection, l, t)?;
             },
+            Command::Animate(t, h) => {
+                let transition_time = Duration::from_secs(t as u64);
+                let hold_time = Duration::from_secs(h as u64);
+                let anim = animation::from_current(&connection, &transition_time, &hold_time)?;
+                anim.play(&connection)?;
+            }
             Command::Invalid => println!("Invalid command"),
             Command::Quit => break,
         }
@@ -113,7 +123,8 @@ enum Command {
     Brightness(LightNumber, BrightnessValue),
     HsvColor(LightNumber, HueValue, SaturationValue, BrightnessValue),
     ColorLoop(LightNumber, bool),
-    TransitionTime(LightNumber, u16),
+    TransitionTime(LightNumber, TransitionTime),
+    Animate(TransitionTime, HoldTime),
     Quit,
     Invalid,
 }
@@ -127,6 +138,18 @@ impl FromStr for Command {
         }
 
         let split = s.split(' ').collect::<Vec<&str>>();
+
+        if s == "anim" {
+            let t_time = split[1].parse::<u16>()?;
+
+            let h_time =  if split.len() > 2 {
+                split[2].parse::<u16>()?
+            } else {
+                0
+            };
+
+            return Ok(Command::Animate(t_time, h_time));
+        }
 
         let light_num = split[0].parse::<u8>()?;
         let command = split[1];

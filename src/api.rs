@@ -2,7 +2,7 @@ use serde_derive::Deserialize;
 use reqwest::Client;
 
 use crate::AnyError;
-use crate::light::{Light, LightState, LightEffect};
+use crate::light::{Light, LightState, LightEffect, LightCollection};
 
 pub struct ApiConnection {
     pub client: reqwest::Client,
@@ -21,6 +21,18 @@ impl ApiConnection {
     pub fn base(&self) -> String {
         self.base_uri.clone()
     }
+}
+
+pub fn get_all_lights(connection: &ApiConnection) -> Result<LightCollection, AnyError> {
+    let uri = format!("{}/lights", connection.base());
+
+    let response = connection.client.get(&uri)
+        .send()?
+        .text()?;
+
+    let lights = serde_json::from_str(&response)?;
+
+    Ok(lights)
 }
 
 pub fn get_light(connection: &ApiConnection, light_number: u8) -> Result<Light, AnyError> {

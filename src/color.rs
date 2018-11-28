@@ -92,5 +92,5 @@ impl Display for Color {
 
 pub fn deg_to_u16(deg: f64) -> u16 {
     let multiplier = deg / 360.0;
-    (multiplier * std::u16::MAX) as u16
+    (multiplier * std::u16::MAX as f64) as u16
 }
