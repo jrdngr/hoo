@@ -139,7 +139,7 @@ impl FromStr for Command {
 
         let split = s.split(' ').collect::<Vec<&str>>();
 
-        if s == "anim" {
+        if s.starts_with("anim") {
             let t_time = split[1].parse::<u16>()?;
 
             let h_time =  if split.len() > 2 {
