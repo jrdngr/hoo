@@ -6,7 +6,7 @@ use hoo::AnyError;
 use hoo::light::LightState;
 use hoo::api;
 use hoo::color::Color;
-use hoo::animation;
+use hoo::effects;
 
 type LightNumber = u8;
 type RgbValue = f64;
@@ -100,9 +100,13 @@ fn main() -> Result<(), AnyError> {
             Command::Animate(t, h) => {
                 let transition_time = Duration::from_secs(t as u64);
                 let hold_time = Duration::from_secs(h as u64);
-                let anim = animation::from_current(&connection, &transition_time, &hold_time)?;
+                let anim = effects::rotate_current(&connection, &transition_time, &hold_time)?;
                 anim.play(&connection)?;
-            }
+            },
+            Command::Rainbow(d) => {
+                let anim = effects::rainbow(&connection, &d)?;
+                anim.play(&connection)?;
+            },
             Command::Invalid => println!("Invalid command"),
             Command::Quit => break,
         }
@@ -125,6 +129,7 @@ enum Command {
     ColorLoop(LightNumber, bool),
     TransitionTime(LightNumber, TransitionTime),
     Animate(TransitionTime, HoldTime),
+    Rainbow(Duration),
     Quit,
     Invalid,
 }
@@ -149,6 +154,12 @@ impl FromStr for Command {
             };
 
             return Ok(Command::Animate(t_time, h_time));
+        }
+
+        if s.starts_with("rainbow") {
+            let loop_seconds = split[1].parse::<u64>()?;
+            let loop_duration = Duration::from_secs(loop_seconds);
+            return Ok(Command::Rainbow(loop_duration));
         }
 
         let light_num = split[0].parse::<u8>()?;
