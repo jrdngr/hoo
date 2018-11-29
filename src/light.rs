@@ -29,7 +29,7 @@ impl Light {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct LightState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub on: Option<bool>,
@@ -154,7 +154,7 @@ impl LightState {
 
     pub fn get_color(&self) -> Option<Color> {
         if self.hue.is_some() && self.sat.is_some() && self.bri.is_some() {
-            return Some(Color::from_hsv(self.hue.unwrap(), self.sat.unwrap(), self.bri.unwrap()));
+            Some(Color::from_hsv(self.hue.unwrap(), self.sat.unwrap(), self.bri.unwrap()))
         } else {
             None
         }

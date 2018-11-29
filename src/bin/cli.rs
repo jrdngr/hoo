@@ -61,9 +61,9 @@ fn main() -> Result<(), AnyError> {
                 api::set_state(&connection, l, &state)?;
             },
             Command::RgbColor(l, r, g, b) => { 
-                let red = r as f64 / std::u8::MAX as f64;
-                let green = g as f64 / std::u8::MAX as f64;
-                let blue = b as f64 / std::u8::MAX as f64;
+                let red = r as f64 / f64::from(std::u8::MAX);
+                let green = g as f64 / f64::from(std::u8::MAX);
+                let blue = b as f64 / f64::from(std::u8::MAX);
                 current_color = Color::from_rgb(red, green, blue);
                 let state = LightState::new().color(&current_color);
                 api::set_state(&connection, l, &state)?;
@@ -98,8 +98,8 @@ fn main() -> Result<(), AnyError> {
                 api::transition_time(&connection, l, t)?;
             },
             Command::Animate(t, h) => {
-                let transition_time = Duration::from_secs(t as u64);
-                let hold_time = Duration::from_secs(h as u64);
+                let transition_time = Duration::from_secs(u64::from(t));
+                let hold_time = Duration::from_secs(u64::from(h));
                 let anim = effects::rotate_current(&connection, &transition_time, &hold_time)?;
                 anim.play(&connection)?;
             },
@@ -108,8 +108,8 @@ fn main() -> Result<(), AnyError> {
                 anim.play(&connection)?;
             },
             Command::Random(t, h) => {
-                let transition_time = Duration::from_secs(t as u64);
-                let hold_time = Duration::from_secs(h as u64);
+                let transition_time = Duration::from_secs(u64::from(t));
+                let hold_time = Duration::from_secs(u64::from(h));
 
                 effects::random(&connection, &transition_time, &hold_time)?; 
             }
@@ -214,31 +214,31 @@ impl FromStr for Command {
             },
             "hue" => {
                 let mut h = split[2].parse::<f64>()?;
-                h = h % 360.0;
+                h %= 360.0;
                 if h < 0.0 {
                     h += 360.0;
                 }
-                let hue = ((h / 360.0) * std::u16::MAX as f64) as u16;
+                let hue = ((h / 360.0) * f64::from(std::u16::MAX)) as u16;
 
                 Ok(Command::Hue(light_num, hue))
             },
             "sat" => {
                 let mut s = split[2].parse::<f64>()?;
                 s = s.min(1.0).max(0.0);
-                let saturation = (s * std::u8::MAX as f64) as u8;
+                let saturation = (s * f64::from(std::u8::MAX)) as u8;
 
                 Ok(Command::Saturation(light_num, saturation))
             },
             "bri" => {
                 let mut v = split[2].parse::<f64>()?;
                 v = v.min(1.0).max(0.0);
-                let value = (v * std::u8::MAX as f64) as u8;
+                let value = (v * f64::from(std::u8::MAX)) as u8;
 
                 Ok(Command::Brightness(light_num, value))
             },
             "hsv" => {
                 let mut h = split[2].parse::<f64>()?;
-                h = h % 360.0;
+                h %= 360.0;
                 if h < 0.0 {
                     h += 360.0;
                 }
@@ -249,9 +249,9 @@ impl FromStr for Command {
                 let mut v = split[4].parse::<f64>()?;
                 v = v.min(1.0).max(0.0);
 
-                let hue = ((h / 360.0) * std::u16::MAX as f64) as u16;
-                let saturation = (s * std::u8::MAX as f64) as u8;
-                let value = (v * std::u8::MAX as f64) as u8;
+                let hue = ((h / 360.0) * f64::from(std::u16::MAX)) as u16;
+                let saturation = (s * f64::from(std::u8::MAX)) as u8;
+                let value = (v * f64::from(std::u8::MAX)) as u8;
 
                 Ok(Command::HsvColor(light_num, hue, saturation, value))
             },

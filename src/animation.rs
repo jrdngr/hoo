@@ -12,7 +12,7 @@ pub struct AnimationFrame {
     pub states: Vec<(LightNumber, LightState)>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Animation {
     frames: Vec<AnimationFrame>,
 }
@@ -41,7 +41,7 @@ impl Animation {
     pub fn play(&self, connection: &ApiConnection) -> Result<(), AnyError> {
         loop {
             for frame in &self.frames {
-                let time = (frame.transition_time.as_secs() * 10) + (frame.transition_time.subsec_millis() / 100) as u64;
+                let time = (frame.transition_time.as_secs() * 10) + u64::from(frame.transition_time.subsec_millis() / 100);
 
                 for (light_num, state) in &frame.states {
                     if let Some(color) = state.get_color() {

@@ -32,8 +32,8 @@ pub fn rotate_current(connection: &ApiConnection, transition_time: &Duration, ho
         let light_states_copy = light_states.clone();
         
         let frame = AnimationFrame {
-            hold_time: hold_time.clone(),
-            transition_time: transition_time.clone(),
+            hold_time: *hold_time,
+            transition_time: *transition_time,
             states: active_lights_copy.into_iter().zip(light_states_copy).collect(),
         };
 
@@ -54,11 +54,11 @@ pub fn rainbow(connection: &ApiConnection, time_per_loop: &Duration) -> Result<A
     let time_per_loop = if *time_per_loop < minimum_time_per_loop {
         minimum_time_per_loop
     } else {
-        time_per_loop.clone()
+        *time_per_loop
     };
 
-    let time_millis = (time_per_loop.as_secs() * 1000) + time_per_loop.subsec_millis() as u64;
-    let transition_time_millis = (transition_time.as_secs() * 1000) + transition_time.subsec_millis() as u64;
+    let time_millis = (time_per_loop.as_secs() * 1000) + u64::from(time_per_loop.subsec_millis());
+    let transition_time_millis = (transition_time.as_secs() * 1000) + u64::from(transition_time.subsec_millis());
 
     let number_of_steps = time_millis / transition_time_millis;
     let transition_time = Duration::from_millis(time_millis / number_of_steps);
@@ -80,7 +80,7 @@ pub fn rainbow(connection: &ApiConnection, time_per_loop: &Duration) -> Result<A
 
         let frame = AnimationFrame {
             hold_time: Duration::from_secs(0),
-            transition_time: transition_time.clone(),
+            transition_time,
             states,
         };
 
@@ -92,14 +92,14 @@ pub fn rainbow(connection: &ApiConnection, time_per_loop: &Duration) -> Result<A
 
 pub fn random(connection: &ApiConnection, transition_time: &Duration, hold_time: &Duration) -> Result<(), AnyError> {
     let mut rng = rand::thread_rng();
-    let transition_millis = transition_time.as_secs() * 1000 + transition_time.subsec_millis() as u64;
+    let transition_millis = transition_time.as_secs() * 1000 + u64::from(transition_time.subsec_millis());
 
     let transition_value = transition_millis as u16 / 100;
 
     let lights = get_active_lights(connection)?.0;
     
     loop {
-        for (light_num, _) in &lights {
+        for light_num in lights.keys() {
             let next_hue: u16 = rng.gen();
             let state = LightState::new().hue(next_hue).sat(255).transitiontime(transition_value);
             set_state(connection, *light_num, &state)?;

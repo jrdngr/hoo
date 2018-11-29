@@ -1,3 +1,5 @@
+#![allow(clippy::many_single_char_names)]
+
 use std::fmt::Display;
 
 pub struct Color {
@@ -20,10 +22,12 @@ impl Color {
         let cmin = r.min(g).min(b);
         let delta = cmax - cmin;
 
+        let error: f64 = 0.0001;
+
         let mut hue = match cmax {
-            cmax if cmax == r => 60.0 * ((g - b) / delta),
-            cmax if cmax == g => 60.0 * (((b - r) / delta) + 2.0),
-            cmax if cmax == b => 60.0 * (((r - g) / delta) + 4.0),
+            cmax if (cmax - r) < error => 60.0 * ((g - b) / delta),
+            cmax if (cmax - g) < error => 60.0 * (((b - r) / delta) + 2.0),
+            cmax if (cmax - b) < error=> 60.0 * (((r - g) / delta) + 4.0),
             _ => 0.0,
         };
 
@@ -31,13 +35,13 @@ impl Color {
             hue += 360.0;
         }
 
-        let saturation = if cmax == 0.0 || cmin == 1.0 { 0.0 } else { delta / cmax };
+        let saturation = if (cmax - 0.0) < error || (cmax - 1.0) < error { 0.0 } else { delta / cmax };
 
         let value = cmax;
 
-        let h = ((hue / 360.0) * std::u16::MAX as f64) as u16;
-        let s = (saturation * std::u8::MAX as f64) as u8;
-        let v = (value * std::u8::MAX as f64) as u8;
+        let h = ((hue / 360.0) * f64::from(std::u16::MAX)) as u16;
+        let s = (saturation * f64::from(std::u8::MAX)) as u8;
+        let v = (value * f64::from(std::u8::MAX)) as u8;
 
         Color::from_hsv(h, s, v)
     }
@@ -59,9 +63,9 @@ impl Color {
     }
 
     pub fn rgb(&self) -> (f64, f64, f64) {
-        let h = (self.hue as f64 / std::u16::MAX as f64) * 360.0;
-        let s = self.saturation as f64 / std::u8::MAX as f64;
-        let v = self.value as f64 / std::u8::MAX as f64;
+        let h = (f64::from(self.hue) / f64::from(std::u16::MAX)) * 360.0;
+        let s = f64::from(self.saturation) / f64::from(std::u8::MAX);
+        let v = f64::from(self.value) / f64::from(std::u8::MAX);
 
         let c = v * s;
         let hp = h / 60.0;
@@ -92,5 +96,5 @@ impl Display for Color {
 
 pub fn deg_to_u16(deg: f64) -> u16 {
     let multiplier = deg / 360.0;
-    (multiplier * std::u16::MAX as f64) as u16
+    (multiplier * f64::from(std::u16::MAX)) as u16
 }
