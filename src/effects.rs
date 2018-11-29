@@ -7,7 +7,6 @@ use crate::AnyError;
 use crate::api::{ApiConnection, get_active_lights, set_state};
 use crate::light::LightState;
 use crate::animation::{Animation, AnimationFrame};
-use crate::color::Color;
 
 pub fn rotate_current(connection: &ApiConnection, transition_time: &Duration, hold_time: &Duration) -> Result<Animation, AnyError> {
     let all_lights = get_active_lights(connection)?.0;
