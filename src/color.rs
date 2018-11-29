@@ -10,7 +10,11 @@ pub struct Color {
 
 impl Color {
     pub fn from_hsv(hue: u16, saturation: u8, value: u8) -> Self {
-        Self { hue, saturation, value }
+        Self {
+            hue,
+            saturation,
+            value,
+        }
     }
 
     pub fn from_rgb(red: f64, green: f64, blue: f64) -> Self {
@@ -27,7 +31,7 @@ impl Color {
         let mut hue = match cmax {
             cmax if (cmax - r) < error => 60.0 * ((g - b) / delta),
             cmax if (cmax - g) < error => 60.0 * (((b - r) / delta) + 2.0),
-            cmax if (cmax - b) < error=> 60.0 * (((r - g) / delta) + 4.0),
+            cmax if (cmax - b) < error => 60.0 * (((r - g) / delta) + 4.0),
             _ => 0.0,
         };
 
@@ -35,7 +39,11 @@ impl Color {
             hue += 360.0;
         }
 
-        let saturation = if (cmax - 0.0) < error || (cmax - 1.0) < error { 0.0 } else { delta / cmax };
+        let saturation = if (cmax - 0.0) < error || (cmax - 1.0) < error {
+            0.0
+        } else {
+            delta / cmax
+        };
 
         let value = cmax;
 
@@ -73,14 +81,14 @@ impl Color {
 
         let (r, g, b) = match hp {
             hp if hp >= 0.0 && hp <= 1.0 => (c, x, 0.0),
-            hp if hp > 1.0 && hp <= 2.0  => (x, c, 0.0),
-            hp if hp > 2.0 && hp <= 3.0  => (0.0, c, x),
-            hp if hp > 3.0 && hp <= 4.0  => (0.0, x, c),
-            hp if hp > 4.0 && hp <= 5.0  => (x, 0.0, c),
-            hp if hp > 5.0 && hp <= 6.0  => (c, 0.0, x),
-            _ => (0.0, 0.0, 0.0)
+            hp if hp > 1.0 && hp <= 2.0 => (x, c, 0.0),
+            hp if hp > 2.0 && hp <= 3.0 => (0.0, c, x),
+            hp if hp > 3.0 && hp <= 4.0 => (0.0, x, c),
+            hp if hp > 4.0 && hp <= 5.0 => (x, 0.0, c),
+            hp if hp > 5.0 && hp <= 6.0 => (c, 0.0, x),
+            _ => (0.0, 0.0, 0.0),
         };
-   
+
         let m = v - c;
 
         (r + m, g + m, b + m)
@@ -90,7 +98,16 @@ impl Color {
 impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let (r, g, b) = self.rgb();
-        write!(f, "Color(h: {}, s: {}, v: {}, r: {}, g: {}, b: {})", self.h(), self.s(), self.v(), r, g, b)
+        write!(
+            f,
+            "Color(h: {}, s: {}, v: {}, r: {}, g: {}, b: {})",
+            self.h(),
+            self.s(),
+            self.v(),
+            r,
+            g,
+            b
+        )
     }
 }
 
