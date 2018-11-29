@@ -1,9 +1,13 @@
 use std::time::Duration;
+use std::thread::sleep;
+
+use rand::Rng;
 
 use crate::AnyError;
-use crate::api::{ApiConnection, get_active_lights};
+use crate::api::{ApiConnection, get_active_lights, set_state};
 use crate::light::LightState;
 use crate::animation::{Animation, AnimationFrame};
+use crate::color::Color;
 
 pub fn rotate_current(connection: &ApiConnection, transition_time: &Duration, hold_time: &Duration) -> Result<Animation, AnyError> {
     let all_lights = get_active_lights(connection)?.0;
@@ -85,4 +89,23 @@ pub fn rainbow(connection: &ApiConnection, time_per_loop: &Duration) -> Result<A
     }
 
     Ok(Animation::new().with_frames(frames))
+}
+
+pub fn random(connection: &ApiConnection, transition_time: &Duration, hold_time: &Duration) -> Result<(), AnyError> {
+    let mut rng = rand::thread_rng();
+    let transition_millis = transition_time.as_secs() * 1000 + transition_time.subsec_millis() as u64;
+
+    let transition_value = transition_millis as u16 / 100;
+
+    let lights = get_active_lights(connection)?.0;
+    
+    loop {
+        for (light_num, _) in &lights {
+            let next_hue: u16 = rng.gen();
+            let state = LightState::new().hue(next_hue).sat(255).transitiontime(transition_value);
+            set_state(connection, *light_num, &state)?;
+        }
+
+        sleep(*hold_time + *transition_time);
+    }
 }

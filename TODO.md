@@ -14,4 +14,3 @@
     * Customization (colors and animations)
     * Cli
 * Make animations asynchronous
-* Add symlink to most recent cli build

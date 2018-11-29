@@ -7,7 +7,7 @@ use crate::color::Color;
 pub type LightNumber = u8;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LightCollection(pub HashMap<u8, Light>);
+pub struct LightCollection(pub HashMap<LightNumber, Light>);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Light {

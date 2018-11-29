@@ -107,6 +107,12 @@ fn main() -> Result<(), AnyError> {
                 let anim = effects::rainbow(&connection, &d)?;
                 anim.play(&connection)?;
             },
+            Command::Random(t, h) => {
+                let transition_time = Duration::from_secs(t as u64);
+                let hold_time = Duration::from_secs(h as u64);
+
+                effects::random(&connection, &transition_time, &hold_time)?; 
+            }
             Command::Invalid => println!("Invalid command"),
             Command::Quit => break,
         }
@@ -130,6 +136,7 @@ enum Command {
     TransitionTime(LightNumber, TransitionTime),
     Animate(TransitionTime, HoldTime),
     Rainbow(Duration),
+    Random(TransitionTime, HoldTime),
     Quit,
     Invalid,
 }
@@ -160,6 +167,18 @@ impl FromStr for Command {
             let loop_seconds = split[1].parse::<u64>()?;
             let loop_duration = Duration::from_secs(loop_seconds);
             return Ok(Command::Rainbow(loop_duration));
+        }
+
+        if s.starts_with("rand") {
+            let t_time = split[1].parse::<u16>()?;
+
+            let h_time =  if split.len() > 2 {
+                split[2].parse::<u16>()?
+            } else {
+                0
+            };
+
+            return Ok(Command::Random(t_time, h_time))
         }
 
         let light_num = split[0].parse::<u8>()?;
