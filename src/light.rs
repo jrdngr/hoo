@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 use crate::color::Color;
 
@@ -133,9 +133,7 @@ impl LightState {
     }
 
     pub fn color(self, color: &Color) -> LightState {
-        self.hue(color.h())
-            .sat(color.s())
-            .bri(color.v())
+        self.hue(color.h()).sat(color.s()).bri(color.v())
     }
 
     pub fn is_on(&self) -> bool {
@@ -154,7 +152,11 @@ impl LightState {
 
     pub fn get_color(&self) -> Option<Color> {
         if self.hue.is_some() && self.sat.is_some() && self.bri.is_some() {
-            Some(Color::from_hsv(self.hue.unwrap(), self.sat.unwrap(), self.bri.unwrap()))
+            Some(Color::from_hsv(
+                self.hue.unwrap(),
+                self.sat.unwrap(),
+                self.bri.unwrap(),
+            ))
         } else {
             None
         }
@@ -162,14 +164,14 @@ impl LightState {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all="lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum LightEffect {
     None,
     ColorLoop,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all="lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum LightAlert {
     None,
     Select,
@@ -177,7 +179,7 @@ pub enum LightAlert {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all="lowercase")]
+#[serde(rename_all = "lowercase")]
 pub enum LightColorMode {
     HS,
     XY,
