@@ -1,0 +1,10 @@
+[package]
+name = "hoo_cli"
+version = "0.1.0"
+authors = ["picklenerd <jordan.t.grace@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hoo = { path = "../hoo" }
+hoohue_api = { path = "../hoohue_api" }
+dotenv = "0.13.0"

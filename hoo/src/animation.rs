@@ -1,8 +1,8 @@
 use std::thread::sleep;
 use std::time::Duration;
 
-use crate::api::{set_state, ApiConnection};
-use crate::light::{LightNumber, LightState};
+use hoohue_api::api::{set_state, ApiConnection};
+use hoohue_api::light::{LightNumber, LightState};
 use crate::AnyError;
 
 #[derive(Debug, Clone)]

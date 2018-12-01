@@ -4,8 +4,8 @@ use std::time::Duration;
 use rand::Rng;
 
 use crate::animation::{Animation, AnimationFrame};
-use crate::api::{get_active_lights, set_state, ApiConnection};
-use crate::light::LightState;
+use hoohue_api::api::{get_active_lights, set_state, ApiConnection};
+use hoohue_api::light::LightState;
 use crate::AnyError;
 
 pub fn rotate_current(
