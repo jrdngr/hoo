@@ -8,7 +8,7 @@ use serde_derive::Deserialize;
 
 use hoo::animation::AnimationMessage;
 use hoo::effects;
-use hoohue_api::{api, api::ApiConnection};
+use hoohue_api::{self, ApiConnection};
 
 fn main() {
     dotenv::dotenv().ok();
@@ -43,12 +43,12 @@ struct AppState {
 }
 
 fn on(state: State<AppState>, info: Path<u8>) -> Result<String> {
-    api::on(&state.connection, *info).expect("Error turning on light");
+    hoohue_api::on(&state.connection, *info).expect("Error turning on light");
     Ok(format!("{} -> on", info))
 }
 
 fn off(state: State<AppState>, info: Path<u8>) -> Result<String> {
-    api::off(&state.connection, *info).expect("Error turning off light");
+    hoohue_api::off(&state.connection, *info).expect("Error turning off light");
     Ok(format!("{} -> off", info))
 }
 

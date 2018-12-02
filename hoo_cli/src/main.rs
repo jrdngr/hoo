@@ -5,9 +5,9 @@ use std::time::Duration;
 use hoo::effects;
 use hoo::AnyError;
 
-use hoohue_api::api::{colorloop, get_light, off, on, set_state, transition_time, ApiConnection};
 use hoohue_api::color::Color;
 use hoohue_api::light::LightState;
+use hoohue_api::{colorloop, get_light, off, on, set_state, transition_time, ApiConnection};
 
 type LightNumber = u8;
 type RgbValue = f64;

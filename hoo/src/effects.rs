@@ -6,8 +6,8 @@ use rand::Rng;
 
 use crate::animation::{Animation, AnimationFrame, AnimationMessage};
 use crate::AnyError;
-use hoohue_api::api::{get_active_lights, set_state, ApiConnection};
 use hoohue_api::light::LightState;
+use hoohue_api::{get_active_lights, set_state, ApiConnection};
 
 pub fn rotate_current(
     connection: &ApiConnection,

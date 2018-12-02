@@ -1,12 +1,10 @@
+use hoohue_api::ApiConnection;
+
 pub mod animation;
 pub mod effects;
 
 pub type AnyError = Box<dyn std::error::Error>;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+pub struct Hoo {
+    connection: ApiConnection,
 }

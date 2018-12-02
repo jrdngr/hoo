@@ -3,8 +3,8 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use crate::AnyError;
-use hoohue_api::api::{set_state, ApiConnection};
 use hoohue_api::light::{LightNumber, LightState};
+use hoohue_api::{set_state, ApiConnection};
 
 #[derive(Debug, Clone)]
 pub enum AnimationMessage {
