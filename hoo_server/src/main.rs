@@ -3,7 +3,7 @@ use std::thread;
 use std::time::Duration;
 
 use actix_web::http::Method;
-use actix_web::{server, App, HttpRequest, Path, Query, Request, Result, State};
+use actix_web::{fs::NamedFile, server, App, HttpRequest, Path, Query, Request, Result, State};
 use serde_derive::Deserialize;
 
 use hoo::animation::AnimationMessage;
@@ -22,6 +22,7 @@ fn main() {
 
     server::new(move || {
         App::with_state(AppState::new(&sender))
+            .resource("/", |r| r.method(Method::GET).with(controls))
             .resource("/on/{light_num}", |r| r.method(Method::GET).with(on))
             .resource("/off/{light_num}", |r| r.method(Method::GET).with(off))
             .resource("/color/{light_num}", |r| r.method(Method::GET).with(color))
@@ -47,16 +48,31 @@ impl AppState {
     }
 }
 
-fn on(state: State<AppState>, light_num: Path<u8>) -> Result<String> {
-    let _ = state.sender.send(HooCommand::On(*light_num));
+fn controls(state: State<AppState>) -> Result<NamedFile> {
+    let path = std::path::Path::new("./static/controls.html");
 
-    Ok(format!("{} -> on", light_num))
+    let result = NamedFile::open(path);
+
+    match &result {
+        Ok(f) => {}
+        Err(e) => {
+            println!("{:?}", e);
+        }
+    }
+
+    Ok(result?)
 }
 
-fn off(state: State<AppState>, light_num: Path<u8>) -> Result<String> {
+fn on(state: State<AppState>, light_num: Path<u8>) -> Result<NamedFile> {
+    let _ = state.sender.send(HooCommand::On(*light_num));
+
+    controls(state)
+}
+
+fn off(state: State<AppState>, light_num: Path<u8>) -> Result<NamedFile> {
     let _ = state.sender.send(HooCommand::Off(*light_num));
 
-    Ok(format!("{} -> off", light_num))
+    controls(state)
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,24 +82,24 @@ struct RGB {
     b: Option<u8>,
 }
 
-fn color(state: State<AppState>, light_num: Path<u8>, color: Query<RGB>) -> Result<String> {
+fn color(state: State<AppState>, light_num: Path<u8>, color: Query<RGB>) -> Result<NamedFile> {
     let r = color.r.unwrap_or(0);
     let g = color.g.unwrap_or(0);
     let b = color.b.unwrap_or(0);
 
     let _ = state.sender.send(HooCommand::RgbColor(*light_num, r, g, b));
 
-    Ok(format!("{} -> r = {}, g = {}, b = {}", light_num, r, g, b))
+    controls(state)
 }
 
 fn light_state(
     state: State<AppState>,
     light_num: Path<u8>,
     light_state: Query<LightState>,
-) -> Result<String> {
+) -> Result<NamedFile> {
     let _ = state
         .sender
         .send(HooCommand::State(*light_num, light_state.clone()));
 
-    Ok(format!("{} -> {:#?}", light_num, light_state))
+    controls(state)
 }
