@@ -13,6 +13,8 @@ use hoo::{Hoo, HooCommand};
 fn main() {
     dotenv::dotenv().ok();
 
+    let socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
+
     let (hoo, sender) = Hoo::new();
 
     thread::spawn(move || hoo.run());
@@ -24,7 +26,7 @@ fn main() {
             .resource("/stop", |r| r.method(Method::GET).with(stop))
             .finish()
     })
-    .bind("127.0.0.1:8080")
+    .bind(format!("{}:8080", socket_ip))
     .unwrap()
     .run();
 }
