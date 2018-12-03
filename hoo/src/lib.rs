@@ -1,7 +1,8 @@
 use std::sync::mpsc::{self, Receiver, Sender};
-use std::thread;
 
 use hoohue_api as api;
+use hoohue_api::color::Color;
+use hoohue_api::light::LightState;
 use hoohue_api::ApiConnection;
 
 pub mod animation;
@@ -10,7 +11,7 @@ pub mod effects;
 pub type AnyError = Box<dyn std::error::Error>;
 
 type LightNumber = u8;
-type RgbValue = f64;
+type RgbValue = u8;
 type HueValue = u16;
 type SaturationValue = u8;
 type BrightnessValue = u8;
@@ -51,6 +52,17 @@ impl Hoo {
                     HooCommand::Off(light_num) => {
                         api::off(&self.connection, light_num);
                     }
+                    HooCommand::RgbColor(light_num, r, g, b) => {
+                        let r = f64::from(r) / f64::from(std::u8::MAX);
+                        let g = f64::from(g) / f64::from(std::u8::MAX);
+                        let b = f64::from(b) / f64::from(std::u8::MAX);
+
+                        let state = LightState::new().color(&Color::from_rgb(r, g, b)).sat(255);
+                        api::set_state(&self.connection, light_num, &state);
+                    }
+                    HooCommand::State(light_num, state) => {
+                        api::set_state(&self.connection, light_num, &state);
+                    }
                     HooCommand::Quit => return,
                     _ => println!("nah"),
                 }
@@ -79,6 +91,7 @@ pub enum HooCommand {
     HsvColor(LightNumber, HueValue, SaturationValue, BrightnessValue),
     ColorLoop(LightNumber, bool),
     TransitionTime(LightNumber, TransitionTime),
+    State(LightNumber, LightState),
     // Animate(TransitionTime, HoldTime),
     // Rainbow(Duration),
     // Random(TransitionTime, HoldTime),

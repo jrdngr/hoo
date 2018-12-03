@@ -9,6 +9,7 @@ use serde_derive::Deserialize;
 use hoo::animation::AnimationMessage;
 use hoo::effects;
 use hoo::{Hoo, HooCommand};
+use hoohue_api::light::LightState;
 
 fn main() {
     dotenv::dotenv().ok();
@@ -23,7 +24,10 @@ fn main() {
         App::with_state(AppState::new(&sender))
             .resource("/on/{light_num}", |r| r.method(Method::GET).with(on))
             .resource("/off/{light_num}", |r| r.method(Method::GET).with(off))
-            .resource("/stop", |r| r.method(Method::GET).with(stop))
+            .resource("/color/{light_num}", |r| r.method(Method::GET).with(color))
+            .resource("/state/{light_num}", |r| {
+                r.method(Method::GET).with(light_state)
+            })
             .finish()
     })
     .bind(format!("{}:8080", socket_ip))
@@ -43,19 +47,43 @@ impl AppState {
     }
 }
 
-fn on(state: State<AppState>, info: Path<u8>) -> Result<String> {
-    let _ = state.sender.send(HooCommand::On(*info));
+fn on(state: State<AppState>, light_num: Path<u8>) -> Result<String> {
+    let _ = state.sender.send(HooCommand::On(*light_num));
 
-    Ok(format!("{} -> on", info))
+    Ok(format!("{} -> on", light_num))
 }
 
-fn off(state: State<AppState>, info: Path<u8>) -> Result<String> {
-    let _ = state.sender.send(HooCommand::Off(*info));
+fn off(state: State<AppState>, light_num: Path<u8>) -> Result<String> {
+    let _ = state.sender.send(HooCommand::Off(*light_num));
 
-    Ok(format!("{} -> off", info))
+    Ok(format!("{} -> off", light_num))
 }
 
-fn stop(state: State<AppState>) -> Result<String> {
-    state.sender.send(HooCommand::Quit);
-    Ok("Stopping server".to_string())
+#[derive(Debug, Deserialize)]
+struct RGB {
+    r: Option<u8>,
+    g: Option<u8>,
+    b: Option<u8>,
+}
+
+fn color(state: State<AppState>, light_num: Path<u8>, color: Query<RGB>) -> Result<String> {
+    let r = color.r.unwrap_or(0);
+    let g = color.g.unwrap_or(0);
+    let b = color.b.unwrap_or(0);
+
+    let _ = state.sender.send(HooCommand::RgbColor(*light_num, r, g, b));
+
+    Ok(format!("{} -> r = {}, g = {}, b = {}", light_num, r, g, b))
+}
+
+fn light_state(
+    state: State<AppState>,
+    light_num: Path<u8>,
+    light_state: Query<LightState>,
+) -> Result<String> {
+    let _ = state
+        .sender
+        .send(HooCommand::State(*light_num, light_state.clone()));
+
+    Ok(format!("{} -> {:#?}", light_num, light_state))
 }
