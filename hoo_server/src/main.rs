@@ -31,7 +31,7 @@ fn main() {
             })
             .finish()
     })
-    .bind(format!("{}:8080", socket_ip))
+    .bind(socket_ip)
     .unwrap()
     .run();
 }
