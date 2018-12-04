@@ -1,9 +1,14 @@
 use std::sync::mpsc::{self, Receiver, Sender};
+use std::time::{Duration, Instant};
 
 use hoohue_api as api;
 use hoohue_api::color::Color;
 use hoohue_api::light::LightState;
 use hoohue_api::ApiConnection;
+
+use crate::animation::AnimationFrame;
+use crate::effects::random::RandomAnimation;
+use crate::effects::rotate::RotateAnimation;
 
 pub mod animation;
 pub mod effects;
@@ -24,6 +29,7 @@ pub struct Hoo {
 }
 
 impl Hoo {
+    #[allow(clippy::new_ret_no_self)]
     pub fn new() -> (Self, Sender<HooCommand>) {
         dotenv::dotenv().ok();
 
@@ -42,15 +48,18 @@ impl Hoo {
     }
 
     pub fn run(&self) {
+        let mut next_frame_time: Option<Instant> = None;
+        let mut animation: Option<Box<dyn Iterator<Item = AnimationFrame>>> = None;
+
         loop {
             if let Ok(msg) = self.receiver.try_recv() {
                 println!("{:?}", msg);
                 match msg {
                     HooCommand::On(light_num) => {
-                        api::on(&self.connection, light_num);
+                        let _ = api::on(&self.connection, light_num);
                     }
                     HooCommand::Off(light_num) => {
-                        api::off(&self.connection, light_num);
+                        let _ = api::off(&self.connection, light_num);
                     }
                     HooCommand::RgbColor(light_num, r, g, b) => {
                         let r = f64::from(r) / f64::from(std::u8::MAX);
@@ -58,13 +67,51 @@ impl Hoo {
                         let b = f64::from(b) / f64::from(std::u8::MAX);
 
                         let state = LightState::new().color(&Color::from_rgb(r, g, b)).sat(255);
-                        api::set_state(&self.connection, light_num, &state);
+                        let _ = api::set_state(&self.connection, light_num, &state);
                     }
                     HooCommand::State(light_num, state) => {
-                        api::set_state(&self.connection, light_num, &state);
+                        let _ = api::set_state(&self.connection, light_num, &state);
                     }
+                    HooCommand::Rotate(tt, ht) => {
+                        let transition_time = Duration::from_secs(u64::from(tt));
+                        let hold_time = Duration::from_secs(u64::from(ht));
+                        let anim =
+                            RotateAnimation::new(&self.connection, &transition_time, &hold_time)
+                                .unwrap();
+                        animation = Some(Box::new(anim));
+                        next_frame_time = Some(Instant::now());
+                    }
+                    HooCommand::Random(tt, ht) => {
+                        let transition_time = Duration::from_secs(u64::from(tt));
+                        let hold_time = Duration::from_secs(u64::from(ht));
+                        let anim =
+                            RandomAnimation::new(&self.connection, transition_time, hold_time)
+                                .unwrap();
+                        animation = Some(Box::new(anim));
+                        next_frame_time = Some(Instant::now());
+                    }
+                    HooCommand::StopAnimation => next_frame_time = None,
                     HooCommand::Quit => return,
-                    _ => println!("nah"),
+                    _ => println!("Not implemented"),
+                }
+            }
+
+            if let Some(time) = next_frame_time {
+                let now = Instant::now();
+                if now >= time {
+                    match &mut animation {
+                        Some(anim) => {
+                            let frame = anim.next();
+                            if let Some(frame) = frame {
+                                let delay = frame.transition_time + frame.hold_time;
+                                next_frame_time = Some(now + delay);
+                                for state in frame.states {
+                                    let _ = api::set_state(&self.connection, state.0, &state.1);
+                                }
+                            }
+                        }
+                        None => next_frame_time = None,
+                    }
                 }
             }
         }
@@ -92,9 +139,9 @@ pub enum HooCommand {
     ColorLoop(LightNumber, bool),
     TransitionTime(LightNumber, TransitionTime),
     State(LightNumber, LightState),
-    // Animate(TransitionTime, HoldTime),
-    // Rainbow(Duration),
-    // Random(TransitionTime, HoldTime),
+    Rotate(TransitionTime, HoldTime),
+    Rainbow(Duration),
+    Random(TransitionTime, HoldTime),
     StopAnimation,
     Quit,
 }

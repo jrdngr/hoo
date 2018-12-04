@@ -6,7 +6,6 @@ use actix_web::http::Method;
 use actix_web::{fs::NamedFile, server, App, HttpRequest, Path, Query, Request, Result, State};
 use serde_derive::Deserialize;
 
-use hoo::animation::AnimationMessage;
 use hoo::effects;
 use hoo::{Hoo, HooCommand};
 use hoohue_api::light::LightState;
@@ -29,6 +28,13 @@ fn main() {
             .resource("/state/{light_num}", |r| {
                 r.method(Method::GET).with(light_state)
             })
+            .resource("/rotate/{trans_time}/{hold_time}", |r| {
+                r.method(Method::GET).with(rotate)
+            })
+            .resource("/random/{trans_time}/{hold_time}", |r| {
+                r.method(Method::GET).with(random)
+            })
+            .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
             .finish()
     })
     .bind(socket_ip)
@@ -101,5 +107,20 @@ fn light_state(
         .sender
         .send(HooCommand::State(*light_num, light_state.clone()));
 
+    controls(state)
+}
+
+fn rotate(state: State<AppState>, info: Path<(u16, u16)>) -> Result<NamedFile> {
+    let _ = state.sender.send(HooCommand::Rotate(info.0, info.1));
+    controls(state)
+}
+
+fn random(state: State<AppState>, info: Path<(u16, u16)>) -> Result<NamedFile> {
+    let _ = state.sender.send(HooCommand::Random(info.0, info.1));
+    controls(state)
+}
+
+fn stop_animation(state: State<AppState>) -> Result<NamedFile> {
+    let _ = state.sender.send(HooCommand::StopAnimation);
     controls(state)
 }

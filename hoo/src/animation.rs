@@ -1,15 +1,8 @@
-use std::sync::{mpsc, Arc, Mutex};
-use std::thread::sleep;
 use std::time::Duration;
 
-use crate::AnyError;
 use hoohue_api::light::{LightNumber, LightState};
-use hoohue_api::{set_state, ApiConnection};
 
-#[derive(Debug, Clone)]
-pub enum AnimationMessage {
-    Stop,
-}
+pub type Animation = Iterator<Item = AnimationFrame>;
 
 #[derive(Debug, Clone)]
 pub struct AnimationFrame {
@@ -18,17 +11,17 @@ pub struct AnimationFrame {
     pub states: Vec<(LightNumber, LightState)>,
 }
 
-#[derive(Debug, Clone)]
-pub struct Animation {
-    receiver: Arc<Mutex<mpsc::Receiver<AnimationMessage>>>,
+#[derive(Debug, Default, Clone)]
+pub struct LoopingAnimation {
     frames: Vec<AnimationFrame>,
+    current_index: usize,
 }
 
-impl Animation {
-    pub fn new(receiver: Arc<Mutex<mpsc::Receiver<AnimationMessage>>>) -> Self {
+impl LoopingAnimation {
+    pub fn new() -> Self {
         Self {
-            receiver: Arc::clone(&receiver),
             frames: Vec::new(),
+            current_index: 0,
         }
     }
 
@@ -46,33 +39,31 @@ impl Animation {
         }
         self
     }
+}
 
-    pub fn play(&self, connection: &ApiConnection) -> Result<(), AnyError> {
-        loop {
-            if let Ok(message) = self.receiver.lock().unwrap().try_recv() {
-                match message {
-                    AnimationMessage::Stop => return Ok(()),
-                }
-            }
+impl Iterator for LoopingAnimation {
+    type Item = AnimationFrame;
 
-            for frame in &self.frames {
-                let time = (frame.transition_time.as_secs() * 10)
-                    + u64::from(frame.transition_time.subsec_millis() / 100);
-
-                for (light_num, state) in &frame.states {
-                    if let Some(color) = state.get_color() {
-                        println!("{} Next color: {}", light_num, color);
-                    }
-                    let state = state.clone().transitiontime(time as u16);
-                    set_state(connection, *light_num, &state)?;
-                }
-
-                println!("Transitioning: {:?}", frame.transition_time);
-                sleep(frame.transition_time);
-
-                println!("Holding: {:?}", frame.hold_time);
-                sleep(frame.hold_time);
-            }
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.frames.is_empty() {
+            return None;
         }
+
+        if self.current_index >= self.frames.len() {
+            self.current_index = 0;
+        }
+
+        let mut next_frame = self.frames[self.current_index].clone();
+        self.current_index += 1;
+
+        let transition_millis = next_frame.transition_time.as_secs() * 1000
+            + u64::from(next_frame.transition_time.subsec_millis());
+        let transition_value = transition_millis as u16 / 100;
+
+        for (_, state) in &mut next_frame.states {
+            state.transitiontime = Some(transition_value);
+        }
+
+        Some(next_frame)
     }
 }
