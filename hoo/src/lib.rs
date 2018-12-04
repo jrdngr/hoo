@@ -85,7 +85,7 @@ impl Hoo {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            RandomAnimation::new(&self.connection, transition_time, hold_time)
+                            RandomAnimation::new(&self.connection, &transition_time, &hold_time)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());

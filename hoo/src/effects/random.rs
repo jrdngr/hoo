@@ -19,8 +19,8 @@ impl RandomAnimation {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         connection: &ApiConnection,
-        transition_time: Duration,
-        hold_time: Duration,
+        transition_time: &Duration,
+        hold_time: &Duration,
     ) -> Result<Self, AnyError> {
         let lights = get_active_lights(connection)?
             .0
@@ -29,8 +29,8 @@ impl RandomAnimation {
             .collect();
 
         let anim = Self {
-            transition_time,
-            hold_time,
+            transition_time: transition_time.clone(),
+            hold_time: hold_time.clone(),
             lights,
             rng: rand::thread_rng(),
         };

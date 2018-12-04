@@ -1,12 +1,10 @@
 use std::sync::mpsc::Sender;
 use std::thread;
-use std::time::Duration;
 
 use actix_web::http::Method;
-use actix_web::{fs::NamedFile, server, App, HttpRequest, Path, Query, Request, Result, State};
+use actix_web::{fs::NamedFile, server, App, Path, Query, Result, State};
 use serde_derive::Deserialize;
 
-use hoo::effects;
 use hoo::{Hoo, HooCommand};
 use hoohue_api::light::LightState;
 
@@ -54,7 +52,7 @@ impl AppState {
     }
 }
 
-fn controls(state: State<AppState>) -> Result<NamedFile> {
+fn controls(_state: State<AppState>) -> Result<NamedFile> {
     let path = std::path::Path::new("./static/controls.html");
 
     let result = NamedFile::open(path);

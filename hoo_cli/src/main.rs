@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use hoo::effects;
 use hoo::AnyError;
+use hoo::{Hoo, HooCommand};
 
 use hoohue_api::color::Color;
 use hoohue_api::light::LightState;
@@ -32,6 +33,9 @@ fn main() -> Result<(), AnyError> {
         Some(color) => color,
         None => Color::from_rgb(0.0, 0.0, 0.0),
     };
+
+    let (hoo, sender) = Hoo::new();
+    std::thread::spawn(move || hoo.run());
 
     loop {
         buffer.clear();
@@ -103,20 +107,17 @@ fn main() -> Result<(), AnyError> {
                 transition_time(&connection, l, t)?;
             }
             Command::Animate(t, h) => {
-                let transition_time = Duration::from_secs(u64::from(t));
-                let hold_time = Duration::from_secs(u64::from(h));
-                // let anim = effects::rotate_current(&connection, &transition_time, &hold_time)?;
-                // anim.play(&connection)?;
+                let _ = sender.send(HooCommand::Rotate(t, h));
             }
             Command::Rainbow(d) => {
                 // let anim = effects::rainbow(&connection, &d)?;
                 // anim.play(&connection)?;
             }
             Command::Random(t, h) => {
-                let transition_time = Duration::from_secs(u64::from(t));
-                let hold_time = Duration::from_secs(u64::from(h));
-
-                //effects::random(&connection, &transition_time, &hold_time)?;
+                let _ = sender.send(HooCommand::Random(t, h));
+            }
+            Command::StopAnimation => {
+                let _ = sender.send(HooCommand::StopAnimation);
             }
             Command::Invalid => println!("Invalid command"),
             Command::Quit => break,
@@ -142,6 +143,7 @@ enum Command {
     Animate(TransitionTime, HoldTime),
     Rainbow(Duration),
     Random(TransitionTime, HoldTime),
+    StopAnimation,
     Quit,
     Invalid,
 }
@@ -155,6 +157,10 @@ impl FromStr for Command {
         }
 
         let split = s.split(' ').collect::<Vec<&str>>();
+
+        if s.starts_with("stop") {
+            return Ok(Command::StopAnimation);
+        }
 
         if s.starts_with("anim") {
             let t_time = split[1].parse::<u16>()?;
