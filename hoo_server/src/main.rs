@@ -2,7 +2,7 @@ use std::sync::mpsc::Sender;
 use std::thread;
 
 use actix_web::http::Method;
-use actix_web::{fs::NamedFile, server, App, Path, Query, Result, State};
+use actix_web::{fs::NamedFile, server, App, Path, Query, Result, State, Json, error, HttpResponse};
 use serde_derive::Deserialize;
 
 use hoo::{Hoo, HooCommand};
@@ -32,6 +32,14 @@ fn main() {
             .resource("/random/{trans_time}/{hold_time}", |r| {
                 r.method(Method::GET).with(random)
             })
+            .resource("/animate", |r| r.method(Method::POST).with_config(animate, |(_, cfg)| {
+                cfg.error_handler(|err, req| {
+                    println!("{:?}", err);
+                    println!("{:?}", req);
+                    error::InternalError::from_response(
+                         err, HttpResponse::Conflict().finish()).into()
+                });
+            }))
             .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
             .finish()
     })
@@ -40,6 +48,7 @@ fn main() {
     .run();
 }
 
+#[derive(Debug)]
 struct AppState {
     sender: Sender<HooCommand>,
 }
@@ -118,7 +127,19 @@ fn random(state: State<AppState>, info: Path<(u16, u16)>) -> Result<NamedFile> {
     controls(state)
 }
 
+fn animate(state: State<AppState>, data: Json<AnimationSettings>) -> Result<NamedFile> {
+    println!("{:?}", data);
+    let _ = state.sender.send(HooCommand::Rotate(data.transition_time, data.hold_time));
+    controls(state)
+}
+
 fn stop_animation(state: State<AppState>) -> Result<NamedFile> {
     let _ = state.sender.send(HooCommand::StopAnimation);
     controls(state)
+}
+
+#[derive(Debug, Deserialize)]
+struct AnimationSettings {
+    transition_time: u16,
+    hold_time: u16,
 }
