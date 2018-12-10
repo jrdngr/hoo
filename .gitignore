@@ -1,4 +1,6 @@
 /target
 **/*.rs.bk
+**/node_modules
+/hoo_server/static/dist/*
 Cargo.lock
 .env

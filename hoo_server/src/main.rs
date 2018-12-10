@@ -2,7 +2,9 @@ use std::sync::mpsc::Sender;
 use std::thread;
 
 use actix_web::http::Method;
-use actix_web::{fs::NamedFile, server, App, Path, Query, Result, State, Json, error, HttpResponse};
+use actix_web::{
+    error, fs, fs::NamedFile, server, App, HttpResponse, Json, Path, Query, Result, State,
+};
 use serde_derive::Deserialize;
 
 use hoo::{Hoo, HooCommand};
@@ -19,7 +21,12 @@ fn main() {
 
     server::new(move || {
         App::with_state(AppState::new(&sender))
-            .resource("/", |r| r.method(Method::GET).with(controls))
+            .handler(
+                "/",
+                fs::StaticFiles::new("./hoo-frontend/dist/")
+                    .unwrap()
+                    .index_file("index.html"),
+            )
             .resource("/on/{light_num}", |r| r.method(Method::GET).with(on))
             .resource("/off/{light_num}", |r| r.method(Method::GET).with(off))
             .resource("/color/{light_num}", |r| r.method(Method::GET).with(color))
@@ -32,14 +39,16 @@ fn main() {
             .resource("/random/{trans_time}/{hold_time}", |r| {
                 r.method(Method::GET).with(random)
             })
-            .resource("/animate", |r| r.method(Method::POST).with_config(animate, |(_, cfg)| {
-                cfg.error_handler(|err, req| {
-                    println!("{:?}", err);
-                    println!("{:?}", req);
-                    error::InternalError::from_response(
-                         err, HttpResponse::Conflict().finish()).into()
-                });
-            }))
+            .resource("/animate", |r| {
+                r.method(Method::POST).with_config(animate, |(_, cfg)| {
+                    cfg.error_handler(|err, req| {
+                        println!("{:?}", err);
+                        println!("{:?}", req);
+                        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+                            .into()
+                    });
+                })
+            })
             .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
             .finish()
     })
@@ -62,7 +71,7 @@ impl AppState {
 }
 
 fn controls(_state: State<AppState>) -> Result<NamedFile> {
-    let path = std::path::Path::new("./static/controls.html");
+    let path = std::path::Path::new("./hoo-frontend/dist/index.html");
 
     let result = NamedFile::open(path);
 
@@ -128,8 +137,10 @@ fn random(state: State<AppState>, info: Path<(u16, u16)>) -> Result<NamedFile> {
 }
 
 fn animate(state: State<AppState>, data: Json<AnimationSettings>) -> Result<NamedFile> {
-    println!("{:?}", data);
-    let _ = state.sender.send(HooCommand::Rotate(data.transition_time, data.hold_time));
+    println!("data: {:?}", data);
+    let _ = state
+        .sender
+        .send(HooCommand::Rotate(data.transition_time, data.hold_time));
     controls(state)
 }
 
