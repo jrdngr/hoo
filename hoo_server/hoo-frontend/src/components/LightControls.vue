@@ -22,7 +22,7 @@
 </template>
 
 <script>
-const baseUrl = "http://localhost:8080";
+const baseUrl = `http://${process.env.VUE_APP_IP}`;
 
 export default {
   name: "LightControls",
