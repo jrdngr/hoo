@@ -1,16 +1,18 @@
 <template>
   <div id="animation">
-    <button v-on:click="rotate">Rotate</button>
-    <button v-on:click="random">Random</button>
-    <button v-on:click="stop">Stop</button>
-    <br>
-    <br>
-    <input id="trans-time" type="number" min="0" max="65535" v-model="transitionTime">
-    <label for="trans-time">Transition time</label>
-    <br>
-    <br>
-    <input id="hold-time" type="number" min="0" max="65535" v-model="holdTime">
-    <label for="hold-time">Hold time</label>
+    <div class="control">
+      <button @click="rotate">Rotate</button>
+      <button @click="random">Random</button>
+      <button @click="stop">Stop</button>
+    </div>
+    <div class="control">
+      <input id="trans-time" type="number" min="0" max="65535" v-model="transitionTime">
+      <label for="trans-time">Transition time</label>
+    </div>
+    <div class="control">
+      <input id="hold-time" type="number" min="0" max="65535" v-model="holdTime">
+      <label for="hold-time">Hold time</label>
+    </div>
   </div>
 </template>
 
@@ -47,19 +49,6 @@ export default {
   display: inline-block;
   border: 1px solid gray;
   padding: 10px;
-  width: 300px;
-}
-
-button {
-  font-size: 1.5em;
-}
-
-input {
-  font-size: 1.5em;
-}
-
-label {
-  font-size: 1.5em;
-  margin-left: 10px;
+  width: 400px;
 }
 </style>
