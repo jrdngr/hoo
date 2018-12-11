@@ -45,6 +45,7 @@ fn main() {
                 })
             })
             .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
+            .resource("/lights", |r| r.method(Method::GET).with(get_lights))
             .handler(
                 "/",
                 fs::StaticFiles::new("./hoo-frontend/dist/")
@@ -136,6 +137,10 @@ fn animate(state: State<AppState>, data: Json<AnimationSettings>) -> HooResult {
 fn stop_animation(state: State<AppState>) -> HooResult {
     let _ = state.sender.send(HooCommand::StopAnimation);
 
+    Ok(Json(Default::default()))
+}
+
+fn get_lights(state: State<AppState>) -> Result<Json<LightState>> {
     Ok(Json(Default::default()))
 }
 

@@ -29,7 +29,7 @@ impl Light {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LightState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub on: Option<bool>,
@@ -67,24 +67,7 @@ pub struct LightState {
 
 impl LightState {
     pub fn new() -> Self {
-        Self {
-            on: None,
-            bri: None,
-            hue: None,
-            sat: None,
-            xy: None,
-            ct: None,
-            effect: None,
-            alert: None,
-            transitiontime: None,
-            bri_inc: None,
-            sat_inc: None,
-            hue_inc: None,
-            ct_inc: None,
-            xy_inc: None,
-            colormode: None,
-            reachable: None,
-        }
+        Default::default()
     }
 
     pub fn on(mut self, is_on: bool) -> LightState {
@@ -159,6 +142,29 @@ impl LightState {
             ))
         } else {
             None
+        }
+    }
+}
+
+impl Default for LightState {
+    fn default() -> Self {
+        Self {
+            on: None,
+            bri: None,
+            hue: None,
+            sat: None,
+            xy: None,
+            ct: None,
+            effect: None,
+            alert: None,
+            transitiontime: None,
+            bri_inc: None,
+            sat_inc: None,
+            hue_inc: None,
+            ct_inc: None,
+            xy_inc: None,
+            colormode: None,
+            reachable: None,
         }
     }
 }

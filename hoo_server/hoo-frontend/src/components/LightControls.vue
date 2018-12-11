@@ -25,5 +25,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+#light {
+  display: inline-block;
+  border: 1px solid gray;
+  padding: 10px;
+}
+
+button {
+  font-size: 1.5em;
+}
 </style>
