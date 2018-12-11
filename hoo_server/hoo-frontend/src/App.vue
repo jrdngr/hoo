@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <LightControls lightNumber="1"/>
+    <LightControls v-bind:lightNumber="3"/>
+    <LightControls v-bind:lightNumber="4"/>
   </div>
 </template>
 
