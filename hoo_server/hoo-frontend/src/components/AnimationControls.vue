@@ -47,6 +47,7 @@ export default {
   display: inline-block;
   border: 1px solid gray;
   padding: 10px;
+  width: 300px;
 }
 
 button {
