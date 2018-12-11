@@ -1,14 +1,15 @@
+use std::default::Default;
 use std::sync::mpsc::Sender;
 use std::thread;
 
 use actix_web::http::Method;
-use actix_web::{
-    error, fs, fs::NamedFile, server, App, HttpResponse, Json, Path, Query, Result, State,
-};
-use serde_derive::Deserialize;
+use actix_web::{error, fs, server, App, HttpResponse, Json, Path, Query, Result, State};
+use serde_derive::{Deserialize, Serialize};
 
 use hoo::{Hoo, HooCommand};
 use hoohue_api::light::LightState;
+
+type HooResult = Result<Json<HooResponse>>;
 
 fn main() {
     dotenv::dotenv().ok();
@@ -21,12 +22,6 @@ fn main() {
 
     server::new(move || {
         App::with_state(AppState::new(&sender))
-            .handler(
-                "/",
-                fs::StaticFiles::new("./hoo-frontend/dist/")
-                    .unwrap()
-                    .index_file("index.html"),
-            )
             .resource("/on/{light_num}", |r| r.method(Method::GET).with(on))
             .resource("/off/{light_num}", |r| r.method(Method::GET).with(off))
             .resource("/color/{light_num}", |r| r.method(Method::GET).with(color))
@@ -50,6 +45,12 @@ fn main() {
                 })
             })
             .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
+            .handler(
+                "/",
+                fs::StaticFiles::new("./hoo-frontend/dist/")
+                    .unwrap()
+                    .index_file("index.html"),
+            )
             .finish()
     })
     .bind(socket_ip)
@@ -70,31 +71,16 @@ impl AppState {
     }
 }
 
-fn controls(_state: State<AppState>) -> Result<NamedFile> {
-    let path = std::path::Path::new("./hoo-frontend/dist/index.html");
-
-    let result = NamedFile::open(path);
-
-    match &result {
-        Ok(f) => {}
-        Err(e) => {
-            println!("{:?}", e);
-        }
-    }
-
-    Ok(result?)
-}
-
-fn on(state: State<AppState>, light_num: Path<u8>) -> Result<NamedFile> {
+fn on(state: State<AppState>, light_num: Path<u8>) -> HooResult {
     let _ = state.sender.send(HooCommand::On(*light_num));
 
-    controls(state)
+    Ok(Json(Default::default()))
 }
 
-fn off(state: State<AppState>, light_num: Path<u8>) -> Result<NamedFile> {
+fn off(state: State<AppState>, light_num: Path<u8>) -> HooResult {
     let _ = state.sender.send(HooCommand::Off(*light_num));
 
-    controls(state)
+    Ok(Json(Default::default()))
 }
 
 #[derive(Debug, Deserialize)]
@@ -104,53 +90,70 @@ struct RGB {
     b: Option<u8>,
 }
 
-fn color(state: State<AppState>, light_num: Path<u8>, color: Query<RGB>) -> Result<NamedFile> {
+fn color(state: State<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HooResult {
     let r = color.r.unwrap_or(0);
     let g = color.g.unwrap_or(0);
     let b = color.b.unwrap_or(0);
 
     let _ = state.sender.send(HooCommand::RgbColor(*light_num, r, g, b));
 
-    controls(state)
+    Ok(Json(Default::default()))
 }
 
 fn light_state(
     state: State<AppState>,
     light_num: Path<u8>,
     light_state: Query<LightState>,
-) -> Result<NamedFile> {
+) -> HooResult {
     let _ = state
         .sender
         .send(HooCommand::State(*light_num, light_state.clone()));
 
-    controls(state)
+    Ok(Json(Default::default()))
 }
 
-fn rotate(state: State<AppState>, info: Path<(u16, u16)>) -> Result<NamedFile> {
+fn rotate(state: State<AppState>, info: Path<(u16, u16)>) -> HooResult {
     let _ = state.sender.send(HooCommand::Rotate(info.0, info.1));
-    controls(state)
+
+    Ok(Json(Default::default()))
 }
 
-fn random(state: State<AppState>, info: Path<(u16, u16)>) -> Result<NamedFile> {
+fn random(state: State<AppState>, info: Path<(u16, u16)>) -> HooResult {
     let _ = state.sender.send(HooCommand::Random(info.0, info.1));
-    controls(state)
+
+    Ok(Json(Default::default()))
 }
 
-fn animate(state: State<AppState>, data: Json<AnimationSettings>) -> Result<NamedFile> {
+fn animate(state: State<AppState>, data: Json<AnimationSettings>) -> HooResult {
     println!("data: {:?}", data);
     let _ = state
         .sender
         .send(HooCommand::Rotate(data.transition_time, data.hold_time));
-    controls(state)
+
+    Ok(Json(Default::default()))
 }
 
-fn stop_animation(state: State<AppState>) -> Result<NamedFile> {
+fn stop_animation(state: State<AppState>) -> HooResult {
     let _ = state.sender.send(HooCommand::StopAnimation);
-    controls(state)
+
+    Ok(Json(Default::default()))
 }
 
 #[derive(Debug, Deserialize)]
 struct AnimationSettings {
     transition_time: u16,
     hold_time: u16,
+}
+
+#[derive(Debug, Serialize)]
+struct HooResponse {
+    message: String,
+}
+
+impl Default for HooResponse {
+    fn default() -> Self {
+        HooResponse {
+            message: "success".to_string(),
+        }
+    }
 }

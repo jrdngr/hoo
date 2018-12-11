@@ -15,15 +15,11 @@ export default {
   methods: {
     on: function(event) {
       const url = `http://localhost:8080/on/${this.lightNumber}`;
-      fetch(url)
-        .then(data => data.json())
-        .then(res => console.log(res));
+      fetch(url);
     },
     off: function(event) {
       const url = `http://localhost:8080/off/${this.lightNumber}`;
-      fetch(url)
-        .then(data => data.json())
-        .then(res => console.log(res));
+      fetch(url);
     }
   }
 };
