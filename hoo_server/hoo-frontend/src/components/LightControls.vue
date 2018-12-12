@@ -58,19 +58,19 @@ export default {
       fetch(url);
     },
     bri: _.throttle(function(event) {
-      const url = `${BASE_URL}/${this.lightNumber}state?bri=${
+      const url = `${BASE_URL}/${this.lightNumber}/state?bri=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
     sat: _.throttle(function(event) {
-      const url = `${BASE_URL}/${this.lightNumber}state?sat=${
+      const url = `${BASE_URL}/${this.lightNumber}/state?sat=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
     hue: _.throttle(function(event) {
-      const url = `${BASE_URL}/${this.lightNumber}state?hue=${
+      const url = `${BASE_URL}/${this.lightNumber}/state?hue=${
         event.srcElement.value
       }`;
       fetch(url);
