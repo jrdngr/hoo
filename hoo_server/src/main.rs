@@ -49,7 +49,9 @@ fn main() {
                 })
             })
             .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
-            .resource("/light", |r| r.method(Method::GET).with(get_light))
+            .resource("/light/{light_num}", |r| {
+                r.method(Method::GET).with(get_light)
+            })
             .resource("/lights", |r| r.method(Method::GET).with(get_all_lights))
             .handler(
                 "/",

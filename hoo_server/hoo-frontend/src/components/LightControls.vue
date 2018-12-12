@@ -24,15 +24,15 @@
         </defs>
         <rect width="130" height="10" fill="url(#hue-gradient)"></rect>
       </svg>
-      <input id="hue" type="range" min="0" max="65535" @input="hue">
+      <input id="hue" type="range" min="0" max="65535" v-bind:value="hue" @input="set_hue">
       <label for="hue">Hue</label>
     </div>
     <div class="control">
-      <input id="sat" type="range" min="0" max="255" @input="sat">
+      <input id="sat" type="range" min="0" max="255" v-bind:value="saturation" @input="set_sat">
       <label for="sat">Saturation</label>
     </div>
     <div class="control">
-      <input id="bri" type="range" min="0" max="255" @input="bri">
+      <input id="bri" type="range" min="0" max="255" v-bind:value="brightness" @input="set_bri">
       <label for="bri">Brightness</label>
     </div>
   </div>
@@ -48,6 +48,23 @@ export default {
     lightName: String,
     lightNumber: Number
   },
+  data: function() {
+    return {
+      hue: 0,
+      saturation: 0,
+      brightness: 0
+    };
+  },
+  created: function() {
+    const url = `${BASE_URL}/light/${this.lightNumber}`;
+    fetch(url)
+      .then(data => data.json())
+      .then(light => {
+        this.hue = light.state.hue;
+        this.saturation = light.state.sat;
+        this.brightness = light.state.bri;
+      });
+  },
   methods: {
     on: function(event) {
       const url = `${BASE_URL}/${this.lightNumber}/on`;
@@ -57,19 +74,19 @@ export default {
       const url = `${BASE_URL}/${this.lightNumber}/off`;
       fetch(url);
     },
-    bri: _.throttle(function(event) {
+    set_bri: _.throttle(function(event) {
       const url = `${BASE_URL}/${this.lightNumber}/state?bri=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
-    sat: _.throttle(function(event) {
+    set_sat: _.throttle(function(event) {
       const url = `${BASE_URL}/${this.lightNumber}/state?sat=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
-    hue: _.throttle(function(event) {
+    set_hue: _.throttle(function(event) {
       const url = `${BASE_URL}/${this.lightNumber}/state?hue=${
         event.srcElement.value
       }`;
