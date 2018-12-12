@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 
 use hoohue_api as api;
 use hoohue_api::color::Color;
-use hoohue_api::light::LightState;
+use hoohue_api::light::{Light, LightCollection, LightState};
 use hoohue_api::ApiConnection;
 
 use crate::animation::AnimationFrame;
@@ -91,6 +91,18 @@ impl Hoo {
                         next_frame_time = Some(Instant::now());
                     }
                     HooCommand::StopAnimation => next_frame_time = None,
+                    HooCommand::GetLight(light_num, sender) => {
+                        let response = api::get_light(&self.connection, light_num);
+                        if let Ok(light) = response {
+                            let _ = sender.send(light);
+                        }
+                    }
+                    HooCommand::GetAllLights(sender) => {
+                        let response = api::get_active_lights(&self.connection);
+                        if let Ok(lights) = response {
+                            let _ = sender.send(lights);
+                        }
+                    }
                     HooCommand::Quit => return,
                     _ => println!("Not implemented"),
                 }
@@ -143,5 +155,7 @@ pub enum HooCommand {
     Rainbow(Duration),
     Random(TransitionTime, HoldTime),
     StopAnimation,
+    GetLight(LightNumber, Sender<Light>),
+    GetAllLights(Sender<LightCollection>),
     Quit,
 }

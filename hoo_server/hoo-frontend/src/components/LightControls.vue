@@ -51,27 +51,27 @@ export default {
   },
   methods: {
     on: function(event) {
-      const url = `${baseUrl}/on/${this.lightNumber}`;
+      const url = `${baseUrl}/${this.lightNumber}/on`;
       fetch(url);
     },
     off: function(event) {
-      const url = `${baseUrl}/off/${this.lightNumber}`;
+      const url = `${baseUrl}/${this.lightNumber}/off`;
       fetch(url);
     },
     bri: _.throttle(function(event) {
-      const url = `${baseUrl}/state/${this.lightNumber}?bri=${
+      const url = `${baseUrl}/${this.lightNumber}state?bri=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
     sat: _.throttle(function(event) {
-      const url = `${baseUrl}/state/${this.lightNumber}?sat=${
+      const url = `${baseUrl}/${this.lightNumber}state?sat=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
     hue: _.throttle(function(event) {
-      const url = `${baseUrl}/state/${this.lightNumber}?hue=${
+      const url = `${baseUrl}/${this.lightNumber}state?hue=${
         event.srcElement.value
       }`;
       fetch(url);

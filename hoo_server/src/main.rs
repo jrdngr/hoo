@@ -1,15 +1,19 @@
 use std::default::Default;
-use std::sync::mpsc::Sender;
+use std::sync::mpsc::{self, Sender};
 use std::thread;
+use std::time::Duration;
 
 use actix_web::http::Method;
-use actix_web::{error, fs, server, App, HttpResponse, Json, Path, Query, Result, State};
+use actix_web::{error, fs, http, server, App, HttpResponse, Json, Path, Query, Result, State};
+use failure::{Error, Fail};
 use serde_derive::{Deserialize, Serialize};
 
 use hoo::{Hoo, HooCommand};
-use hoohue_api::light::LightState;
+use hoohue_api::light::{Light, LightCollection, LightState};
 
 type HooResult = Result<Json<HooResponse>>;
+
+const TIMEOUT: Duration = Duration::from_secs(5);
 
 fn main() {
     dotenv::dotenv().ok();
@@ -22,10 +26,10 @@ fn main() {
 
     server::new(move || {
         App::with_state(AppState::new(&sender))
-            .resource("/on/{light_num}", |r| r.method(Method::GET).with(on))
-            .resource("/off/{light_num}", |r| r.method(Method::GET).with(off))
-            .resource("/color/{light_num}", |r| r.method(Method::GET).with(color))
-            .resource("/state/{light_num}", |r| {
+            .resource("{light_num}/on", |r| r.method(Method::GET).with(on))
+            .resource("{light_num}/off", |r| r.method(Method::GET).with(off))
+            .resource("{light_num}/color", |r| r.method(Method::GET).with(color))
+            .resource("{light_num}/state", |r| {
                 r.method(Method::GET).with(light_state)
             })
             .resource("/rotate/{trans_time}/{hold_time}", |r| {
@@ -45,7 +49,7 @@ fn main() {
                 })
             })
             .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
-            .resource("/lights", |r| r.method(Method::GET).with(get_lights))
+            .resource("/lights", |r| r.method(Method::GET).with(get_all_lights))
             .handler(
                 "/",
                 fs::StaticFiles::new("./hoo-frontend/dist/")
@@ -140,8 +144,28 @@ fn stop_animation(state: State<AppState>) -> HooResult {
     Ok(Json(Default::default()))
 }
 
-fn get_lights(state: State<AppState>) -> Result<Json<LightState>> {
-    Ok(Json(Default::default()))
+fn get_light(state: State<AppState>, light_num: Path<u8>) -> Result<Json<Light>> {
+    let (sender, receiver) = mpsc::channel::<Light>();
+    let _ = state.sender.send(HooCommand::GetLight(*light_num, sender));
+
+    let response = receiver.recv_timeout(TIMEOUT);
+
+    match response {
+        Ok(light) => Ok(Json(light)),
+        Err(_) => Err(HooError::new().into()),
+    }
+}
+
+fn get_all_lights(state: State<AppState>) -> Result<Json<LightCollection>> {
+    let (sender, receiver) = mpsc::channel::<LightCollection>();
+    let _ = state.sender.send(HooCommand::GetAllLights(sender));
+
+    let response = receiver.recv_timeout(TIMEOUT);
+
+    match response {
+        Ok(lights) => Ok(Json(lights)),
+        Err(_) => Err(HooError::new().into()),
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -160,5 +184,21 @@ impl Default for HooResponse {
         HooResponse {
             message: "success".to_string(),
         }
+    }
+}
+
+#[derive(Fail, Debug)]
+#[fail(display = "Internal server error")]
+struct HooError {}
+
+impl HooError {
+    pub fn new() -> Self {
+        HooError {}
+    }
+}
+
+impl error::ResponseError for HooError {
+    fn error_response(&self) -> HttpResponse {
+        HttpResponse::new(http::StatusCode::INTERNAL_SERVER_ERROR)
     }
 }
