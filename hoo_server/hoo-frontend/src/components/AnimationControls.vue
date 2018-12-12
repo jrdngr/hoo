@@ -17,7 +17,7 @@
 </template>
 
 <script>
-const baseUrl = `http://${process.env.VUE_APP_IP}`;
+import { BASE_URL } from "../App.vue";
 
 export default {
   name: "AnimationControls",
@@ -29,15 +29,15 @@ export default {
   },
   methods: {
     rotate: function(event) {
-      const url = `${baseUrl}/rotate/${this.transitionTime}/${this.holdTime}`;
+      const url = `${BASE_URL}/rotate/${this.transitionTime}/${this.holdTime}`;
       fetch(url);
     },
     random: function(event) {
-      const url = `${baseUrl}/random/${this.transitionTime}/${this.holdTime}`;
+      const url = `${BASE_URL}/random/${this.transitionTime}/${this.holdTime}`;
       fetch(url);
     },
     stop: function(event) {
-      const url = `${baseUrl}/stop`;
+      const url = `${BASE_URL}/stop`;
       fetch(url);
     }
   }

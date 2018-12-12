@@ -1,6 +1,6 @@
 <template>
   <div id="light">
-    <h1>Light #{{lightNumber}}</h1>
+    <h1>{{lightNumber}}: {{lightName}}</h1>
     <div class="control">
       <button @click="on">On</button>
       <button @click="off">Off</button>
@@ -40,38 +40,37 @@
 
 <script>
 import _ from "lodash";
-import { INPUT_THROTTLING_DELAY } from "../App.vue";
-
-const baseUrl = `http://${process.env.VUE_APP_IP}`;
+import { BASE_URL, INPUT_THROTTLING_DELAY } from "../App.vue";
 
 export default {
   name: "LightControls",
   props: {
+    lightName: String,
     lightNumber: Number
   },
   methods: {
     on: function(event) {
-      const url = `${baseUrl}/${this.lightNumber}/on`;
+      const url = `${BASE_URL}/${this.lightNumber}/on`;
       fetch(url);
     },
     off: function(event) {
-      const url = `${baseUrl}/${this.lightNumber}/off`;
+      const url = `${BASE_URL}/${this.lightNumber}/off`;
       fetch(url);
     },
     bri: _.throttle(function(event) {
-      const url = `${baseUrl}/${this.lightNumber}state?bri=${
+      const url = `${BASE_URL}/${this.lightNumber}state?bri=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
     sat: _.throttle(function(event) {
-      const url = `${baseUrl}/${this.lightNumber}state?sat=${
+      const url = `${BASE_URL}/${this.lightNumber}state?sat=${
         event.srcElement.value
       }`;
       fetch(url);
     }, INPUT_THROTTLING_DELAY),
     hue: _.throttle(function(event) {
-      const url = `${baseUrl}/${this.lightNumber}state?hue=${
+      const url = `${BASE_URL}/${this.lightNumber}state?hue=${
         event.srcElement.value
       }`;
       fetch(url);
