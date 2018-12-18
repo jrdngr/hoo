@@ -6,7 +6,7 @@ use crate::animation::AnimationFrame;
 use crate::AnyError;
 
 use hoohue_api::light::{LightNumber, LightState};
-use hoohue_api::{get_active_lights, ApiConnection};
+use hoohue_api::ApiConnection;
 
 pub struct RandomAnimation {
     transition_time: Duration,
@@ -22,7 +22,8 @@ impl RandomAnimation {
         transition_time: &Duration,
         hold_time: &Duration,
     ) -> Result<Self, AnyError> {
-        let lights = get_active_lights(connection)?
+        let lights = connection
+            .get_active_lights()?
             .0
             .keys()
             .map(|num| *num)

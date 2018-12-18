@@ -3,7 +3,7 @@ use std::time::Duration;
 use crate::animation::{AnimationFrame, LoopingAnimation};
 use crate::AnyError;
 use hoohue_api::light::LightState;
-use hoohue_api::{get_active_lights, ApiConnection};
+use hoohue_api::ApiConnection;
 
 pub struct RotateAnimation {
     animation: LoopingAnimation,
@@ -16,7 +16,7 @@ impl RotateAnimation {
         transition_time: &Duration,
         hold_time: &Duration,
     ) -> Result<Self, AnyError> {
-        let all_lights = get_active_lights(connection)?.0;
+        let all_lights = connection.get_active_lights()?.0;
 
         let mut active_lights = Vec::new();
         let mut light_states = Vec::new();

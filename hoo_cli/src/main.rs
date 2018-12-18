@@ -8,7 +8,7 @@ use hoo::{Hoo, HooCommand};
 
 use hoohue_api::color::Color;
 use hoohue_api::light::LightState;
-use hoohue_api::{colorloop, get_light, off, on, set_state, transition_time, ApiConnection};
+use hoohue_api::ApiConnection;
 
 type LightNumber = u8;
 type RgbValue = f64;
@@ -28,7 +28,7 @@ fn main() -> Result<(), AnyError> {
 
     let mut buffer = String::new();
 
-    let light = get_light(&connection, 1)?;
+    let light = connection.get_light(1)?;
     let mut current_color = match light.color() {
         Some(color) => color,
         None => Color::from_rgb(0.0, 0.0, 0.0),
@@ -46,28 +46,28 @@ fn main() -> Result<(), AnyError> {
 
         match command {
             Command::On(l) => {
-                on(&connection, l)?;
+                connection.on(l)?;
             }
             Command::Off(l) => {
-                off(&connection, l)?;
+                connection.off(l)?;
             }
             Command::Red(l, r) => {
                 let (_, g, b) = current_color.rgb();
                 current_color = Color::from_rgb(r, g, b);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::Green(l, g) => {
                 let (r, _, b) = current_color.rgb();
                 current_color = Color::from_rgb(r, g, b);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::Blue(l, b) => {
                 let (r, g, _) = current_color.rgb();
                 current_color = Color::from_rgb(r, g, b);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::RgbColor(l, r, g, b) => {
                 let red = r as f64 / f64::from(std::u8::MAX);
@@ -75,42 +75,42 @@ fn main() -> Result<(), AnyError> {
                 let blue = b as f64 / f64::from(std::u8::MAX);
                 current_color = Color::from_rgb(red, green, blue);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::Hue(l, h) => {
                 let (_, s, v) = current_color.hsv();
                 current_color = Color::from_hsv(h, s, v);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::Saturation(l, s) => {
                 let (h, _, v) = current_color.hsv();
                 current_color = Color::from_hsv(h, s, v);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::Brightness(l, v) => {
                 let (h, s, _) = current_color.hsv();
                 current_color = Color::from_hsv(h, s, v);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::HsvColor(l, h, s, v) => {
                 current_color = Color::from_hsv(h, s, v);
                 let state = LightState::new().color(&current_color);
-                set_state(&connection, l, &state)?;
+                connection.set_state(l, &state)?;
             }
             Command::ColorLoop(l, e) => {
-                colorloop(&connection, l, e)?;
+                connection.colorloop(l, e)?;
             }
             Command::TransitionTime(l, t) => {
-                transition_time(&connection, l, t)?;
+                connection.transition_time(l, t)?;
             }
             Command::Animate(t, h) => {
                 let _ = sender.send(HooCommand::Rotate(t, h));
             }
             Command::Rainbow(d) => {
-                // let anim = effects::rainbow(&connection, &d)?;
+                // let anim = effects::rainbow(&d)?;
                 // anim.play(&connection)?;
             }
             Command::Random(t, h) => {

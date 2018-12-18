@@ -12,6 +12,7 @@ use crate::effects::rotate::RotateAnimation;
 
 pub mod animation;
 pub mod effects;
+pub mod light_controller;
 
 pub type AnyError = Box<dyn std::error::Error>;
 
@@ -56,10 +57,10 @@ impl Hoo {
                 println!("{:?}", msg);
                 match msg {
                     HooCommand::On(light_num) => {
-                        let _ = api::on(&self.connection, light_num);
+                        let _ = self.connection.on(light_num);
                     }
                     HooCommand::Off(light_num) => {
-                        let _ = api::off(&self.connection, light_num);
+                        let _ = self.connection.off(light_num);
                     }
                     HooCommand::RgbColor(light_num, r, g, b) => {
                         let r = f64::from(r) / f64::from(std::u8::MAX);
@@ -67,10 +68,10 @@ impl Hoo {
                         let b = f64::from(b) / f64::from(std::u8::MAX);
 
                         let state = LightState::new().color(&Color::from_rgb(r, g, b)).sat(255);
-                        let _ = api::set_state(&self.connection, light_num, &state);
+                        let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::State(light_num, state) => {
-                        let _ = api::set_state(&self.connection, light_num, &state);
+                        let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::Rotate(tt, ht) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
@@ -92,13 +93,13 @@ impl Hoo {
                     }
                     HooCommand::StopAnimation => next_frame_time = None,
                     HooCommand::GetLight(light_num, sender) => {
-                        let response = api::get_light(&self.connection, light_num);
+                        let response = self.connection.get_light(light_num);
                         if let Ok(light) = response {
                             let _ = sender.send(light);
                         }
                     }
                     HooCommand::GetAllLights(sender) => {
-                        let response = api::get_active_lights(&self.connection);
+                        let response = self.connection.get_active_lights();
                         if let Ok(lights) = response {
                             let _ = sender.send(lights);
                         }
@@ -118,7 +119,7 @@ impl Hoo {
                                 let delay = frame.transition_time + frame.hold_time;
                                 next_frame_time = Some(now + delay);
                                 for state in frame.states {
-                                    let _ = api::set_state(&self.connection, state.0, &state.1);
+                                    let _ = self.connection.set_state(state.0, &state.1);
                                 }
                             }
                         }

@@ -24,81 +24,73 @@ impl ApiConnection {
     pub fn base(&self) -> String {
         self.base_uri.clone()
     }
-}
 
-pub fn get_all_lights(connection: &ApiConnection) -> Result<LightCollection, AnyError> {
-    let uri = format!("{}/lights", connection.base());
+    pub fn get_all_lights(&self) -> Result<LightCollection, AnyError> {
+        let uri = format!("{}/lights", self.base());
 
-    let response = connection.client.get(&uri).send()?.text()?;
+        let response = self.client.get(&uri).send()?.text()?;
 
-    let lights = serde_json::from_str(&response)?;
+        let lights = serde_json::from_str(&response)?;
 
-    Ok(lights)
-}
+        Ok(lights)
+    }
 
-pub fn get_active_lights(connection: &ApiConnection) -> Result<LightCollection, AnyError> {
-    let active_lights: HashMap<u8, Light> = get_all_lights(connection)?
-        .0
-        .into_iter()
-        .filter(|(_, l)| l.state.is_on() && l.state.is_reachable())
-        .collect();
+    pub fn get_active_lights(&self) -> Result<LightCollection, AnyError> {
+        let active_lights: HashMap<u8, Light> = self
+            .get_all_lights()?
+            .0
+            .into_iter()
+            .filter(|(_, l)| l.state.is_on() && l.state.is_reachable())
+            .collect();
 
-    Ok(LightCollection(active_lights))
-}
+        Ok(LightCollection(active_lights))
+    }
 
-pub fn get_light(connection: &ApiConnection, light_number: u8) -> Result<Light, AnyError> {
-    let uri = format!("{}/lights/{}", connection.base(), light_number);
+    pub fn get_light(&self, light_number: u8) -> Result<Light, AnyError> {
+        let uri = format!("{}/lights/{}", self.base(), light_number);
+        let response = self.client.get(&uri).send()?.text()?;
 
-    let response = connection.client.get(&uri).send()?.text()?;
+        let light = serde_json::from_str(&response)?;
 
-    let light = serde_json::from_str(&response)?;
+        Ok(light)
+    }
 
-    Ok(light)
-}
+    pub fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, AnyError> {
+        let body = serde_json::to_string(state)?;
 
-pub fn set_state(
-    connection: &ApiConnection,
-    light_number: u8,
-    state: &LightState,
-) -> Result<String, AnyError> {
-    let body = serde_json::to_string(state)?;
+        let uri = format!("{}/lights/{}/state", self.base(), light_number);
 
-    let uri = format!("{}/lights/{}/state", connection.base(), light_number);
+        let response = self.client.put(&uri).body(body).send()?.text()?;
 
-    let response = connection.client.put(&uri).body(body).send()?.text()?;
+        Ok(response)
+    }
 
-    Ok(response)
-}
+    pub fn on(&self, light_number: u8) -> Result<String, AnyError> {
+        let state = LightState::new().on(true);
+        self.set_state(light_number, &state)
+    }
 
-pub fn on(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
-    let state = LightState::new().on(true);
-    set_state(connection, light_number, &state)
-}
+    pub fn off(&self, light_number: u8) -> Result<String, AnyError> {
+        let state = LightState::new().on(false);
+        self.set_state(light_number, &state)
+    }
 
-pub fn off(connection: &ApiConnection, light_number: u8) -> Result<String, AnyError> {
-    let state = LightState::new().on(false);
-    set_state(connection, light_number, &state)
-}
+    pub fn colorloop(&self, light_number: u8, enabled: bool) -> Result<String, AnyError> {
+        let effect = if enabled {
+            LightEffect::ColorLoop
+        } else {
+            LightEffect::None
+        };
+        let state = LightState::new().effect(effect);
+        self.set_state(light_number, &state)
+    }
 
-pub fn colorloop(
-    connection: &ApiConnection,
-    light_number: u8,
-    enabled: bool,
-) -> Result<String, AnyError> {
-    let effect = if enabled {
-        LightEffect::ColorLoop
-    } else {
-        LightEffect::None
-    };
-    let state = LightState::new().effect(effect);
-    set_state(connection, light_number, &state)
-}
-
-pub fn transition_time(
-    connection: &ApiConnection,
-    light_number: u8,
-    transition_time: u16,
-) -> Result<String, AnyError> {
-    let state = LightState::new().transitiontime(transition_time);
-    set_state(connection, light_number, &state)
+    pub fn transition_time(
+        &self,
+        light_number: u8,
+        transition_time: u16,
+    ) -> Result<String, AnyError> {
+        let state = LightState::new().transitiontime(transition_time);
+        self.set_state(light_number, &state)
+    }
 }
