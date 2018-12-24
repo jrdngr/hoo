@@ -6,7 +6,7 @@ use std::time::Duration;
 use actix_web::http::Method;
 use actix_web::{error, fs, http, server, App, HttpResponse, Json, Path, Query, Result, State};
 use failure::{Error, Fail};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use hoo::{Hoo, HooCommand};
 use hoohue_api::light::{Light, LightCollection, LightState};
