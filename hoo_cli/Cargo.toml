@@ -8,3 +8,4 @@ edition = "2018"
 hoo = { path = "../hoo" }
 hoohue_api = { path = "../hoohue_api" }
 dotenv = "0.13.0"
+clap = "2.32.0"
