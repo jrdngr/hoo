@@ -5,7 +5,7 @@ authors = ["picklenerd <jordan.t.grace@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-hoohue_api = { path = "../hoohue_api" }
+hoo_api = { path = "../hoo_api" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 chrono = "0.4"

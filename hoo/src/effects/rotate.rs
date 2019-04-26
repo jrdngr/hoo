@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use crate::animation::{AnimationFrame, LoopingAnimation};
 use crate::AnyError;
-use hoohue_api::light::LightState;
-use hoohue_api::ApiConnection;
+use hoo_api::light::LightState;
+use hoo_api::ApiConnection;
 
 pub struct RotateAnimation {
     animation: LoopingAnimation,

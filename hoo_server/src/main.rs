@@ -5,11 +5,11 @@ use std::time::Duration;
 
 use actix_web::http::Method;
 use actix_web::{error, fs, http, server, App, HttpResponse, Json, Path, Query, Result, State};
-use failure::{Error, Fail};
+use failure::Fail;
 use serde::{Deserialize, Serialize};
 
 use hoo::{Hoo, HooCommand};
-use hoohue_api::light::{Light, LightCollection, LightState};
+use hoo_api::light::{Light, LightCollection, LightState};
 
 type HooResult = Result<Json<HooResponse>>;
 

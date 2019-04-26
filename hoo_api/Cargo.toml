@@ -1,5 +1,5 @@
 [package]
-name = "hoohue_api"
+name = "hoo_api"
 version = "0.1.0"
 authors = ["picklenerd <jordan.t.grace@gmail.com>"]
 edition = "2018"

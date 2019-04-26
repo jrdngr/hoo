@@ -1,7 +1,7 @@
 use actix::prelude::*;
 
-use hoohue_api::light::{LightNumber, LightState};
-use hoohue_api::ApiConnection;
+use hoo_api::light::{LightNumber, LightState};
+use hoo_api::ApiConnection;
 
 #[derive(Debug, Message)]
 struct SetLightState {

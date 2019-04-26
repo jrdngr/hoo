@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use hoohue_api::light::{LightNumber, LightState};
+use hoo_api::light::{LightNumber, LightState};
 
 pub type Animation = Iterator<Item = AnimationFrame>;
 

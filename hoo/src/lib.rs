@@ -1,10 +1,10 @@
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
-use hoohue_api as api;
-use hoohue_api::color::Color;
-use hoohue_api::light::{Light, LightCollection, LightState};
-use hoohue_api::ApiConnection;
+use hoo_api as api;
+use hoo_api::color::Color;
+use hoo_api::light::{Light, LightCollection, LightState};
+use hoo_api::ApiConnection;
 
 use crate::animation::AnimationFrame;
 use crate::effects::random::RandomAnimation;

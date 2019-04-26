@@ -3,5 +3,5 @@ members = [
     "hoo",
     "hoo_cli",
     "hoo_server",
-    "hoohue_api",
+    "hoo_api",
 ]

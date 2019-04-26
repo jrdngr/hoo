@@ -116,7 +116,7 @@ impl LightState {
     }
 
     pub fn color(self, color: &Color) -> LightState {
-        self.hue(color.h()).sat(color.s()).bri(color.v())
+        self.hue(color.hue).sat(color.saturation).bri(color.value)
     }
 
     pub fn is_on(&self) -> bool {

@@ -6,6 +6,6 @@ edition = "2018"
 
 [dependencies]
 hoo = { path = "../hoo" }
-hoohue_api = { path = "../hoohue_api" }
+hoo_api = { path = "../hoo_api" }
 dotenv = "0.13.0"
 clap = "2.32.0"

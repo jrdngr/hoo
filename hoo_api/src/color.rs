@@ -2,10 +2,11 @@
 
 use std::fmt::Display;
 
+#[derive(Default)]
 pub struct Color {
-    hue: u16,
-    saturation: u8,
-    value: u8,
+    pub hue: u16,
+    pub saturation: u8,
+    pub value: u8,
 }
 
 impl Color {
@@ -54,18 +55,6 @@ impl Color {
         Color::from_hsv(h, s, v)
     }
 
-    pub fn h(&self) -> u16 {
-        self.hue
-    }
-
-    pub fn s(&self) -> u8 {
-        self.saturation
-    }
-
-    pub fn v(&self) -> u8 {
-        self.value
-    }
-
     pub fn hsv(&self) -> (u16, u8, u8) {
         (self.hue, self.saturation, self.value)
     }
@@ -101,12 +90,7 @@ impl Display for Color {
         write!(
             f,
             "Color(h: {}, s: {}, v: {}, r: {}, g: {}, b: {})",
-            self.h(),
-            self.s(),
-            self.v(),
-            r,
-            g,
-            b
+            self.hue, self.saturation, self.value, r, g, b
         )
     }
 }

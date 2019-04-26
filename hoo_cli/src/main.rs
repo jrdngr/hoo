@@ -2,15 +2,15 @@ use std::io::stdin;
 use std::str::FromStr;
 use std::time::Duration;
 
-use clap::{Arg, App, SubCommand, values_t};
+use clap::{values_t, App, Arg, SubCommand};
 
 use hoo::effects;
 use hoo::AnyError;
 use hoo::{Hoo, HooCommand};
 
-use hoohue_api::color::Color;
-use hoohue_api::light::LightState;
-use hoohue_api::ApiConnection;
+use hoo_api::color::Color;
+use hoo_api::light::LightState;
+use hoo_api::ApiConnection;
 
 fn main() -> Result<(), AnyError> {
     dotenv::dotenv().ok();
@@ -39,12 +39,12 @@ fn main() -> Result<(), AnyError> {
     match matches.subcommand() {
         ("on", Some(on_matches)) => {
             let lights_typed = values_t!(on_matches, "lights", u8).unwrap_or(Vec::new());
-            
+
             for light in &lights_typed {
                 // I think the program ends before this can be processed
                 sender.send(HooCommand::On(*light));
             }
-        },
+        }
         _ => unreachable!(),
     }
 

@@ -5,8 +5,8 @@ use std::time::Duration;
 use crate::animation::AnimationFrame;
 use crate::AnyError;
 
-use hoohue_api::light::{LightNumber, LightState};
-use hoohue_api::ApiConnection;
+use hoo_api::light::{LightNumber, LightState};
+use hoo_api::ApiConnection;
 
 pub struct RandomAnimation {
     transition_time: Duration,
