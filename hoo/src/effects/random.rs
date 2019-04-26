@@ -3,7 +3,6 @@ use rand::Rng;
 use std::time::Duration;
 
 use crate::animation::AnimationFrame;
-use crate::AnyError;
 
 use hoo_api::light::{LightNumber, LightState};
 use hoo_api::ApiConnection;
@@ -21,17 +20,12 @@ impl RandomAnimation {
         connection: &ApiConnection,
         transition_time: &Duration,
         hold_time: &Duration,
-    ) -> Result<Self, AnyError> {
-        let lights = connection
-            .get_active_lights()?
-            .0
-            .keys()
-            .map(|num| *num)
-            .collect();
+    ) -> Result<Self, failure::Error> {
+        let lights = connection.get_active_lights()?.0.keys().cloned().collect();
 
         let anim = Self {
-            transition_time: transition_time.clone(),
-            hold_time: hold_time.clone(),
+            transition_time: *transition_time,
+            hold_time: *hold_time,
             lights,
             rng: rand::thread_rng(),
         };

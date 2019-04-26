@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 use crate::animation::{AnimationFrame, LoopingAnimation};
-use crate::AnyError;
 use hoo_api::light::LightState;
 use hoo_api::ApiConnection;
 
@@ -15,7 +14,7 @@ impl RotateAnimation {
         connection: &ApiConnection,
         transition_time: &Duration,
         hold_time: &Duration,
-    ) -> Result<Self, AnyError> {
+    ) -> Result<Self, failure::Error> {
         let all_lights = connection.get_active_lights()?.0;
 
         let mut active_lights = Vec::new();

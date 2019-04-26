@@ -6,10 +6,11 @@ edition = "2018"
 
 [dependencies]
 hoo_api = { path = "../hoo_api" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+actix = "0.7.9"
 chrono = "0.4"
+dotenv = "0.13.0"
+failure = "0.1.5"
 reqwest = "0.9"
 rand = "0.6.1"
-dotenv = "0.13.0"
-actix = "0.7.9"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

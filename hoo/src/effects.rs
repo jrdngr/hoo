@@ -4,7 +4,7 @@ pub mod rotate;
 // pub fn rainbow(
 //     connection: &ApiConnection,
 //     time_per_loop: &Duration,
-// ) -> Result<Animation, AnyError> {
+// ) -> Result<Animation, failure::Error> {
 //     let minimum_time_per_loop = Duration::from_secs(3);
 //     let transition_time = Duration::from_millis(500);
 

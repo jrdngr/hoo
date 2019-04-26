@@ -1,7 +1,6 @@
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
-use hoo_api as api;
 use hoo_api::color::Color;
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_api::ApiConnection;
@@ -13,8 +12,6 @@ use crate::effects::rotate::RotateAnimation;
 pub mod animation;
 pub mod effects;
 pub mod light_controller;
-
-pub type AnyError = Box<dyn std::error::Error>;
 
 type LightNumber = u8;
 type RgbValue = u8;

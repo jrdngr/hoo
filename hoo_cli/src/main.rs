@@ -1,22 +1,9 @@
-use std::io::stdin;
-use std::str::FromStr;
-use std::time::Duration;
-
 use clap::{values_t, App, Arg, SubCommand};
 
-use hoo::effects;
-use hoo::AnyError;
 use hoo::{Hoo, HooCommand};
 
-use hoo_api::color::Color;
-use hoo_api::light::LightState;
-use hoo_api::ApiConnection;
-
-fn main() -> Result<(), AnyError> {
+fn main() -> Result<(), failure::Error> {
     dotenv::dotenv().ok();
-
-    let base_uri = std::env::var("HUE_BASE_URI").expect("HUE_BASE_URI must be set");
-    let user_id = std::env::var("HUE_USER_ID").expect("HUE_USER_ID must be set");
 
     let (hoo, sender) = Hoo::new();
     std::thread::spawn(move || hoo.run());
@@ -38,11 +25,11 @@ fn main() -> Result<(), AnyError> {
 
     match matches.subcommand() {
         ("on", Some(on_matches)) => {
-            let lights_typed = values_t!(on_matches, "lights", u8).unwrap_or(Vec::new());
+            let lights_typed = values_t!(on_matches, "lights", u8).unwrap_or_default();
 
             for light in &lights_typed {
                 // I think the program ends before this can be processed
-                sender.send(HooCommand::On(*light));
+                let _ = sender.send(HooCommand::On(*light));
             }
         }
         _ => unreachable!(),
