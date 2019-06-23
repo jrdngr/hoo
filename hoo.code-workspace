@@ -1,0 +1,20 @@
+{
+    "folders": [
+		{
+			"path": "hoo_base"
+		},
+		{
+			"path": "hoo_api"
+		},
+		{
+			"path": "hoo_cli"
+		},
+		{
+			"path": "hoo_server"
+		},
+		{
+			"path": "hoo_frontend"
+		}
+	],
+    "settings": {}
+}

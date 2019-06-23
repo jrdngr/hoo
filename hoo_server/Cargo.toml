@@ -5,7 +5,7 @@ authors = ["picklenerd <jordan.t.grace@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-hoo = { path = "../hoo" }
+hoo_base = { path = "../hoo_base" }
 hoo_api = { path = "../hoo_api" }
 actix-web = "0.7.15"
 serde = { version = "1.0", features = ["derive"] }

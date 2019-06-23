@@ -1,6 +1,6 @@
 use clap::{values_t, App, Arg, SubCommand};
 
-use hoo::{Hoo, HooCommand};
+use hoo_base::{Hoo, HooCommand};
 
 fn main() -> Result<(), failure::Error> {
     dotenv::dotenv().ok();

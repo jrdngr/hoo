@@ -5,7 +5,7 @@ authors = ["picklenerd <jordan.t.grace@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-hoo = { path = "../hoo" }
+hoo_base = { path = "../hoo_base" }
 hoo_api = { path = "../hoo_api" }
 clap = "2.32.0"
 dotenv = "0.13.0"

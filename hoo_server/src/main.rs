@@ -8,7 +8,7 @@ use actix_web::{error, fs, http, server, App, HttpResponse, Json, Path, Query, R
 use failure::Fail;
 use serde::{Deserialize, Serialize};
 
-use hoo::{Hoo, HooCommand};
+use hoo_base::{Hoo, HooCommand};
 use hoo_api::light::{Light, LightCollection, LightState};
 
 type HooResult = Result<Json<HooResponse>>;
