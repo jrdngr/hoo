@@ -8,9 +8,9 @@ use actix_web::{error, fs, http, server, App, HttpResponse, Json, Path, Query, R
 use failure::Fail;
 use serde::{Deserialize, Serialize};
 
-use hoo_base::{Hoo, HooCommand};
-use hoo_api::light::{Light, LightCollection, LightState};
 
+use hoo_api::light::{Light, LightCollection, LightState};
+use hoo_base::{Hoo, HooCommand};
 type HooResult = Result<Json<HooResponse>>;
 
 const TIMEOUT: Duration = Duration::from_secs(5);
@@ -55,7 +55,7 @@ fn main() {
             .resource("/lights", |r| r.method(Method::GET).with(get_all_lights))
             .handler(
                 "/",
-                fs::StaticFiles::new("./hoo-frontend/dist/")
+                fs::StaticFiles::new("./static")
                     .unwrap()
                     .index_file("index.html"),
             )
