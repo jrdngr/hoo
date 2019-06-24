@@ -1,22 +1,23 @@
-use std::default::Default;
 use std::sync::mpsc::{self, Sender};
 use std::thread;
 use std::time::Duration;
 
-use actix_web::http::Method;
-use actix_web::{error, fs, http, server, App, HttpResponse, Json, Path, Query, Result, State};
+use actix_cors::Cors;
+use actix_web::web::{Data, Json, Path, Query};
+use actix_web::{error, http, web, App, HttpResponse, HttpServer, Result};
 use failure::Fail;
 use serde::{Deserialize, Serialize};
 
-
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_base::{Hoo, HooCommand};
-type HooResult = Result<Json<HooResponse>>;
 
 const TIMEOUT: Duration = Duration::from_secs(5);
 
-fn main() {
+fn main() -> Result<()> {
     dotenv::dotenv().ok();
+
+    let args: Vec<String> = std::env::args().collect();
+    let is_dev_mode = args.contains(&"dev".to_string());
 
     let socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
 
@@ -24,46 +25,52 @@ fn main() {
 
     thread::spawn(move || hoo.run());
 
-    server::new(move || {
-        App::with_state(AppState::new(&sender))
-            .resource("{light_num}/on", |r| r.method(Method::GET).with(on))
-            .resource("{light_num}/off", |r| r.method(Method::GET).with(off))
-            .resource("{light_num}/color", |r| r.method(Method::GET).with(color))
-            .resource("{light_num}/state", |r| {
-                r.method(Method::GET).with(light_state)
-            })
-            .resource("/rotate/{trans_time}/{hold_time}", |r| {
-                r.method(Method::GET).with(rotate)
-            })
-            .resource("/random/{trans_time}/{hold_time}", |r| {
-                r.method(Method::GET).with(random)
-            })
-            .resource("/animate", |r| {
-                r.method(Method::POST).with_config(animate, |(_, cfg)| {
-                    cfg.error_handler(|err, req| {
-                        println!("{:?}", err);
-                        println!("{:?}", req);
-                        error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-                            .into()
-                    });
-                })
-            })
-            .resource("/stop", |r| r.method(Method::GET).with(stop_animation))
-            .resource("/light/{light_num}", |r| {
-                r.method(Method::GET).with(get_light)
-            })
-            .resource("/lights", |r| r.method(Method::GET).with(get_all_lights))
-            .handler(
-                "/",
-                fs::StaticFiles::new("./static")
-                    .unwrap()
-                    .index_file("index.html"),
+    HttpServer::new(move || {
+        let mut app = App::new()
+            .wrap(
+                Cors::new()
+                    .allowed_origin("http://localhost:8080")
+                    .allowed_methods(vec!["GET", "POST"])
+                    .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+                    .allowed_header(http::header::CONTENT_TYPE)
+                    .max_age(3600),
             )
-            .finish()
+            .data(AppState::new(&sender))
+            .service(web::resource("/stop").route(web::get().to(stop_animation)))
+            .service(web::resource("/rotate/{trans_time}/{hold_time}").route(web::get().to(rotate)))
+            .service(web::resource("/random/{trans_time}/{hold_time}").route(web::get().to(random)))
+            .service(web::resource("/animate").route(web::post().to(animate)))
+            // |r| {
+            //     r.method(Method::POST).with_config(animate, |(_, cfg)| {
+            //         cfg.error_handler(|err, req| {
+            //             println!("{:?}", err);
+            //             println!("{:?}", req);
+            //             error::InternalError::from_response(err, HttpResponse::Conflict().finish())
+            //                 .into()
+            //         });
+            //     })
+            // }))
+            .service(web::resource("/light/{light_num}").route(web::get().to(get_light)))
+            .service(web::resource("/lights").route(web::get().to(get_all_lights)))
+            .service(
+                web::scope("/{light_num}")
+                    .service(web::resource("/on").route(web::get().to(on)))
+                    .service(web::resource("/off").route(web::get().to(off)))
+                    .service(web::resource("/color").route(web::get().to(color)))
+                    .service(web::resource("/state").route(web::get().to(light_state))),
+            );
+
+        if !is_dev_mode {
+            app = app.service(actix_files::Files::new("./static", "/").index_file("index.html"));
+        }
+
+        app
     })
-    .bind(socket_ip)
-    .unwrap()
-    .run();
+    .bind(socket_ip)?
+    .workers(1)
+    .run()?;
+
+    Ok(())
 }
 
 #[derive(Debug)]
@@ -79,16 +86,16 @@ impl AppState {
     }
 }
 
-fn on(state: State<AppState>, light_num: Path<u8>) -> HooResult {
+fn on(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::On(*light_num));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn off(state: State<AppState>, light_num: Path<u8>) -> HooResult {
+fn off(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Off(*light_num));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
 #[derive(Debug, Deserialize)]
@@ -98,56 +105,56 @@ struct RGB {
     b: Option<u8>,
 }
 
-fn color(state: State<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HooResult {
+fn color(state: Data<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HttpResponse {
     let r = color.r.unwrap_or(0);
     let g = color.g.unwrap_or(0);
     let b = color.b.unwrap_or(0);
 
     let _ = state.sender.send(HooCommand::RgbColor(*light_num, r, g, b));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
 fn light_state(
-    state: State<AppState>,
+    state: Data<AppState>,
     light_num: Path<u8>,
     light_state: Query<LightState>,
-) -> HooResult {
+) -> HttpResponse {
     let _ = state
         .sender
         .send(HooCommand::State(*light_num, light_state.clone()));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn rotate(state: State<AppState>, info: Path<(u16, u16)>) -> HooResult {
+fn rotate(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Rotate(info.0, info.1));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn random(state: State<AppState>, info: Path<(u16, u16)>) -> HooResult {
+fn random(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Random(info.0, info.1));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn animate(state: State<AppState>, data: Json<AnimationSettings>) -> HooResult {
+fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpResponse {
     println!("data: {:?}", data);
     let _ = state
         .sender
         .send(HooCommand::Rotate(data.transition_time, data.hold_time));
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn stop_animation(state: State<AppState>) -> HooResult {
+fn stop_animation(state: Data<AppState>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::StopAnimation);
 
-    Ok(Json(Default::default()))
+    HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn get_light(state: State<AppState>, light_num: Path<u8>) -> Result<Json<Light>> {
+fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<Json<Light>> {
     let (sender, receiver) = mpsc::channel::<Light>();
     let _ = state.sender.send(HooCommand::GetLight(*light_num, sender));
 
@@ -159,7 +166,7 @@ fn get_light(state: State<AppState>, light_num: Path<u8>) -> Result<Json<Light>>
     }
 }
 
-fn get_all_lights(state: State<AppState>) -> Result<Json<LightCollection>> {
+fn get_all_lights(state: Data<AppState>) -> Result<Json<LightCollection>> {
     let (sender, receiver) = mpsc::channel::<LightCollection>();
     let _ = state.sender.send(HooCommand::GetAllLights(sender));
 
