@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { BASE_URL } from "../App.vue";
+import { BASE_URL } from "../Hoo.vue";
 
 export default {
   name: "AnimationControls",

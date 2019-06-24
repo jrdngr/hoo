@@ -40,7 +40,7 @@
 
 <script>
 import _ from "lodash";
-import { BASE_URL, INPUT_THROTTLING_DELAY } from "../App.vue";
+import { BASE_URL, INPUT_THROTTLING_DELAY } from "../Hoo.vue";
 
 export default {
   name: "LightControls",

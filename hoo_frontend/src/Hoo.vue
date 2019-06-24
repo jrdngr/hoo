@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="hoo">
     <animation-controls/>
     <ul>
       <li v-for="light in lights" :key="light.number">
@@ -9,25 +9,23 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from "vue-property-decorator";
 import LightControls from "./components/LightControls.vue";
 import AnimationControls from "./components/AnimationControls.vue";
+
+declare let process: any;
 
 export const BASE_URL = `http://${process.env.VUE_APP_IP}`;
 export const INPUT_THROTTLING_DELAY = 100;
 
-export default {
-  name: "app",
-  components: {
-    LightControls,
-    AnimationControls
-  },
-  data: function() {
-    return {
-      lights: []
-    };
-  },
-  created: function() {
+@Component({
+  components: { LightControls, AnimationControls }
+})
+export default class Hoo extends Vue {
+  private lights: Light[] = [];
+
+  private created() {
     const url = `${BASE_URL}/lights`;
     fetch(url)
       .then(data => data.json())
@@ -37,10 +35,13 @@ export default {
         }
       });
   }
-};
+}
 
 class Light {
-  constructor(number, name) {
+  private number: number;
+  private name: string;
+
+  constructor(number: string, name: string) {
     this.number = parseInt(number);
     this.name = name;
   }
