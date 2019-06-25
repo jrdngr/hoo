@@ -38,24 +38,21 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import _ from "lodash";
 import { BASE_URL, INPUT_THROTTLING_DELAY } from "../Hoo.vue";
 
-export default {
-  name: "LightControls",
-  props: {
-    lightName: String,
-    lightNumber: Number
-  },
-  data: function() {
-    return {
-      hue: 0,
-      saturation: 0,
-      brightness: 0
-    };
-  },
-  created: function() {
+@Component
+export default class LightControls extends Vue {
+    @Prop({type: String, required: true}) private lightName!: string;
+    @Prop({type: Number, required: true}) private lightNumber!: number;
+
+    private hue: number = 0;
+    private saturation: number = 0;
+    private brightness: number = 0;
+
+  private created() {
     const url = `${BASE_URL}/light/${this.lightNumber}`;
     fetch(url)
       .then(data => data.json())
@@ -64,36 +61,38 @@ export default {
         this.saturation = light.state.sat;
         this.brightness = light.state.bri;
       });
-  },
-  methods: {
-    on: function(event) {
+  }
+    private on(event: any) {
       const url = `${BASE_URL}/${this.lightNumber}/on`;
       fetch(url);
-    },
-    off: function(event) {
+    }
+
+    private off(event: any) {
       const url = `${BASE_URL}/${this.lightNumber}/off`;
       fetch(url);
-    },
-    set_bri: _.throttle(function(event) {
-      const url = `${BASE_URL}/${this.lightNumber}/state?bri=${
-        event.srcElement.value
-      }`;
-      fetch(url);
-    }, INPUT_THROTTLING_DELAY),
-    set_sat: _.throttle(function(event) {
-      const url = `${BASE_URL}/${this.lightNumber}/state?sat=${
-        event.srcElement.value
-      }`;
-      fetch(url);
-    }, INPUT_THROTTLING_DELAY),
-    set_hue: _.throttle(function(event) {
-      const url = `${BASE_URL}/${this.lightNumber}/state?hue=${
-        event.srcElement.value
-      }`;
-      fetch(url);
-    }, INPUT_THROTTLING_DELAY)
-  }
-};
+    }
+
+    private set_bri(event: any) { 
+        _.throttle(function(this: LightControls, event: any) {
+            const url = `${BASE_URL}/${this.lightNumber}/state?bri=${event.srcElement.value}`;
+            fetch(url);
+        }, INPUT_THROTTLING_DELAY);
+    }
+
+    private set_sat(event: any) { 
+        _.throttle(function(this: LightControls, event: any) {
+            const url = `${BASE_URL}/${this.lightNumber}/state?sat=${event.srcElement.value}`;
+            fetch(url);
+        }, INPUT_THROTTLING_DELAY);
+    }
+
+    private set_hue(event: any) {
+         _.throttle(function(this: LightControls, event: any) {
+            const url = `${BASE_URL}/${this.lightNumber}/state?hue=${event.srcElement.value}`;
+            fetch(url);
+        }, INPUT_THROTTLING_DELAY);
+    }
+}
 </script>
 
 <style scoped>

@@ -16,32 +16,30 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import {Component, Vue} from 'vue-property-decorator';
 import { BASE_URL } from "../Hoo.vue";
 
-export default {
-  name: "AnimationControls",
-  data: function() {
-    return {
-      transitionTime: 10,
-      holdTime: 0
-    };
-  },
-  methods: {
-    rotate: function(event) {
+@Component
+export default class AnimationControls extends Vue {
+    private transitionTime: number = 10;
+    private holdTime: number = 0;
+
+    private rotate(event: any) {
       const url = `${BASE_URL}/rotate/${this.transitionTime}/${this.holdTime}`;
       fetch(url);
-    },
-    random: function(event) {
+    }
+
+    private random(event: any) {
       const url = `${BASE_URL}/random/${this.transitionTime}/${this.holdTime}`;
       fetch(url);
-    },
-    stop: function(event) {
+    }
+
+    private stop(event: any) {
       const url = `${BASE_URL}/stop`;
       fetch(url);
     }
-  }
-};
+}
 </script>
 
 <style scoped>

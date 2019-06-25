@@ -10,9 +10,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import LightControls from "./components/LightControls.vue";
-import AnimationControls from "./components/AnimationControls.vue";
+import { Component, Vue } from 'vue-property-decorator';
+import LightControls from './components/LightControls.vue';
+import AnimationControls from './components/AnimationControls.vue';
 
 declare let process: any;
 
@@ -20,54 +20,56 @@ export const BASE_URL = `http://${process.env.VUE_APP_IP}`;
 export const INPUT_THROTTLING_DELAY = 100;
 
 @Component({
-  components: { LightControls, AnimationControls }
+    components: { LightControls, AnimationControls },
 })
 export default class Hoo extends Vue {
-  private lights: Light[] = [];
+    private lights: Light[] = [];
 
-  private created() {
-    const url = `${BASE_URL}/lights`;
-    fetch(url)
-      .then(data => data.json())
-      .then(lights => {
-        for (let lightNum in lights) {
-          this.lights.push(new Light(lightNum, lights[lightNum].name));
-        }
-      });
-  }
+    private created() {
+        const url = `${BASE_URL}/lights`;
+        fetch(url)
+            .then(data => data.json())
+            .then(lights => {
+                for (let lightNum in lights) {
+                    this.lights.push(
+                        new Light(lightNum, lights[lightNum].name),
+                    );
+                }
+            });
+    }
 }
 
 class Light {
-  private number: number;
-  private name: string;
+    private number: number;
+    private name: string;
 
-  constructor(number: string, name: string) {
-    this.number = parseInt(number);
-    this.name = name;
-  }
+    constructor(number: string, name: string) {
+        this.number = parseInt(number);
+        this.name = name;
+    }
 }
 </script>
 
 <style>
 ul {
-  list-style-type: none;
+    list-style-type: none;
 }
 
 button {
-  font-size: 1.5em;
-  margin: 10px;
+    font-size: 1.5em;
+    margin: 10px;
 }
 
 input {
-  font-size: 1.5em;
+    font-size: 1.5em;
 }
 
 label {
-  font-size: 1.5em;
-  margin-left: 10px;
+    font-size: 1.5em;
+    margin-left: 10px;
 }
 
 .control {
-  margin: 10px;
+    margin: 10px;
 }
 </style>
