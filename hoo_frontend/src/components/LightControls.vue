@@ -1,6 +1,11 @@
 <template>
   <div id="light">
-    <h1>{{lightNumber}}: {{lightName}}</h1>
+      <div id="header">
+        <h1>{{lightNumber}}: {{lightName}}</h1>
+        <svg id="preview">
+            <circle cx="50%" cy="50%" r="20px" :fill='previewFillColor'/>
+        </svg>
+      </div>
     <div class="control">
       <button @click="on">On</button>
       <button @click="off">Off</button>
@@ -40,7 +45,6 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import _ from "lodash";
 import { BASE_URL, INPUT_THROTTLING_DELAY } from "../Hoo.vue";
 
 @Component
@@ -52,16 +56,25 @@ export default class LightControls extends Vue {
     private saturation: number = 0;
     private brightness: number = 0;
 
-  private created() {
-    const url = `${BASE_URL}/light/${this.lightNumber}`;
-    fetch(url)
-      .then(data => data.json())
-      .then(light => {
-        this.hue = light.state.hue;
-        this.saturation = light.state.sat;
-        this.brightness = light.state.bri;
-      });
-  }
+    private get previewFillColor(): string {
+        const h = (this.hue / 65535) * 360;
+        const s = (this.saturation / 255) * 100;
+        const l = (this.brightness / 255) * 100;
+
+        return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    private created() {
+        const url = `${BASE_URL}/light/${this.lightNumber}`;
+        fetch(url)
+            .then(data => data.json())
+            .then(light => {
+                this.hue = light.state.hue;
+                this.saturation = light.state.sat;
+                this.brightness = light.state.bri;
+            });
+    }
+
     private on(event: any) {
       const url = `${BASE_URL}/${this.lightNumber}/on`;
       fetch(url);
@@ -73,29 +86,41 @@ export default class LightControls extends Vue {
     }
 
     private set_bri(event: any) { 
-        _.throttle(function(this: LightControls, event: any) {
-            const url = `${BASE_URL}/${this.lightNumber}/state?bri=${event.srcElement.value}`;
-            fetch(url);
-        }, INPUT_THROTTLING_DELAY);
+        this.brightness = event.srcElement.value;
+
+        const url = `${BASE_URL}/${this.lightNumber}/state?bri=${this.brightness}`;
+        fetch(url);
     }
 
     private set_sat(event: any) { 
-        _.throttle(function(this: LightControls, event: any) {
-            const url = `${BASE_URL}/${this.lightNumber}/state?sat=${event.srcElement.value}`;
-            fetch(url);
-        }, INPUT_THROTTLING_DELAY);
+        this.saturation = event.srcElement.value;
+
+        const url = `${BASE_URL}/${this.lightNumber}/state?sat=${this.saturation}`;
+        fetch(url);
     }
 
     private set_hue(event: any) {
-         _.throttle(function(this: LightControls, event: any) {
-            const url = `${BASE_URL}/${this.lightNumber}/state?hue=${event.srcElement.value}`;
-            fetch(url);
-        }, INPUT_THROTTLING_DELAY);
+        this.hue = event.srcElement.value;
+
+        const url = `${BASE_URL}/${this.lightNumber}/state?hue=${this.hue}`;
+        fetch(url);
     }
 }
 </script>
 
 <style scoped>
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#header svg {
+    width: 30%;
+    height: 50px;
+}
+
 #light {
   display: inline-block;
   border: 1px solid gray;
