@@ -16,9 +16,6 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 fn main() -> Result<()> {
     dotenv::dotenv().ok();
 
-    let args: Vec<String> = std::env::args().collect();
-    let is_dev_mode = args.contains(&"dev".to_string());
-
     let socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
 
     let (hoo, sender) = Hoo::new();
@@ -26,7 +23,7 @@ fn main() -> Result<()> {
     thread::spawn(move || hoo.run());
 
     HttpServer::new(move || {
-        let mut app = App::new()
+        App::new()
             .wrap(
                 Cors::new()
                     .allowed_origin("http://localhost:8080")
@@ -58,13 +55,8 @@ fn main() -> Result<()> {
                     .service(web::resource("/off").route(web::get().to(off)))
                     .service(web::resource("/color").route(web::get().to(color)))
                     .service(web::resource("/state").route(web::get().to(light_state))),
-            );
-
-        if !is_dev_mode {
-            app = app.service(actix_files::Files::new("./static", "/").index_file("index.html"));
-        }
-
-        app
+            )
+            .service(actix_files::Files::new("/", "./static").index_file("index.html"))
     })
     .bind(socket_ip)?
     .workers(1)
