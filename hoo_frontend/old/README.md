@@ -1,1 +1,0 @@
-# Vue front end for the Hoo web service
