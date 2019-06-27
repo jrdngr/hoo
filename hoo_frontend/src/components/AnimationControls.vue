@@ -17,36 +17,46 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator';
-import { BASE_URL } from "../Hoo.vue";
+import Vue from 'vue';
+import { BASE_URL } from '@/common/constants';
 
-@Component
-export default class AnimationControls extends Vue {
-    private transitionTime: number = 10;
-    private holdTime: number = 0;
+export default Vue.extend({
+    name: 'animationControls',
+    data() {
+        const transitionTime: number = 10;
+        const holdTime: number = 0;
 
-    private rotate(event: any) {
-      const url = `${BASE_URL}/rotate/${this.transitionTime}/${this.holdTime}`;
-      fetch(url);
-    }
-
-    private random(event: any) {
-      const url = `${BASE_URL}/random/${this.transitionTime}/${this.holdTime}`;
-      fetch(url);
-    }
-
-    private stop(event: any) {
-      const url = `${BASE_URL}/stop`;
-      fetch(url);
-    }
-}
+        return {
+            transitionTime,
+            holdTime,
+        };
+    },
+    methods: {
+        rotate(event: any) {
+            const url = `${BASE_URL}/rotate/${this.transitionTime}/${
+                this.holdTime
+            }`;
+            fetch(url);
+        },
+        random(event: any) {
+            const url = `${BASE_URL}/random/${this.transitionTime}/${
+                this.holdTime
+            }`;
+            fetch(url);
+        },
+        stop(event: any) {
+            const url = `${BASE_URL}/stop`;
+            fetch(url);
+        },
+    },
+});
 </script>
 
 <style scoped>
 #animation {
-  display: inline-block;
-  border: 1px solid gray;
-  padding: 10px;
-  width: 400px;
+    display: inline-block;
+    border: 1px solid gray;
+    padding: 10px;
+    width: 400px;
 }
 </style>

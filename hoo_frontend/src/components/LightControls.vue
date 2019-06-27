@@ -1,11 +1,11 @@
 <template>
   <div id="light">
-      <div id="header">
-        <h1>{{lightNumber}}: {{lightName}}</h1>
-        <svg id="preview">
-            <circle cx="50%" cy="50%" r="20px" :fill='previewFillColor'/>
-        </svg>
-      </div>
+    <div id="header">
+      <h1>{{lightNumber}}: {{lightName}}</h1>
+      <svg id="preview">
+        <circle cx="50%" cy="50%" r="20px" :fill="previewFillColor"></circle>
+      </svg>
+    </div>
     <div class="control">
       <button @click="on">On</button>
       <button @click="off">Off</button>
@@ -44,68 +44,89 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { BASE_URL, INPUT_THROTTLING_DELAY } from "../Hoo.vue";
+import Vue from 'vue';
+import { BASE_URL, INPUT_THROTTLING_DELAY } from '@/common/constants';
+import Light from '@/common/types/light';
 
-@Component
-export default class LightControls extends Vue {
-    @Prop({type: String, required: true}) private lightName!: string;
-    @Prop({type: Number, required: true}) private lightNumber!: number;
+export default Vue.extend({
+    name: 'lightControls',
+    props: {
+        lightName: {
+            type: String,
+            required: true,
+        },
+        lightNumber: {
+            type: Number,
+            required: true,
+        },
+    },
+    data() {
+        const hue: number = 0;
+        const saturation: number = 0;
+        const brightness: number = 0;
 
-    private hue: number = 0;
-    private saturation: number = 0;
-    private brightness: number = 0;
+        return {
+            hue,
+            saturation,
+            brightness,
+        };
+    },
+    computed: {
+        previewFillColor(): string {
+            const h = (this.hue / 65535) * 360;
+            const s = (this.saturation / 255) * 100;
+            const l = (this.brightness / 255) * 100;
 
-    private get previewFillColor(): string {
-        const h = (this.hue / 65535) * 360;
-        const s = (this.saturation / 255) * 100;
-        const l = (this.brightness / 255) * 100;
-
-        return `hsl(${h}, ${s}%, ${l}%)`;
-    }
-
-    private created() {
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        },
+    },
+    async created() {
         const url = `${BASE_URL}/light/${this.lightNumber}`;
-        fetch(url)
-            .then(data => data.json())
-            .then(light => {
-                this.hue = light.state.hue;
-                this.saturation = light.state.sat;
-                this.brightness = light.state.bri;
-            });
-    }
+        const response: any = await fetch(url);
+        const light: Light = await response.json();
+        this.hue = light.state.hue;
+        this.saturation = light.state.sat;
+        this.brightness = light.state.bri;
+    },
+    methods: {
+        on(event: any) {
+            const url = `${BASE_URL}/${this.lightNumber}/on`;
+            fetch(url);
+        },
 
-    private on(event: any) {
-      const url = `${BASE_URL}/${this.lightNumber}/on`;
-      fetch(url);
-    }
+        off(event: any) {
+            const url = `${BASE_URL}/${this.lightNumber}/off`;
+            fetch(url);
+        },
 
-    private off(event: any) {
-      const url = `${BASE_URL}/${this.lightNumber}/off`;
-      fetch(url);
-    }
+        set_bri(event: any) {
+            this.brightness = event.srcElement.value;
 
-    private set_bri(event: any) { 
-        this.brightness = event.srcElement.value;
+            const url = `${BASE_URL}/${this.lightNumber}/state?bri=${
+                this.brightness
+            }`;
+            fetch(url);
+        },
 
-        const url = `${BASE_URL}/${this.lightNumber}/state?bri=${this.brightness}`;
-        fetch(url);
-    }
+        set_sat(event: any) {
+            this.saturation = event.srcElement.value;
 
-    private set_sat(event: any) { 
-        this.saturation = event.srcElement.value;
+            const url = `${BASE_URL}/${this.lightNumber}/state?sat=${
+                this.saturation
+            }`;
+            fetch(url);
+        },
 
-        const url = `${BASE_URL}/${this.lightNumber}/state?sat=${this.saturation}`;
-        fetch(url);
-    }
+        set_hue(event: any) {
+            this.hue = event.srcElement.value;
 
-    private set_hue(event: any) {
-        this.hue = event.srcElement.value;
+            const url = `${BASE_URL}/${this.lightNumber}/state?hue=${this.hue}`;
+            fetch(url);
+        },
+    },
+});
 
-        const url = `${BASE_URL}/${this.lightNumber}/state?hue=${this.hue}`;
-        fetch(url);
-    }
-}
+export class LightControls extends Vue {}
 </script>
 
 <style scoped>
@@ -122,13 +143,13 @@ export default class LightControls extends Vue {
 }
 
 #light {
-  display: inline-block;
-  border: 1px solid gray;
-  padding: 10px;
-  width: 400px;
+    display: inline-block;
+    border: 1px solid gray;
+    padding: 10px;
+    width: 400px;
 }
 
 #hue-rainbow {
-  display: block;
+    display: block;
 }
 </style>

@@ -10,44 +10,32 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import LightControls from './components/LightControls.vue';
-import AnimationControls from './components/AnimationControls.vue';
+import Vue from 'vue';
+import { BASE_URL } from '@/common/constants';
+import Light from '@/common/types/light';
+import LightControls from '@/components/LightControls.vue';
+import AnimationControls from '@/components/AnimationControls.vue';
 
-declare let process: any;
-
-export const BASE_URL = `http://${process.env.VUE_APP_IP}`;
-export const INPUT_THROTTLING_DELAY = 100;
-
-@Component({
+export default Vue.extend({
+    name: 'hoo',
     components: { LightControls, AnimationControls },
-})
-export default class Hoo extends Vue {
-    private lights: Light[] = [];
-
-    private created() {
+    data() {
+        const lights: Light[] = [];
+        return {
+            lights,
+        };
+    },
+    async created() {
         const url = `${BASE_URL}/lights`;
-        fetch(url)
-            .then(data => data.json())
-            .then(lights => {
-                for (let lightNum in lights) {
-                    this.lights.push(
-                        new Light(lightNum, lights[lightNum].name),
-                    );
-                }
-            });
-    }
-}
-
-class Light {
-    private number: number;
-    private name: string;
-
-    constructor(number: string, name: string) {
-        this.number = parseInt(number);
-        this.name = name;
-    }
-}
+        const response = await fetch(url);
+        const lights: Light[] = await response.json();
+        for (const lightNum in lights) {
+            const lightNumber = parseInt(lightNum, 10);
+            const light = lights[lightNum];
+            this.lights.push(new Light(light.name, lightNumber, light.state));
+        }
+    },
+});
 </script>
 
 <style>
