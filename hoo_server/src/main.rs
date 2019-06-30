@@ -16,17 +16,30 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 fn main() -> Result<()> {
     dotenv::dotenv().ok();
 
-    let socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
+    let api_socket_ip = std::env::var("API_SOCKET_IP").expect("API_SOCKET_IP must be set");
+    let web_socket_ip = std::env::var("WEB_SOCKET_IP").expect("WEB_SOCKET_IP must be set");
+    let website_url = format!("http://{}", web_socket_ip);
 
     let (hoo, sender) = Hoo::new();
 
     thread::spawn(move || hoo.run());
 
+    thread::spawn(move || {
+        HttpServer::new(move || {
+            App::new().service(
+                actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
+            )
+        })
+        .bind(web_socket_ip)?
+        .workers(1)
+        .run()
+    });
+
     HttpServer::new(move || {
         App::new()
             .wrap(
                 Cors::new()
-                    .allowed_origin("http://localhost:8080")
+                    .allowed_origin(&website_url)
                     .allowed_methods(vec!["GET", "POST"])
                     .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
                     .allowed_header(http::header::CONTENT_TYPE)
@@ -56,9 +69,8 @@ fn main() -> Result<()> {
                     .service(web::resource("/color").route(web::get().to(color)))
                     .service(web::resource("/state").route(web::get().to(light_state))),
             )
-            .service(actix_files::Files::new("/", "./static").index_file("index.html"))
     })
-    .bind(socket_ip)?
+    .bind(api_socket_ip)?
     .workers(1)
     .run()?;
 
