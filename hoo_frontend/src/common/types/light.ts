@@ -1,10 +1,10 @@
 export default class Light {
     public readonly name: string;
-    public readonly lightNumber: number;
+    public readonly number: number;
     public readonly state: LightState;
 
     constructor(name: string, lightNumber: number, state: LightState) {
-        this.lightNumber = lightNumber;
+        this.number = lightNumber;
         this.name = name;
         this.state = state;
     }
