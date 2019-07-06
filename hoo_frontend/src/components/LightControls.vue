@@ -1,7 +1,7 @@
 <template>
   <div id="light">
     <div id="header">
-      <h1>{{lightNumber}}: {{lightName}}</h1>
+      <h1>{{lightData.number}}: {{lightData.name}}</h1>
       <svg id="preview">
         <circle cx="50%" cy="50%" r="20px" :fill="previewFillColor" />
       </svg>
@@ -29,15 +29,36 @@
         </defs>
         <rect width="130" height="10" fill="url(#hue-gradient)" />
       </svg>
-      <input id="hue" type="range" min="0" max="65535" v-bind:value="hue" @input="setHue" />
+      <input
+        id="hue"
+        type="range"
+        min="0"
+        max="65535"
+        v-bind:value="lightData.state.hue"
+        @input="setHue"
+      />
       <label for="hue">Hue</label>
     </div>
     <div class="control">
-      <input id="sat" type="range" min="0" max="255" v-bind:value="saturation" @input="setSat" />
+      <input
+        id="sat"
+        type="range"
+        min="0"
+        max="255"
+        v-bind:value="lightData.state.sat"
+        @input="setSat"
+      />
       <label for="sat">Saturation</label>
     </div>
     <div class="control">
-      <input id="bri" type="range" min="0" max="255" v-bind:value="brightness" @input="setBri" />
+      <input
+        id="bri"
+        type="range"
+        min="0"
+        max="255"
+        v-bind:value="lightData.state.bri"
+        @input="setBri"
+      />
       <label for="bri">Brightness</label>
     </div>
   </div>
@@ -54,31 +75,21 @@ const POLLING_DELAY_MS: number = 5000;
 export default Vue.extend({
     name: 'lightControls',
     props: {
-        lightName: {
-            type: String,
-            required: true,
-        },
-        lightNumber: {
-            type: Number,
+        light: {
+            type: Object as () => Light,
             required: true,
         },
     },
     data() {
-        const hue: number = 0;
-        const saturation: number = 0;
-        const brightness: number = 0;
-
         return {
-            hue,
-            saturation,
-            brightness,
+            lightData: this.light,
         };
     },
     computed: {
         previewFillColor(): string {
-            const h = (this.hue / 65535) * 360;
-            const s = (this.saturation / 255) * 100;
-            const l = (this.brightness / 255) * 100;
+            const h = (this.lightData.state.hue / 65535) * 360;
+            const s = (this.lightData.state.sat / 255) * 100;
+            const l = (this.lightData.state.bri / 255) * 100;
 
             return `hsl(${h}, ${s}%, ${l}%)`;
         },
@@ -88,32 +99,41 @@ export default Vue.extend({
     },
     methods: {
         async on(event: any) {
-            await LightApi.on(this.lightNumber);
+            await LightApi.on(this.lightData.number);
         },
 
         async off(event: any) {
-            await LightApi.off(this.lightNumber);
+            await LightApi.off(this.lightData.number);
         },
 
         async setBri(event: any) {
-            this.brightness = event.srcElement.value;
-            await LightApi.setBrightness(this.lightNumber, this.brightness);
+            this.lightData.state.bri = event.srcElement.value;
+            await LightApi.setBrightness(
+                this.lightData.number,
+                this.lightData.state.bri,
+            );
         },
 
         async setSat(event: any) {
-            this.saturation = event.srcElement.value;
-            await LightApi.setSaturation(this.lightNumber, this.saturation);
+            this.lightData.state.sat = event.srcElement.value;
+            await LightApi.setSaturation(
+                this.lightData.number,
+                this.lightData.state.sat,
+            );
         },
 
         async setHue(event: any) {
-            this.hue = event.srcElement.value;
-            await LightApi.setHue(this.lightNumber, this.hue);
+            this.lightData.state.hue = event.srcElement.value;
+            await LightApi.setHue(
+                this.lightData.number,
+                this.lightData.state.hue,
+            );
         },
         async updateState() {
-            const light = await LightApi.getLight(this.lightNumber);
-            this.hue = light.state.hue;
-            this.saturation = light.state.sat;
-            this.brightness = light.state.bri;
+            const light = await LightApi.getLight(this.lightData.number);
+            this.lightData.state.hue = light.state.hue;
+            this.lightData.state.sat = light.state.sat;
+            this.lightData.state.bri = light.state.bri;
         },
     },
 });

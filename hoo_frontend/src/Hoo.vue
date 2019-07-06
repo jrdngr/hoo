@@ -3,7 +3,7 @@
     <animation-controls />
     <ul>
       <li v-for="light in lights" :key="light.number">
-        <LightControls v-bind:lightNumber="light.number" v-bind:lightName="light.name" />
+        <LightControls v-bind:light="light" />
       </li>
     </ul>
   </div>
