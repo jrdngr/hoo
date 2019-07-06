@@ -24,16 +24,21 @@ fn main() -> Result<()> {
 
     thread::spawn(move || hoo.run());
 
-    thread::spawn(move || {
-        HttpServer::new(move || {
-            App::new().service(
-                actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
-            )
-        })
-        .bind(web_socket_ip)?
-        .workers(1)
-        .run()
-    });
+    let args: Vec<String> = std::env::args().collect();
+
+    if !args.contains(&"--noweb".to_string()) {
+        thread::spawn(move || {
+            HttpServer::new(move || {
+                App::new().service(
+                    actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
+                )
+            })
+            .bind(web_socket_ip)?
+            .workers(1)
+            .run()
+        });
+    }
+
 
     HttpServer::new(move || {
         App::new()
