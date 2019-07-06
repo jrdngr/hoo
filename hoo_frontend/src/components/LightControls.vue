@@ -29,15 +29,15 @@
         </defs>
         <rect width="130" height="10" fill="url(#hue-gradient)" />
       </svg>
-      <input id="hue" type="range" min="0" max="65535" v-bind:value="hue" @input="set_hue" />
+      <input id="hue" type="range" min="0" max="65535" v-bind:value="hue" @input="setHue" />
       <label for="hue">Hue</label>
     </div>
     <div class="control">
-      <input id="sat" type="range" min="0" max="255" v-bind:value="saturation" @input="set_sat" />
+      <input id="sat" type="range" min="0" max="255" v-bind:value="saturation" @input="setSat" />
       <label for="sat">Saturation</label>
     </div>
     <div class="control">
-      <input id="bri" type="range" min="0" max="255" v-bind:value="brightness" @input="set_bri" />
+      <input id="bri" type="range" min="0" max="255" v-bind:value="brightness" @input="setBri" />
       <label for="bri">Brightness</label>
     </div>
   </div>
@@ -48,6 +48,8 @@ import Vue from 'vue';
 import { BASE_URL, INPUT_THROTTLING_DELAY } from '@/common/constants';
 import Light from '@/common/types/light';
 import * as LightApi from '@/common/api/lights';
+
+const POLLING_DELAY_MS: number = 5000;
 
 export default Vue.extend({
     name: 'lightControls',
@@ -82,10 +84,7 @@ export default Vue.extend({
         },
     },
     async created() {
-        const light = await LightApi.getLight(this.lightNumber);
-        this.hue = light.state.hue;
-        this.saturation = light.state.sat;
-        this.brightness = light.state.bri;
+        this.updateState();
     },
     methods: {
         async on(event: any) {
@@ -96,19 +95,25 @@ export default Vue.extend({
             await LightApi.off(this.lightNumber);
         },
 
-        async set_bri(event: any) {
+        async setBri(event: any) {
             this.brightness = event.srcElement.value;
             await LightApi.setBrightness(this.lightNumber, this.brightness);
         },
 
-        async set_sat(event: any) {
+        async setSat(event: any) {
             this.saturation = event.srcElement.value;
             await LightApi.setSaturation(this.lightNumber, this.saturation);
         },
 
-        async set_hue(event: any) {
+        async setHue(event: any) {
             this.hue = event.srcElement.value;
             await LightApi.setHue(this.lightNumber, this.hue);
+        },
+        async updateState() {
+            const light = await LightApi.getLight(this.lightNumber);
+            this.hue = light.state.hue;
+            this.saturation = light.state.sat;
+            this.brightness = light.state.bri;
         },
     },
 });
