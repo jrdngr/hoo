@@ -1,9 +1,9 @@
 <template>
   <div id="hoo">
-    <animation-controls/>
+    <animation-controls />
     <ul>
       <li v-for="light in lights" :key="light.number">
-        <LightControls v-bind:lightNumber="light.number" v-bind:lightName="light.name"/>
+        <LightControls v-bind:lightNumber="light.number" v-bind:lightName="light.name" />
       </li>
     </ul>
   </div>
@@ -11,10 +11,10 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { BASE_URL } from '@/common/constants';
 import Light from '@/common/types/light';
 import LightControls from '@/components/LightControls.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
+import * as LightApi from '@/common/api/lights';
 
 export default Vue.extend({
     name: 'hoo',
@@ -26,9 +26,7 @@ export default Vue.extend({
         };
     },
     async created() {
-        const url = `${BASE_URL}/lights`;
-        const response = await fetch(url);
-        const lights: Light[] = await response.json();
+        const lights = await LightApi.getAllLights();
         for (const lightNum in lights) {
             const lightNumber = parseInt(lightNum, 10);
             const light = lights[lightNum];

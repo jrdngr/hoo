@@ -3,7 +3,7 @@
     <div id="header">
       <h1>{{lightNumber}}: {{lightName}}</h1>
       <svg id="preview">
-        <circle cx="50%" cy="50%" r="20px" :fill="previewFillColor"></circle>
+        <circle cx="50%" cy="50%" r="20px" :fill="previewFillColor" />
       </svg>
     </div>
     <div class="control">
@@ -14,30 +14,30 @@
       <svg id="hue-rainbow" width="130" height="10">
         <defs>
           <linearGradient id="hue-gradient" x1="0%" y1="50%" x2="100%" y2="50%">
-            <stop offset="0%" stop-color="hsl(0,100%,50%)"></stop>
-            <stop offset="10%" stop-color="hsl(36,100%,50%)"></stop>
-            <stop offset="20%" stop-color="hsl(72,100%,50%)"></stop>
-            <stop offset="30%" stop-color="hsl(108,100%,50%)"></stop>
-            <stop offset="40%" stop-color="hsl(144,100%,50%)"></stop>
-            <stop offset="50%" stop-color="hsl(180,100%,50%)"></stop>
-            <stop offset="60%" stop-color="hsl(216,100%,50%)"></stop>
-            <stop offset="70%" stop-color="hsl(252,100%,50%)"></stop>
-            <stop offset="80%" stop-color="hsl(288,100%,50%)"></stop>
-            <stop offset="90%" stop-color="hsl(324,100%,50%)"></stop>
-            <stop offset="100%" stop-color="hsl(360,100%,50%)"></stop>
+            <stop offset="0%" stop-color="hsl(0,100%,50%)" />
+            <stop offset="10%" stop-color="hsl(36,100%,50%)" />
+            <stop offset="20%" stop-color="hsl(72,100%,50%)" />
+            <stop offset="30%" stop-color="hsl(108,100%,50%)" />
+            <stop offset="40%" stop-color="hsl(144,100%,50%)" />
+            <stop offset="50%" stop-color="hsl(180,100%,50%)" />
+            <stop offset="60%" stop-color="hsl(216,100%,50%)" />
+            <stop offset="70%" stop-color="hsl(252,100%,50%)" />
+            <stop offset="80%" stop-color="hsl(288,100%,50%)" />
+            <stop offset="90%" stop-color="hsl(324,100%,50%)" />
+            <stop offset="100%" stop-color="hsl(360,100%,50%)" />
           </linearGradient>
         </defs>
-        <rect width="130" height="10" fill="url(#hue-gradient)"></rect>
+        <rect width="130" height="10" fill="url(#hue-gradient)" />
       </svg>
-      <input id="hue" type="range" min="0" max="65535" v-bind:value="hue" @input="set_hue">
+      <input id="hue" type="range" min="0" max="65535" v-bind:value="hue" @input="set_hue" />
       <label for="hue">Hue</label>
     </div>
     <div class="control">
-      <input id="sat" type="range" min="0" max="255" v-bind:value="saturation" @input="set_sat">
+      <input id="sat" type="range" min="0" max="255" v-bind:value="saturation" @input="set_sat" />
       <label for="sat">Saturation</label>
     </div>
     <div class="control">
-      <input id="bri" type="range" min="0" max="255" v-bind:value="brightness" @input="set_bri">
+      <input id="bri" type="range" min="0" max="255" v-bind:value="brightness" @input="set_bri" />
       <label for="bri">Brightness</label>
     </div>
   </div>
@@ -47,6 +47,7 @@
 import Vue from 'vue';
 import { BASE_URL, INPUT_THROTTLING_DELAY } from '@/common/constants';
 import Light from '@/common/types/light';
+import * as LightApi from '@/common/api/lights';
 
 export default Vue.extend({
     name: 'lightControls',
@@ -81,47 +82,33 @@ export default Vue.extend({
         },
     },
     async created() {
-        const url = `${BASE_URL}/light/${this.lightNumber}`;
-        const response: any = await fetch(url);
-        const light: Light = await response.json();
+        const light = await LightApi.getLight(this.lightNumber);
         this.hue = light.state.hue;
         this.saturation = light.state.sat;
         this.brightness = light.state.bri;
     },
     methods: {
-        on(event: any) {
-            const url = `${BASE_URL}/${this.lightNumber}/on`;
-            fetch(url);
+        async on(event: any) {
+            await LightApi.on(this.lightNumber);
         },
 
-        off(event: any) {
-            const url = `${BASE_URL}/${this.lightNumber}/off`;
-            fetch(url);
+        async off(event: any) {
+            await LightApi.off(this.lightNumber);
         },
 
-        set_bri(event: any) {
+        async set_bri(event: any) {
             this.brightness = event.srcElement.value;
-
-            const url = `${BASE_URL}/${this.lightNumber}/state?bri=${
-                this.brightness
-            }`;
-            fetch(url);
+            await LightApi.setBrightness(this.lightNumber, this.brightness);
         },
 
-        set_sat(event: any) {
+        async set_sat(event: any) {
             this.saturation = event.srcElement.value;
-
-            const url = `${BASE_URL}/${this.lightNumber}/state?sat=${
-                this.saturation
-            }`;
-            fetch(url);
+            await LightApi.setSaturation(this.lightNumber, this.saturation);
         },
 
-        set_hue(event: any) {
+        async set_hue(event: any) {
             this.hue = event.srcElement.value;
-
-            const url = `${BASE_URL}/${this.lightNumber}/state?hue=${this.hue}`;
-            fetch(url);
+            await LightApi.setHue(this.lightNumber, this.hue);
         },
     },
 });

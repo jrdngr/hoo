@@ -6,11 +6,11 @@
       <button @click="stop">Stop</button>
     </div>
     <div class="control">
-      <input id="trans-time" type="number" min="0" max="65535" v-model="transitionTime">
+      <input id="trans-time" type="number" min="0" max="65535" v-model="transitionTime" />
       <label for="trans-time">Transition time</label>
     </div>
     <div class="control">
-      <input id="hold-time" type="number" min="0" max="65535" v-model="holdTime">
+      <input id="hold-time" type="number" min="0" max="65535" v-model="holdTime" />
       <label for="hold-time">Hold time</label>
     </div>
   </div>
@@ -19,6 +19,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { BASE_URL } from '@/common/constants';
+import * as AnimationApi from '@/common/api/animations';
 
 export default Vue.extend({
     name: 'animationControls',
@@ -32,21 +33,14 @@ export default Vue.extend({
         };
     },
     methods: {
-        rotate(event: any) {
-            const url = `${BASE_URL}/rotate/${this.transitionTime}/${
-                this.holdTime
-            }`;
-            fetch(url);
+        async rotate(event: any) {
+            await AnimationApi.rotate(this.transitionTime, this.holdTime);
         },
-        random(event: any) {
-            const url = `${BASE_URL}/random/${this.transitionTime}/${
-                this.holdTime
-            }`;
-            fetch(url);
+        async random(event: any) {
+            await AnimationApi.random(this.transitionTime, this.holdTime);
         },
-        stop(event: any) {
-            const url = `${BASE_URL}/stop`;
-            fetch(url);
+        async stop(event: any) {
+            await AnimationApi.stop();
         },
     },
 });
