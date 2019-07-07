@@ -1,7 +1,6 @@
 <template>
   <div id="hoo">
     <animation-controls />
-    <button @click="onAddFakeLightClicked">Add Fake Light</button>
     <ul>
       <li v-for="light in lights" :key="light.number">
         <LightControls v-bind:light="light" />
@@ -22,10 +21,8 @@ export default Vue.extend({
     components: { LightControls, AnimationControls },
     data() {
         const lights: Light[] = [];
-        const fakeLightNumber: number = 0;
         return {
             lights,
-            fakeLightNumber,
         };
     },
     async created() {
@@ -37,16 +34,6 @@ export default Vue.extend({
                 new HooLight(light.name, lightNumber, light.state),
             );
         }
-    },
-    methods: {
-        onAddFakeLightClicked() {
-            this.fakeLightNumber -= 1;
-            const light = new FakeLight(
-                `Fake Light ${this.fakeLightNumber}`,
-                this.fakeLightNumber,
-            );
-            this.lights.push(light);
-        },
     },
 });
 </script>
