@@ -2,7 +2,7 @@ use rand::rngs::ThreadRng;
 use rand::Rng;
 use std::time::Duration;
 
-use crate::animation::AnimationFrame;
+use crate::animation_old::AnimationFrame;
 
 use hoo_api::light::{LightNumber, LightState};
 use hoo_api::ApiConnection;

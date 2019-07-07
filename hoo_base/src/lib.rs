@@ -5,12 +5,12 @@ use hoo_api::color::Color;
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_api::ApiConnection;
 
-use crate::animation::AnimationFrame;
-use crate::effects::random::RandomAnimation;
-use crate::effects::rotate::RotateAnimation;
+use crate::animation_old::AnimationFrame;
+use crate::animation_old::effects::random::RandomAnimation;
+use crate::animation_old::effects::rotate::RotateAnimation;
 
 pub mod animation;
-pub mod effects;
+pub mod animation_old;
 pub mod light_controller;
 
 type LightNumber = u8;
