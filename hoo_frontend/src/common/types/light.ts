@@ -1,4 +1,5 @@
 import * as LightApi from "@/common/api/lights";
+import { randomInt } from "@/common/utils/random";
 
 export interface Light {
     readonly name: string;
@@ -88,9 +89,9 @@ export class FakeLight implements Light {
         this.number = lightNumber;
         this.name = name;
         this._isOn = false;
-        this._hue = 0;
-        this._saturation = 0;
-        this._brightness = 0;
+        this._hue = randomInt(0, 64435);
+        this._saturation = randomInt(0, 255);
+        this._brightness = randomInt(0, 255);
     }
 
     public async update() {
