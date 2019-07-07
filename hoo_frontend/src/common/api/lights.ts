@@ -1,17 +1,17 @@
 import { BASE_URL } from '@/common/constants';
-import { Light } from '@/common/types/light';
+import { Light, HooLight } from '@/common/types/light';
 
-export async function getAllLights(): Promise<Light[]> {
+export async function getAllLights(): Promise<HooLight[]> {
     const url = `${BASE_URL}/lights`;
     const response = await fetch(url);
-    const lights: Light[] = await response.json();
+    const lights: HooLight[] = await response.json();
     return lights;
 }
 
-export async function getLight(lightNumber: number) {
+export async function getLight(lightNumber: number): Promise<HooLight> {
     const url = `${BASE_URL}/light/${lightNumber}`;
     const response: any = await fetch(url);
-    const light: Light = await response.json();
+    const light: HooLight = await response.json();
     return light;
 }
 

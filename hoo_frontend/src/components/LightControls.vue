@@ -34,7 +34,7 @@
         type="range"
         min="0"
         max="65535"
-        v-bind:value="lightModel.state.hue"
+        v-bind:value="lightModel.hue"
         @input="setHue"
       />
       <label for="hue">Hue</label>
@@ -45,7 +45,7 @@
         type="range"
         min="0"
         max="255"
-        v-bind:value="lightModel.state.sat"
+        v-bind:value="lightModel.saturation"
         @input="setSat"
       />
       <label for="sat">Saturation</label>
@@ -56,7 +56,7 @@
         type="range"
         min="0"
         max="255"
-        v-bind:value="lightModel.state.bri"
+        v-bind:value="lightModel.brightness"
         @input="setBri"
       />
       <label for="bri">Brightness</label>
@@ -86,9 +86,9 @@ export default Vue.extend({
     },
     computed: {
         previewFillColor(): string {
-            const h = (this.lightModel.state.hue / 65535) * 360;
-            const s = (this.lightModel.state.sat / 255) * 100;
-            const l = (this.lightModel.state.bri / 255) * 100;
+            const h = (this.lightModel.hue / 65535) * 360;
+            const s = (this.lightModel.saturation / 255) * 100;
+            const l = (this.lightModel.brightness / 255) * 100;
 
             return `hsl(${h}, ${s}%, ${l}%)`;
         },
