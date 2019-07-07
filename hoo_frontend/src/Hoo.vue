@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Light from '@/common/types/light';
+import { Light, HooLight } from '@/common/types/light';
 import LightControls from '@/components/LightControls.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
 import * as LightApi from '@/common/api/lights';
@@ -30,7 +30,7 @@ export default Vue.extend({
         for (const lightNum in lights) {
             const lightNumber = parseInt(lightNum, 10);
             const light = lights[lightNum];
-            this.lights.push(new Light(light.name, lightNumber, light.state));
+            this.lights.push(new HooLight(light.name, lightNumber, light.state));
         }
     },
 });
