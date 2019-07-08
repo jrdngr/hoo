@@ -2,7 +2,6 @@ use std::sync::mpsc::{self, Sender};
 use std::thread;
 use std::time::Duration;
 
-use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{error, http, web, App, HttpResponse, HttpServer, Result};
 use failure::Fail;
@@ -16,63 +15,33 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 fn main() -> Result<()> {
     dotenv::dotenv().ok();
 
-    let api_socket_ip = std::env::var("API_SOCKET_IP").expect("API_SOCKET_IP must be set");
-    let web_socket_ip = std::env::var("WEB_SOCKET_IP").expect("WEB_SOCKET_IP must be set");
-    let website_url = format!("http://{}", web_socket_ip);
+    let api_socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
 
     let (hoo, sender) = Hoo::new();
 
     thread::spawn(move || hoo.run());
 
-    let args: Vec<String> = std::env::args().collect();
-
-    if !args.contains(&"--noweb".to_string()) {
-        thread::spawn(move || {
-            HttpServer::new(move || {
-                App::new().service(
-                    actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
-                )
-            })
-            .bind(web_socket_ip)?
-            .workers(1)
-            .run()
-        });
-    }
-
-
     HttpServer::new(move || {
         App::new()
-            .wrap(
-                Cors::new()
-                    .allowed_origin(&website_url)
-                    .allowed_methods(vec!["GET", "POST"])
-                    .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-                    .allowed_header(http::header::CONTENT_TYPE)
-                    .max_age(3600),
-            )
             .data(AppState::new(&sender))
-            .service(web::resource("/stop").route(web::get().to(stop_animation)))
-            .service(web::resource("/rotate/{trans_time}/{hold_time}").route(web::get().to(rotate)))
-            .service(web::resource("/random/{trans_time}/{hold_time}").route(web::get().to(random)))
-            .service(web::resource("/animate").route(web::post().to(animate)))
-            // |r| {
-            //     r.method(Method::POST).with_config(animate, |(_, cfg)| {
-            //         cfg.error_handler(|err, req| {
-            //             println!("{:?}", err);
-            //             println!("{:?}", req);
-            //             error::InternalError::from_response(err, HttpResponse::Conflict().finish())
-            //                 .into()
-            //         });
-            //     })
-            // }))
-            .service(web::resource("/light/{light_num}").route(web::get().to(get_light)))
-            .service(web::resource("/lights").route(web::get().to(get_all_lights)))
             .service(
-                web::scope("/{light_num}")
-                    .service(web::resource("/on").route(web::get().to(on)))
-                    .service(web::resource("/off").route(web::get().to(off)))
-                    .service(web::resource("/color").route(web::get().to(color)))
-                    .service(web::resource("/state").route(web::get().to(light_state))),
+                web::scope("/api")
+                    .service(web::resource("/stop").route(web::get().to(stop_animation)))
+                    .service(web::resource("/rotate/{trans_time}/{hold_time}").route(web::get().to(rotate)))
+                    .service(web::resource("/random/{trans_time}/{hold_time}").route(web::get().to(random)))
+                    .service(web::resource("/animate").route(web::post().to(animate)))
+                    .service(web::resource("/light/{light_num}").route(web::get().to(get_light)))
+                    .service(web::resource("/lights").route(web::get().to(get_all_lights)))
+                    .service(
+                        web::scope("/{light_num}")
+                            .service(web::resource("/on").route(web::get().to(on)))
+                            .service(web::resource("/off").route(web::get().to(off)))
+                            .service(web::resource("/color").route(web::get().to(color)))
+                            .service(web::resource("/state").route(web::get().to(light_state))),
+                    )
+            )
+            .service(
+                actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
             )
     })
     .bind(api_socket_ip)?
