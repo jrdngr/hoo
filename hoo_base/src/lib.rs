@@ -11,6 +11,7 @@ use crate::animation_old::effects::rotate::RotateAnimation;
 use crate::animation_old::AnimationFrame;
 pub mod animation;
 pub mod animation_old;
+pub mod config;
 // pub mod light_controller;
 
 type LightNumber = u8;

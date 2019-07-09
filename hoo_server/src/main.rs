@@ -10,13 +10,9 @@ use std::time::Duration;
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_base::{Hoo, HooCommand};
 
-pub mod config;
-
 const TIMEOUT: Duration = Duration::from_secs(5);
 
 fn main() -> Result<()> {
-    dotenv::dotenv().ok();
-
     let api_socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
 
     let (hoo, sender) = Hoo::new();
