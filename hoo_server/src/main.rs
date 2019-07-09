@@ -1,14 +1,16 @@
-use std::sync::mpsc::{self, Sender};
-use std::thread;
-use std::time::Duration;
-
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{error, http, web, App, HttpResponse, HttpServer, Result};
 use failure::Fail;
 use serde::{Deserialize, Serialize};
 
+use std::sync::mpsc::{self, Sender};
+use std::thread;
+use std::time::Duration;
+
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_base::{Hoo, HooCommand};
+
+pub mod config;
 
 const TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -27,8 +29,14 @@ fn main() -> Result<()> {
             .service(
                 web::scope("/api")
                     .service(web::resource("/stop").route(web::get().to(stop_animation)))
-                    .service(web::resource("/rotate/{trans_time}/{hold_time}").route(web::get().to(rotate)))
-                    .service(web::resource("/random/{trans_time}/{hold_time}").route(web::get().to(random)))
+                    .service(
+                        web::resource("/rotate/{trans_time}/{hold_time}")
+                            .route(web::get().to(rotate)),
+                    )
+                    .service(
+                        web::resource("/random/{trans_time}/{hold_time}")
+                            .route(web::get().to(random)),
+                    )
                     .service(web::resource("/animate").route(web::post().to(animate)))
                     .service(web::resource("/light/{light_num}").route(web::get().to(get_light)))
                     .service(web::resource("/lights").route(web::get().to(get_all_lights)))
@@ -38,11 +46,9 @@ fn main() -> Result<()> {
                             .service(web::resource("/off").route(web::get().to(off)))
                             .service(web::resource("/color").route(web::get().to(color)))
                             .service(web::resource("/state").route(web::get().to(light_state))),
-                    )
+                    ),
             )
-            .service(
-                actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
-            )
+            .service(actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"))
     })
     .bind(api_socket_ip)?
     .workers(1)
