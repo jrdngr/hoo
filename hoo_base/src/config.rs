@@ -61,4 +61,8 @@ impl HooConfig {
 
         Ok(())
     }
+
+    pub fn write_default_file(&self) -> Result<(), Box<Error>> {
+        self.write_file(DEFAULT_CONFIG_FILE_NAME)
+    }
 }
