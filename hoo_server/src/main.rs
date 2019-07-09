@@ -8,12 +8,12 @@ use std::thread;
 use std::time::Duration;
 
 use hoo_api::light::{Light, LightCollection, LightState};
-use hoo_base::{Hoo, HooCommand};
+use hoo_base::{Hoo, HooCommand, HooConfig};
 
 const TIMEOUT: Duration = Duration::from_secs(5);
 
 fn main() -> Result<()> {
-    let api_socket_ip = std::env::var("SOCKET_IP").expect("SOCKET_IP must be set");
+    let config = HooConfig::from_env();
 
     let (hoo, sender) = Hoo::new();
 
@@ -46,7 +46,7 @@ fn main() -> Result<()> {
             )
             .service(actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"))
     })
-    .bind(api_socket_ip)?
+    .bind(config.hoo_server_socket_uri)?
     .workers(1)
     .run()?;
 
