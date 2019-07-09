@@ -24,6 +24,7 @@ type TransitionTime = u16;
 type HoldTime = u16;
 
 pub struct Hoo {
+    config: HooConfig,
     receiver: Receiver<HooCommand>,
     connection: ApiConnection,
 }
@@ -31,20 +32,22 @@ pub struct Hoo {
 impl Hoo {
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> (Self, Sender<HooCommand>) {
-        dotenv::dotenv().ok();
-
-        let base_uri = std::env::var("HUE_BASE_URI").expect("HUE_BASE_URI must be set");
-        let user_id = std::env::var("HUE_USER_ID").expect("HUE_USER_ID must be set");
-
+        let config = HooConfig::from_dotenv();
         let (sender, receiver) = mpsc::channel();
+        let connection = ApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
 
         (
             Hoo {
+                config,
                 receiver,
-                connection: ApiConnection::new(&base_uri, &user_id),
+                connection,
             },
             sender,
         )
+    }
+
+    pub fn config(&self) -> &HooConfig {
+        &self.config
     }
 
     pub fn run(&self) {

@@ -2,15 +2,14 @@ use actix_web::Result;
 
 use std::thread;
 
-use hoo_base::{Hoo, HooConfig};
+use hoo_base::Hoo;
 pub use server::HooServer;
 
 pub mod server;
 
 fn main() -> Result<()> {
-    let config = HooConfig::from_dotenv();
-
     let (hoo, sender) = Hoo::new();
+    let config = hoo.config().clone();
 
     thread::spawn(move || hoo.run());
 
