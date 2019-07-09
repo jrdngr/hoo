@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use std::error::Error;
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, Write};
 use std::path::Path;
 
 pub const DEFAULT_CONFIG_FILE_NAME: &str = "hoo_config.json";
@@ -46,7 +46,7 @@ impl HooConfig {
         let file = File::open(file_path)?;
         let reader = BufReader::new(file);
 
-        let config = serde_json::from_reader(reader)?;
+        let config = ron::de::from_reader(reader)?;
 
         Ok(config)
     }
@@ -56,9 +56,9 @@ impl HooConfig {
     }
 
     pub fn write_file<P: AsRef<Path>>(&self, file_path: P) -> Result<(), Box<Error>> {
-        let file = File::create(file_path)?;
-        serde_json::to_writer(file, &self)?;
-
+        let mut file = File::create(file_path)?;
+        let contents = ron::ser::to_string_pretty(&self, ron::ser::PrettyConfig::default())?;
+        file.write_all(contents.as_bytes())?;
         Ok(())
     }
 
