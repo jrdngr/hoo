@@ -2,17 +2,17 @@
 
 ## General
 - [ ] Make a build script
-    - [ ] —- Should be easy to run on pi after building
+    - [ ] Should be easy to run on pi after building
 
 ## Hoo Base
 - [ ] Add easier ways to build light states and animations
 - [ ] Make animations asynchronous
 - [ ] Enhance Color struct
-    - [ ] -- Check out `palette` crate
-    - [ ] -- Add HSL
-    - [ ] -- Add more options for argument types in constructors (u8 for rgb)
-    - [ ] -- RGB conversions might be broken
-    - [ ] —- Unify colors throughout modules
+    - [ ] Check out `palette` crate
+    - [ ] Add HSL
+    - [ ] Add more options for argument types in constructors (u8 for rgb)
+    - [ ] RGB conversions might be broken
+    - [ ] Unify colors throughout modules
 
 ## Hoo Server
 - [ ] Make fake api
