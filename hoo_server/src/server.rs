@@ -114,7 +114,7 @@ fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<Json<Light>> 
     let response = receiver.recv_timeout(TIMEOUT);
     match response {
         Ok(light) => Ok(Json(light)),
-        Err(_) => Err(HooError::new().into()),
+        Err(_) => Err(HooError::default().into()),
     }
 }
 
@@ -125,6 +125,6 @@ fn get_all_lights(state: Data<AppState>) -> Result<Json<LightCollection>> {
     let response = receiver.recv_timeout(TIMEOUT);
     match response {
         Ok(lights) => Ok(Json(lights)),
-        Err(_) => Err(HooError::new().into()),
+        Err(_) => Err(HooError::default().into()),
     }
 }

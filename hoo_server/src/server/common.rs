@@ -32,8 +32,8 @@ impl Default for HooResponse {
 #[fail(display = "Internal server error")]
 pub struct HooError {}
 
-impl HooError {
-    pub fn new() -> Self {
+impl Default for HooError {
+    fn default() -> Self {
         HooError {}
     }
 }
