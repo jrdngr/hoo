@@ -26,4 +26,4 @@
 - [ ] Make everything not ugly
 
 ## Hue Api
-Probably done
+- [ ] Try out GraphQL
