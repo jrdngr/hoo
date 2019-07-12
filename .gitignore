@@ -1,6 +1,8 @@
 /target
 **/*.rs.bk
 **/node_modules
-/hoo_server/static/
 Cargo.lock
 .env
+
+hoo_config.ron
+/hoo_server/static/

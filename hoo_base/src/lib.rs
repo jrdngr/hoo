@@ -1,13 +1,17 @@
+use std::error::Error;
+use std::path::Path;
+
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
+
+use crate::animation_old::effects::random::RandomAnimation;
+use crate::animation_old::effects::rotate::RotateAnimation;
+use crate::animation_old::AnimationFrame;
 
 use hoo_api::color::Color;
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_api::ApiConnection;
 
-use crate::animation_old::effects::random::RandomAnimation;
-use crate::animation_old::effects::rotate::RotateAnimation;
-use crate::animation_old::AnimationFrame;
 pub use crate::config::HooConfig;
 
 pub mod animation;
@@ -30,9 +34,7 @@ pub struct Hoo {
 }
 
 impl Hoo {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> (Self, Sender<HooCommand>) {
-        let config = HooConfig::from_dotenv();
+    pub fn with_config(config: HooConfig) -> (Self, Sender<HooCommand>) {
         let (sender, receiver) = mpsc::channel();
         let connection = ApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
 
@@ -44,6 +46,20 @@ impl Hoo {
             },
             sender,
         )
+
+    }
+
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new() -> (Self, Sender<HooCommand>) {
+        let config = HooConfig::from_dotenv();
+        Self::with_config(config)
+    }
+
+    pub fn with_config_file<P: AsRef<Path>>(
+        file_path: P,
+    ) -> Result<(Self, Sender<HooCommand>), Box<Error>> {
+        let config = HooConfig::from_file(file_path)?;
+        Ok(Self::with_config(config))
     }
 
     pub fn config(&self) -> &HooConfig {

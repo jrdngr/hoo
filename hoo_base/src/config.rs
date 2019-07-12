@@ -4,8 +4,9 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::Path;
+use core::fmt::Debug;
 
-pub const DEFAULT_CONFIG_FILE_NAME: &str = "hoo_config.json";
+pub const DEFAULT_CONFIG_FILE_NAME: &str = "hoo_config.ron";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HooConfig {
@@ -55,10 +56,17 @@ impl HooConfig {
         Self::from_file(DEFAULT_CONFIG_FILE_NAME)
     }
 
-    pub fn write_file<P: AsRef<Path>>(&self, file_path: P) -> Result<(), Box<Error>> {
-        let mut file = File::create(file_path)?;
+    pub fn write_file<P: AsRef<Path> + Debug>(&self, file_path: P) -> Result<(), Box<Error>> {
+        if file_path.as_ref().exists() {
+            println!("File already exists: {:?}", &file_path);
+            return Ok(());
+        }
+
+        let mut file = File::create(&file_path)?;
         let contents = ron::ser::to_string_pretty(&self, ron::ser::PrettyConfig::default())?;
         file.write_all(contents.as_bytes())?;
+        println!("Wrote file: {:?}", &file_path);
+
         Ok(())
     }
 
