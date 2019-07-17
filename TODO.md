@@ -19,6 +19,7 @@
 - [ ] Finish config file support
 - [ ] Add command line parameters
 - [ ] Run animation based on current settings
+- [ ] Look at the warp crate
 
 ## Hoo Frontend
 - [ ] Animation editor with previews
