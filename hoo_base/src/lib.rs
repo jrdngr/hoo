@@ -9,9 +9,10 @@ use crate::animation_old::effects::rotate::RotateAnimation;
 use crate::animation_old::AnimationFrame;
 
 use hoo_api::color::Color;
-use hoo_api::light::{Light, LightCollection, LightState};
-use hoo_api::ApiConnection;
 use hoo_api::connection::standard::StandardApiConnection;
+use hoo_api::ApiConnection;
+use hoo_api::light::{Light, LightCollection, LightState};
+
 
 pub use crate::config::HooConfig;
 
@@ -66,7 +67,9 @@ impl Hoo<StandardApiConnection> {
     pub fn config(&self) -> &HooConfig {
         &self.config
     }
+}
 
+impl<T: ApiConnection> Hoo<T> {
     pub fn run(&self) {
         let mut next_frame_time: Option<Instant> = None;
         let mut animation: Option<Box<dyn Iterator<Item = AnimationFrame>>> = None;
@@ -148,6 +151,7 @@ impl Hoo<StandardApiConnection> {
             }
         }
     }
+
 }
 
 #[derive(Debug, Clone)]
