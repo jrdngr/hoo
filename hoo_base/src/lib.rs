@@ -11,6 +11,7 @@ use crate::animation_old::AnimationFrame;
 use hoo_api::color::Color;
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_api::ApiConnection;
+use hoo_api::connection::standard::StandardApiConnection;
 
 pub use crate::config::HooConfig;
 
@@ -27,16 +28,16 @@ type BrightnessValue = u8;
 type TransitionTime = u16;
 type HoldTime = u16;
 
-pub struct Hoo {
+pub struct Hoo<T: ApiConnection> {
     config: HooConfig,
     receiver: Receiver<HooCommand>,
-    connection: ApiConnection,
+    connection: T,
 }
 
-impl Hoo {
+impl Hoo<StandardApiConnection> {
     pub fn with_config(config: HooConfig) -> (Self, Sender<HooCommand>) {
         let (sender, receiver) = mpsc::channel();
-        let connection = ApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
+        let connection = StandardApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
 
         (
             Hoo {
@@ -146,12 +147,6 @@ impl Hoo {
                 }
             }
         }
-    }
-}
-
-impl Default for Hoo {
-    fn default() -> Self {
-        Hoo::new().0
     }
 }
 
