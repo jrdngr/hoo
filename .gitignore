@@ -4,6 +4,5 @@
 Cargo.lock
 .env
 
-fakestate
-hoo_config.ron
+/local/
 /hoo_server/static/
