@@ -57,8 +57,14 @@ impl AnimationFrameBuilder {
         self
     }
 
-    pub fn add_light_state(mut self, light_number: LightNumber, light_state: LightState) -> Self  {
+    pub fn with_light_state(mut self, light_number: LightNumber, light_state: LightState) -> Self  {
         self.states.insert(light_number, light_state);
+        self
+    }
+
+    pub fn with_color_change(mut self, light_numer: LightNumber, color_change: ColorChange) -> Self {
+        // I think I actuailly need to encode this into AnimationFrame so that they can use the current
+        // state of the light even if it's set from the Hue app
         self
     }
 
