@@ -10,9 +10,10 @@ use crate::animation_old::AnimationFrame;
 
 use hoo_api::color::Color;
 use hoo_api::connection::standard::StandardApiConnection;
-use hoo_api::ApiConnection;
-use hoo_api::light::{Light, LightCollection, LightState};
+use hoo_api::connection::testing::TestingApiConnection;
 
+use hoo_api::light::{Light, LightCollection, LightState};
+use hoo_api::ApiConnection;
 
 pub use crate::config::HooConfig;
 
@@ -48,7 +49,6 @@ impl Hoo<StandardApiConnection> {
             },
             sender,
         )
-
     }
 
     #[allow(clippy::new_ret_no_self)]
@@ -64,12 +64,31 @@ impl Hoo<StandardApiConnection> {
         Ok(Self::with_config(config))
     }
 
-    pub fn config(&self) -> &HooConfig {
-        &self.config
+}
+
+impl Hoo<TestingApiConnection> {
+    pub fn from_file<P: AsRef<std::path::Path>>(file_path: P) -> (Self, Sender<HooCommand>) {
+        let config = HooConfig::default();
+
+        let (sender, receiver) = mpsc::channel();
+        let connection = TestingApiConnection::new(file_path).unwrap();
+
+        (
+            Hoo {
+                config,
+                receiver,
+                connection,
+            },
+            sender,
+        )
     }
 }
 
 impl<T: ApiConnection> Hoo<T> {
+    pub fn config(&self) -> &HooConfig {
+        &self.config
+    }
+
     pub fn run(&self) {
         let mut next_frame_time: Option<Instant> = None;
         let mut animation: Option<Box<dyn Iterator<Item = AnimationFrame>>> = None;
@@ -121,7 +140,7 @@ impl<T: ApiConnection> Hoo<T> {
                         }
                     }
                     HooCommand::GetAllLights(sender) => {
-                        let response = self.connection.get_active_lights();
+                        let response = self.connection.get_all_lights();
                         if let Ok(lights) = response {
                             let _ = sender.send(lights);
                         }

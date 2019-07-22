@@ -13,36 +13,36 @@ pub struct TestingApiConnection {
 }
 
 impl TestingApiConnection {
-    pub fn from_file<P: AsRef<Path>>(file_path: P) -> Self {
-        let mut path = PathBuf::new();
-        path.push(file_path);
-
-        Self { file_path: path }
-    }
-
     pub fn new<P: AsRef<Path>>(file_path: P) -> Result<Self, failure::Error> {
-        let light_state = LightState {
-            ..Default::default()
-        };
-
-        let light = Light {
-            name: "Mr. Light".to_string(),
-            state: light_state,
-        };
-
-        let mut collection_map = HashMap::new();
-        collection_map.insert(1, light);
-
-        let collection = LightCollection(collection_map);
-
         let mut path = PathBuf::new();
         path.push(file_path);
 
-        let connection = Self { file_path: path };
+        if path.exists() {
+            Ok(Self { file_path: path })
+        } else {
+            let light_state = LightState {
+                on: Some(true),
+                bri: Some(127),
+                hue: Some(0),
+                sat: Some(255),
+                ..Default::default()
+            };
 
-        connection.set_local_state(collection)?;
+            let light = Light {
+                name: "Mr. Light".to_string(),
+                state: light_state,
+            };
 
-        Ok(connection)
+            let mut collection_map = HashMap::new();
+            collection_map.insert(1, light);
+
+            let collection = LightCollection(collection_map);
+            let connection = Self { file_path: path };
+
+            connection.set_local_state(collection)?;
+
+            Ok(connection)
+        }
     }
 
     pub fn get_local_state(&self) -> Result<LightCollection, failure::Error> {
@@ -93,7 +93,7 @@ impl ApiConnection for TestingApiConnection {
 
     fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, failure::Error> {
         let mut light = self.get_light(light_number)?;
-        light.state = state.clone();
+        light.state = LightState::combine(&light.state, state);
 
         let mut all_lights = self.get_local_state()?;
         all_lights.0.insert(light_number, light);

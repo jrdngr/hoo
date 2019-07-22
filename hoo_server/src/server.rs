@@ -51,7 +51,6 @@ impl HooServer {
     }
 }
 
-
 fn on(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::On(*light_num));
     HttpResponse::Ok().json(HooResponse::default())

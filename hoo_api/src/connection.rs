@@ -3,6 +3,9 @@ use crate::light::{Light, LightCollection, LightState};
 pub mod standard;
 pub mod testing;
 
+pub use self::standard::StandardApiConnection;
+pub use self::testing::TestingApiConnection;
+
 pub trait ApiConnection {
     fn get_all_lights(&self) -> Result<LightCollection, failure::Error>;
     fn get_active_lights(&self) -> Result<LightCollection, failure::Error>;

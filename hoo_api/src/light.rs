@@ -144,6 +144,44 @@ impl LightState {
             None
         }
     }
+
+    pub fn combine(base: &Self, diff: &Self) -> Self {
+        let on = diff.on.or(base.on);
+        let bri = diff.bri.or(base.bri);
+        let hue = diff.hue.or(base.hue);
+        let sat = diff.sat.or(base.sat);
+        let xy = diff.xy.or(base.xy);
+        let ct = diff.ct.or(base.ct);
+        let effect = diff.effect.or(base.effect);
+        let alert = diff.alert.or(base.alert);
+        let transitiontime = diff.transitiontime.or(base.transitiontime);
+        let bri_inc = diff.bri_inc.or(base.bri_inc);
+        let sat_inc = diff.sat_inc.or(base.sat_inc);
+        let hue_inc = diff.hue_inc.or(base.hue_inc);
+        let ct_inc = diff.ct_inc.or(base.ct_inc);
+        let xy_inc = diff.xy_inc.or(base.xy_inc);
+        let colormode = diff.colormode.or(base.colormode);
+        let reachable = diff.reachable.or(base.reachable);
+
+        Self {
+            on,
+            bri,
+            hue,
+            sat,
+            xy,
+            ct,
+            effect,
+            alert,
+            transitiontime,
+            bri_inc,
+            sat_inc,
+            hue_inc,
+            ct_inc,
+            xy_inc,
+            colormode,
+            reachable,
+        }
+    }
 }
 
 impl Default for LightState {
@@ -169,14 +207,14 @@ impl Default for LightState {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LightEffect {
     None,
     ColorLoop,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LightAlert {
     None,
@@ -184,7 +222,7 @@ pub enum LightAlert {
     Lselect,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LightColorMode {
     HS,
