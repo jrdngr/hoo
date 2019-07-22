@@ -1,5 +1,6 @@
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{web, App, HttpResponse, HttpServer, Result};
+use actix_cors::Cors;
 
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
@@ -20,6 +21,12 @@ impl HooServer {
     pub fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<(), std::io::Error> {
         HttpServer::new(move || {
             App::new()
+                .wrap(
+                    Cors::new()
+                        .allowed_origin("http://localhost:8080")
+                        .allowed_origin("http://127.0.0.1:8080")
+                        .allowed_methods(vec!["GET", "POST"])
+                )
                 .data(AppState::new(&sender))
                 .service(
                     web::scope("/api")
@@ -33,7 +40,9 @@ impl HooServer {
                                 .route(web::get().to(random)),
                         )
                         .service(web::resource("/animate").route(web::post().to(animate)))
-                        .service(web::resource("/light/{light_num}").route(web::get().to(get_light)))
+                        .service(
+                            web::resource("/light/{light_num}").route(web::get().to(get_light)),
+                        )
                         .service(web::resource("/lights").route(web::get().to(get_all_lights)))
                         .service(
                             web::scope("/{light_num}")
@@ -43,7 +52,9 @@ impl HooServer {
                                 .service(web::resource("/state").route(web::get().to(light_state))),
                         ),
                 )
-                .service(actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"))
+                .service(
+                    actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
+                )
         })
         .bind(&config.hoo_server_socket_uri)?
         .workers(1)
