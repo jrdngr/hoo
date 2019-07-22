@@ -1,5 +1,5 @@
-pub mod random;
-pub mod rotate;
+// pub mod random;
+// pub mod rotate;
 
 // pub fn rainbow(
 //     connection: &ApiConnection,

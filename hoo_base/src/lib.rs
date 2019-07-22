@@ -4,8 +4,8 @@ use std::path::Path;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
-use crate::animation::effects::random::RandomAnimation;
-use crate::animation::effects::rotate::RotateAnimation;
+// use crate::animation::effects::random::RandomAnimation;
+// use crate::animation::effects::rotate::RotateAnimation;
 use crate::animation::AnimationFrame;
 
 use hoo_api::color::Color;
@@ -115,22 +115,22 @@ impl<T: ApiConnection> Hoo<T> {
                         let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::Rotate(tt, ht) => {
-                        let transition_time = Duration::from_secs(u64::from(tt));
-                        let hold_time = Duration::from_secs(u64::from(ht));
-                        let anim =
-                            RotateAnimation::new(&self.connection, &transition_time, &hold_time)
-                                .unwrap();
-                        animation = Some(Box::new(anim));
-                        next_frame_time = Some(Instant::now());
+                        // let transition_time = Duration::from_secs(u64::from(tt));
+                        // let hold_time = Duration::from_secs(u64::from(ht));
+                        // let anim =
+                        //     RotateAnimation::new(&self.connection, &transition_time, &hold_time)
+                        //         .unwrap();
+                        // animation = Some(Box::new(anim));
+                        // next_frame_time = Some(Instant::now());
                     }
                     HooCommand::Random(tt, ht) => {
-                        let transition_time = Duration::from_secs(u64::from(tt));
-                        let hold_time = Duration::from_secs(u64::from(ht));
-                        let anim =
-                            RandomAnimation::new(&self.connection, &transition_time, &hold_time)
-                                .unwrap();
-                        animation = Some(Box::new(anim));
-                        next_frame_time = Some(Instant::now());
+                        // let transition_time = Duration::from_secs(u64::from(tt));
+                        // let hold_time = Duration::from_secs(u64::from(ht));
+                        // let anim =
+                        //     RandomAnimation::new(&self.connection, &transition_time, &hold_time)
+                        //         .unwrap();
+                        // animation = Some(Box::new(anim));
+                        // next_frame_time = Some(Instant::now());
                     }
                     HooCommand::StopAnimation => next_frame_time = None,
                     HooCommand::GetLight(light_num, sender) => {
@@ -157,7 +157,7 @@ impl<T: ApiConnection> Hoo<T> {
                         Some(anim) => {
                             let frame = anim.next();
                             if let Some(frame) = frame {
-                                let delay = frame.transition_time + frame.hold_time;
+                                let delay = frame.transition_time.unwrap_or(Duration::from_secs(0)) + frame.hold_time;
                                 next_frame_time = Some(now + delay);
                                 for state in frame.states {
                                     let _ = self.connection.set_state(state.0, &state.1);
@@ -170,7 +170,6 @@ impl<T: ApiConnection> Hoo<T> {
             }
         }
     }
-
 }
 
 #[derive(Debug, Clone)]
