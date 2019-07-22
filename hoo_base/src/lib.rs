@@ -4,9 +4,9 @@ use std::path::Path;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
-use crate::animation_old::effects::random::RandomAnimation;
-use crate::animation_old::effects::rotate::RotateAnimation;
-use crate::animation_old::AnimationFrame;
+use crate::animation::effects::random::RandomAnimation;
+use crate::animation::effects::rotate::RotateAnimation;
+use crate::animation::AnimationFrame;
 
 use hoo_api::color::Color;
 use hoo_api::connection::standard::StandardApiConnection;
@@ -18,8 +18,8 @@ use hoo_api::ApiConnection;
 pub use crate::config::HooConfig;
 
 pub mod animation;
-pub mod animation_old;
 pub mod config;
+// Some day I'll play with actix
 // pub mod light_controller;
 
 type LightNumber = u8;
