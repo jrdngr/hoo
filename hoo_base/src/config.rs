@@ -6,7 +6,7 @@ use std::io::{BufReader, Write};
 use std::path::Path;
 use core::fmt::Debug;
 
-pub const DEFAULT_CONFIG_FILE_NAME: &str = "hoo_config.ron";
+pub const DEFAULT_CONFIG_FILE_PATH: &str = "./local/hoo_config.ron";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HooConfig {
@@ -53,7 +53,7 @@ impl HooConfig {
     }
 
     pub fn from_default_file() -> Result<Self, Box<Error>> {
-        Self::from_file(DEFAULT_CONFIG_FILE_NAME)
+        Self::from_file(DEFAULT_CONFIG_FILE_PATH)
     }
 
     pub fn write_file<P: AsRef<Path> + Debug>(&self, file_path: P) -> Result<(), Box<Error>> {
@@ -71,6 +71,6 @@ impl HooConfig {
     }
 
     pub fn write_default_file(&self) -> Result<(), Box<Error>> {
-        self.write_file(DEFAULT_CONFIG_FILE_NAME)
+        self.write_file(DEFAULT_CONFIG_FILE_PATH)
     }
 }
