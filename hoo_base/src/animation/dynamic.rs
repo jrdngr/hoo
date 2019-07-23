@@ -8,24 +8,39 @@ use std::ops::{Add, Mul};
 use crate::animation::AnimationFrame;
 
 use hoo_api::light::{LightNumber, LightState, LightCollection};
+use hoo_api::ApiConnection;
 
-pub struct DynamicAnimation {
+pub struct DynamicAnimation<'a> {
+    connection: &'a ApiConnection,
+    hold_time: Duration,
     steps: Vec<DynamicAnimationStep>,
     current_index: usize,
 }
 
-impl Default for DynamicAnimation {
-    fn default() -> Self {
-        Self {
-            steps: Vec::new(),
-            current_index: 0,
+impl <'a> Iterator for DynamicAnimation<'a> {
+    type Item = AnimationFrame;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.connection.get_active_lights() {
+            Ok(lights) => Some(self.next_frame(&lights)),
+            Err(_) => None,
         }
     }
 }
 
-impl DynamicAnimation {
-    pub fn new() -> Self {
-        Default::default()
+impl <'a> DynamicAnimation<'a> {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(connection: &'a ApiConnection, hold_time: &Duration) -> Result<Self, failure::Error> {
+        Ok(Self {
+            connection,
+            hold_time: *hold_time,
+            steps: Vec::new(),
+            current_index: 0,
+        })
+    }
+
+    pub fn animation_step(&mut self, step: DynamicAnimationStep) {
+        self.steps.push(step);
     }
 
     pub fn next_frame(&mut self, lights: &LightCollection) -> AnimationFrame {
@@ -40,16 +55,16 @@ impl DynamicAnimation {
         let next_step = &self.steps[self.current_index];
         self.current_index += 1;
 
-        next_step.as_animation_frame(lights)
+        next_step.as_animation_frame(lights, &self.hold_time)
     }
 }
 
 pub struct DynamicAnimationStep {
-    transforms: HashMap<LightNumber, LightStateTransform>,
+    pub transforms: HashMap<LightNumber, LightStateTransform>,
 }
 
 impl DynamicAnimationStep {
-    pub fn as_animation_frame(&self, lights: &LightCollection) -> AnimationFrame {
+    pub fn as_animation_frame(&self, lights: &LightCollection, hold_time: &Duration) -> AnimationFrame {
         let mut states: HashMap<LightNumber, LightState> = HashMap::new();
 
         for (light_num, transform) in &self.transforms {
@@ -60,19 +75,20 @@ impl DynamicAnimationStep {
         }
 
         AnimationFrame {
-            hold_time: Duration::from_secs(0),
+            hold_time: *hold_time,
             transition_time: None,
             states,
         }
     }
 }
 
+#[derive(Default)]
 pub struct LightStateTransform {
-    on: Option<LightOnStateOperation>,
-    transition_time: Option<LightStateValueOperation<u16>>,
-    hue: Option<LightStateValueOperation<u16>>,
-    saturation: Option<LightStateValueOperation<u8>>,
-    brightness: Option<LightStateValueOperation<u8>>,
+    pub on: Option<LightOnStateOperation>,
+    pub transition_time: Option<LightStateValueOperation<u16>>,
+    pub hue: Option<LightStateValueOperation<u16>>,
+    pub saturation: Option<LightStateValueOperation<u8>>,
+    pub brightness: Option<LightStateValueOperation<u8>>,
 }
 
 impl LightStateTransform {
@@ -190,6 +206,7 @@ where
     }
 }
 
+#[derive(Clone)]
 pub enum LightStateValue<T>
 where
     T: Clone + Add + Mul + SampleUniform,

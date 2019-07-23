@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
-use crate::animation::builtins::random::RandomAnimation;
+use crate::animation::builtins::random::create_random_animation;
 use crate::animation::builtins::rotate::RotateAnimation;
 use crate::animation::AnimationFrame;
 
@@ -127,7 +127,7 @@ impl<T: ApiConnection> Hoo<T> {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            RandomAnimation::new(&self.connection, &transition_time, &hold_time)
+                            create_random_animation(&self.connection, &transition_time, &hold_time)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());

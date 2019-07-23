@@ -1,67 +1,38 @@
-use rand::rngs::ThreadRng;
-use rand::Rng;
-
-use std::collections::HashMap;
 use std::time::Duration;
+use std::collections::HashMap;
 
-use crate::animation::AnimationFrame;
-
-use hoo_api::light::{LightNumber, LightState};
 use hoo_api::ApiConnection;
+use hoo_api::light::LightNumber;
 
-pub struct RandomAnimation {
-    transition_time: Duration,
-    hold_time: Duration,
-    lights: Vec<u8>,
-    rng: ThreadRng,
-}
+use crate::animation::dynamic::{DynamicAnimation, DynamicAnimationStep, LightStateTransform, LightStateValueOperation, LightStateValue};
 
-impl RandomAnimation {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(
-        connection: &ApiConnection,
-        transition_time: &Duration,
-        hold_time: &Duration,
-    ) -> Result<Self, failure::Error> {
-        let lights = connection.get_active_lights()?.0.keys().cloned().collect();
+pub fn create_random_animation<'a> (
+    connection: &'a ApiConnection,
+    transition_time: &Duration,
+    hold_time: &Duration,
+) -> Result<DynamicAnimation<'a>, failure::Error> {
+    let mut animation = DynamicAnimation::new(connection, hold_time)?;
 
-        let anim = Self {
-            transition_time: *transition_time,
-            hold_time: *hold_time,
-            lights,
-            rng: rand::thread_rng(),
+    let transition_millis = (transition_time.as_secs() * 1000 + u64::from(transition_time.subsec_millis())) as u16;
+
+    let lights = connection.get_active_lights()?.clone();
+    
+    let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
+    for light_num in lights.0.keys() {
+        let transform = LightStateTransform {
+            hue: Some(LightStateValueOperation::Set(LightStateValue::Random)),
+            transition_time: Some(LightStateValueOperation::Set(LightStateValue::Constant(transition_millis))),
+            ..Default::default()
         };
 
-        Ok(anim)
+        transforms.insert(*light_num, transform);
     }
-}
 
-impl Iterator for RandomAnimation {
-    type Item = AnimationFrame;
+    let step = DynamicAnimationStep {
+        transforms,
+    };
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let transition_millis =
-            self.transition_time.as_secs() * 1000 + u64::from(self.transition_time.subsec_millis());
-
-        let transition_value = transition_millis as u16 / 100;
-
-        let mut states: HashMap<LightNumber, LightState> = HashMap::new();
-
-        for light_num in &self.lights {
-            let next_hue: u16 = self.rng.gen();
-            let state = LightState::new()
-                .hue(next_hue)
-                .sat(255)
-                .transitiontime(transition_value);
-            states.insert(*light_num, state);
-        }
-
-        let frame = AnimationFrame {
-            transition_time: Some(self.transition_time),
-            hold_time: self.hold_time,
-            states,
-        };
-
-        Some(frame)
-    }
+    animation.animation_step(step);
+    
+    Ok(animation)
 }
