@@ -1,5 +1,7 @@
 use rand::rngs::ThreadRng;
 use rand::Rng;
+
+use std::collections::HashMap;
 use std::time::Duration;
 
 use crate::animation::AnimationFrame;
@@ -43,7 +45,7 @@ impl Iterator for RandomAnimation {
 
         let transition_value = transition_millis as u16 / 100;
 
-        let mut states: Vec<(LightNumber, LightState)> = Vec::new();
+        let mut states: HashMap<LightNumber, LightState> = HashMap::new();
 
         for light_num in &self.lights {
             let next_hue: u16 = self.rng.gen();
@@ -51,7 +53,7 @@ impl Iterator for RandomAnimation {
                 .hue(next_hue)
                 .sat(255)
                 .transitiontime(transition_value);
-            states.push((*light_num, state));
+            states.insert(*light_num, state);
         }
 
         let frame = AnimationFrame {
