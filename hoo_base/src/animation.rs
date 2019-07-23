@@ -2,7 +2,7 @@ use std::time::Duration;
 use hoo_api::light::{LightNumber, LightState};
 
 pub mod builder;
-pub mod effects;
+pub mod builtins;
 
 pub use self::builder::AnimationBuilder;
 

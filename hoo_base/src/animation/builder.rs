@@ -20,12 +20,26 @@ impl Default for AnimationBuilder {
 }
 
 impl AnimationBuilder {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
     pub fn build(self) -> impl Iterator<Item = AnimationFrame> {
         self.frames.into_iter()
     }
 
     pub fn with_frame(mut self, frame: AnimationFrame) -> Self {
         self.frames.push(frame);
+        self
+    }
+
+    pub fn with_frames<I>(mut self, frames: I) -> Self
+    where
+        I: IntoIterator<Item = AnimationFrame>,
+    {
+        for frame in frames {
+            self.frames.push(frame);
+        }
         self
     }
 }

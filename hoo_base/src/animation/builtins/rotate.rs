@@ -39,7 +39,7 @@ impl RotateAnimation {
 
             let frame = AnimationFrame {
                 hold_time: *hold_time,
-                transition_time: *transition_time,
+                transition_time: Some(*transition_time),
                 states: active_lights_copy
                     .into_iter()
                     .zip(light_states_copy)

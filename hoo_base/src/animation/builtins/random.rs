@@ -55,7 +55,7 @@ impl Iterator for RandomAnimation {
         }
 
         let frame = AnimationFrame {
-            transition_time: self.transition_time,
+            transition_time: Some(self.transition_time),
             hold_time: self.hold_time,
             states,
         };
