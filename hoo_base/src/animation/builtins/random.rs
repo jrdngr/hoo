@@ -26,6 +26,7 @@ pub fn create_random_animation<'a>(
     for light_num in lights.0.keys() {
         let transform = LightStateTransform {
             hue: Some(LightStateValueOperation::Set(LightStateValue::Random)),
+            saturation: Some(LightStateValueOperation::Set(LightStateValue::RandomRange(200, 255))),
             transition_time: Some(LightStateValueOperation::Set(LightStateValue::Constant(
                 transition_hue_units,
             ))),
