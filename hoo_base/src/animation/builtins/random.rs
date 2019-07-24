@@ -42,3 +42,22 @@ pub fn create_random_animation<'a>(
 
     Ok(animation)
 }
+
+
+// pub fn create_random_animation_ideal<'a>(
+//     connection: &'a ApiConnection,
+//     transition_time: &Duration,
+//     hold_time: &Duration,
+// ) -> Result<DynamicAnimation<'a>, failure::Error> {
+//     DynamicAnimation::new(connection)
+//         .step(DynamicAnimationStep::new()
+//             .hold_time(hold_time)
+//             .transition_time(transition_time)
+//             .all_lights([
+//                 Hue::Random, 
+//                 Sat::RandomRange(200, 255)
+//             ])
+//             .build()
+//         )
+//         .build()
+// }
