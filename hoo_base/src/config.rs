@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use core::fmt::Debug;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::Path;
-use core::fmt::Debug;
 
 pub const DEFAULT_CONFIG_FILE_PATH: &str = "./local/hoo_config.ron";
 

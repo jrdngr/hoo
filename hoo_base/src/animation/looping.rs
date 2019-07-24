@@ -47,7 +47,8 @@ impl Iterator for LoopingAnimation {
         let mut next_frame = self.frames[self.current_index].clone();
         self.current_index += 1;
 
-        let temporary_transition_time = next_frame.transition_time.unwrap_or(Duration::from_secs(0));
+        let temporary_transition_time =
+            next_frame.transition_time.unwrap_or(Duration::from_secs(0));
 
         let transition_millis = temporary_transition_time.as_secs() * 1000
             + u64::from(temporary_transition_time.subsec_millis());

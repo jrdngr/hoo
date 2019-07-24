@@ -1,14 +1,14 @@
+use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{web, App, HttpResponse, HttpServer, Result};
-use actix_cors::Cors;
 
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
 
+pub use app_state::AppState;
+pub use common::{AnimationSettings, HooError, HooResponse, RGB};
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_base::{HooCommand, HooConfig};
-pub use app_state::AppState;
-pub use common::{RGB, AnimationSettings, HooResponse, HooError};
 
 pub mod app_state;
 pub mod common;
@@ -25,7 +25,7 @@ impl HooServer {
                     Cors::new()
                         .allowed_origin("http://localhost:8080")
                         .allowed_origin("http://127.0.0.1:8080")
-                        .allowed_methods(vec!["GET", "POST"])
+                        .allowed_methods(vec!["GET", "POST"]),
                 )
                 .data(AppState::new(&sender))
                 .service(

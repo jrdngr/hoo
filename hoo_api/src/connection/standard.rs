@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::light::{Light, LightCollection, LightEffect, LightState};
 use crate::connection::ApiConnection;
+use crate::light::{Light, LightCollection, LightEffect, LightState};
 
 pub struct StandardApiConnection {
     pub client: reqwest::Client,
@@ -53,11 +53,7 @@ impl ApiConnection for StandardApiConnection {
         Ok(light)
     }
 
-    fn set_state(
-        &self,
-        light_number: u8,
-        state: &LightState,
-    ) -> Result<String, failure::Error> {
+    fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, failure::Error> {
         let body = serde_json::to_string(state)?;
 
         let uri = format!("{}/lights/{}/state", self.base(), light_number);

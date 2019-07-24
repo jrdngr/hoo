@@ -1,13 +1,13 @@
+use rand::distributions::{uniform::SampleUniform, Distribution, Standard};
 use rand::{thread_rng, Rng};
-use rand::distributions::{Distribution, Standard, uniform::SampleUniform};
 
-use std::time::Duration;
 use std::collections::HashMap;
 use std::ops::{Add, Mul};
+use std::time::Duration;
 
 use crate::animation::AnimationFrame;
 
-use hoo_api::light::{LightNumber, LightState, LightCollection};
+use hoo_api::light::{LightCollection, LightNumber, LightState};
 use hoo_api::ApiConnection;
 
 pub struct DynamicAnimation<'a> {
@@ -17,7 +17,7 @@ pub struct DynamicAnimation<'a> {
     current_index: usize,
 }
 
-impl <'a> Iterator for DynamicAnimation<'a> {
+impl<'a> Iterator for DynamicAnimation<'a> {
     type Item = AnimationFrame;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -28,9 +28,12 @@ impl <'a> Iterator for DynamicAnimation<'a> {
     }
 }
 
-impl <'a> DynamicAnimation<'a> {
+impl<'a> DynamicAnimation<'a> {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(connection: &'a ApiConnection, hold_time: &Duration) -> Result<Self, failure::Error> {
+    pub fn new(
+        connection: &'a ApiConnection,
+        hold_time: &Duration,
+    ) -> Result<Self, failure::Error> {
         Ok(Self {
             connection,
             hold_time: *hold_time,
@@ -64,7 +67,11 @@ pub struct DynamicAnimationStep {
 }
 
 impl DynamicAnimationStep {
-    pub fn as_animation_frame(&self, lights: &LightCollection, hold_time: &Duration) -> AnimationFrame {
+    pub fn as_animation_frame(
+        &self,
+        lights: &LightCollection,
+        hold_time: &Duration,
+    ) -> AnimationFrame {
         let mut states: HashMap<LightNumber, LightState> = HashMap::new();
 
         for (light_num, transform) in &self.transforms {

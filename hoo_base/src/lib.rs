@@ -63,7 +63,6 @@ impl Hoo<StandardApiConnection> {
         let config = HooConfig::from_file(file_path)?;
         Ok(Self::with_config(config))
     }
-
 }
 
 impl Hoo<TestingApiConnection> {
@@ -157,7 +156,8 @@ impl<T: ApiConnection> Hoo<T> {
                         Some(anim) => {
                             let frame = anim.next();
                             if let Some(frame) = frame {
-                                let delay = frame.transition_time.unwrap_or(Duration::from_secs(0)) + frame.hold_time;
+                                let delay = frame.transition_time.unwrap_or(Duration::from_secs(0))
+                                    + frame.hold_time;
                                 next_frame_time = Some(now + delay);
                                 for state in frame.states {
                                     let _ = self.connection.set_state(state.0, &state.1);

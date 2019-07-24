@@ -3,9 +3,9 @@ use structopt::StructOpt;
 
 use std::error::Error;
 
+use hoo_base::{Hoo, HooConfig};
 use std::path::PathBuf;
 use std::thread;
-use hoo_base::{Hoo, HooConfig};
 
 pub use server::HooServer;
 

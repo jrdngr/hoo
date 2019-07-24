@@ -1,10 +1,10 @@
-use std::time::Duration;
 use std::collections::HashMap;
+use std::time::Duration;
 
 use hoo_api::light::{LightNumber, LightState};
 
-pub mod dynamic;
 pub mod builtins;
+pub mod dynamic;
 pub mod looping;
 
 pub use self::dynamic::DynamicAnimation;
