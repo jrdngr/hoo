@@ -6,6 +6,7 @@
 
 ## Hoo Base
 - [ ] Add easier ways to build light states and animations
+    - [ ] Macro for builder?
 - [ ] Make animations asynchronous
 - [ ] Enhance Color struct
     - [ ] Check out `palette` crate
@@ -13,6 +14,7 @@
     - [ ] Add more options for argument types in constructors (u8 for rgb)
     - [ ] RGB conversions might be broken
     - [ ] Unify colors throughout modules
+- [ ] Add ability to save states and animations. Maybe SQLite?
 
 ## Hoo Server
 - [ ] Make fake api
@@ -27,4 +29,5 @@
 - [ ] Make everything not ugly
 
 ## Hue Api
+- [ ] LightCollection shouldn’t act like a tuple. Type alias or test out Deref
 - [ ] Try out GraphQL
