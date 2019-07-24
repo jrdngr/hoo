@@ -13,7 +13,8 @@ pub fn create_random_animation<'a> (
 ) -> Result<DynamicAnimation<'a>, failure::Error> {
     let mut animation = DynamicAnimation::new(connection, hold_time)?;
 
-    let transition_millis = (transition_time.as_secs() * 1000 + u64::from(transition_time.subsec_millis())) as u16;
+    let transition_millis = transition_time.as_secs() * 1000 + u64::from(transition_time.subsec_millis());
+    let transition_hue_units = (transition_millis / 100) as u16;
 
     let lights = connection.get_active_lights()?.clone();
     
@@ -21,7 +22,7 @@ pub fn create_random_animation<'a> (
     for light_num in lights.0.keys() {
         let transform = LightStateTransform {
             hue: Some(LightStateValueOperation::Set(LightStateValue::Random)),
-            transition_time: Some(LightStateValueOperation::Set(LightStateValue::Constant(transition_millis))),
+            transition_time: Some(LightStateValueOperation::Set(LightStateValue::Constant(transition_hue_units))),
             ..Default::default()
         };
 
