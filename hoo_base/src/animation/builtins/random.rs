@@ -43,7 +43,6 @@ pub fn create_random_animation<'a>(
     Ok(animation)
 }
 
-
 // pub fn create_random_animation_ideal<'a>(
 //     connection: &'a ApiConnection,
 //     transition_time: &Duration,
@@ -54,8 +53,8 @@ pub fn create_random_animation<'a>(
 //             .hold_time(hold_time)
 //             .transition_time(transition_time)
 //             .all_lights([
-//                 Hue::Random, 
-//                 Sat::RandomRange(200, 255)
+//                 Hue::set(Value::Random), 
+//                 Sat::set(Value::RandomRange(200, 255))
 //             ])
 //             .build()
 //         )
