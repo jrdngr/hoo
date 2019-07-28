@@ -6,12 +6,14 @@ use crate::animation::AnimationFrame;
 use hoo_api::light::{LightCollection, LightNumber, LightState};
 use hoo_api::ApiConnection;
 
-pub mod value;
 pub mod operation;
+pub mod producer;
 pub mod transform;
 
-pub use value::LightStateValue;
-pub use operation::{LightOnStateOperation, LightStateValueOperation, LightStateValueFunction};
+pub use operation::{LightOnStateOperation, LightStateValueFunction, LightStateValueOperation};
+pub use producer::{
+    BoxedValueProducer, ConstantProducer, RandomProducer, RandomRangeProducer, ValueProducer,
+};
 pub use transform::LightStateTransform;
 
 pub struct DynamicAnimation<'a> {
@@ -59,7 +61,7 @@ impl<'a> DynamicAnimation<'a> {
             self.current_index = 0;
         }
 
-        let next_step = &self.steps[self.current_index];
+        let next_step = &mut self.steps[self.current_index];
         self.current_index += 1;
 
         next_step.as_animation_frame(lights, &self.hold_time)
@@ -72,13 +74,13 @@ pub struct DynamicAnimationStep {
 
 impl DynamicAnimationStep {
     pub fn as_animation_frame(
-        &self,
+        &mut self,
         lights: &LightCollection,
         hold_time: &Duration,
     ) -> AnimationFrame {
         let mut states: HashMap<LightNumber, LightState> = HashMap::new();
 
-        for (light_num, transform) in &self.transforms {
+        for (light_num, transform) in &mut self.transforms {
             if lights.0.contains_key(&light_num) {
                 let new_state = transform.create_light_state(*light_num, lights);
                 states.insert(*light_num, new_state);

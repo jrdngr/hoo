@@ -1,7 +1,6 @@
-use hoo_api::{LightNumber, LightCollection, LightState};
+use hoo_api::{LightCollection, LightNumber, LightState};
 
 use crate::animation::dynamic::{LightOnStateOperation, LightStateValueOperation};
-
 
 #[derive(Default)]
 pub struct LightStateTransform {
@@ -14,7 +13,7 @@ pub struct LightStateTransform {
 
 impl LightStateTransform {
     pub fn create_light_state(
-        &self,
+        &mut self,
         light_num: LightNumber,
         previous_states: &LightCollection,
     ) -> LightState {
@@ -27,28 +26,28 @@ impl LightStateTransform {
             )
         });
 
-        let transitiontime = self.transition_time.as_ref().and_then(|op| {
+        let transitiontime = self.transition_time.as_mut().and_then(|op| {
             op.process(
                 previous_states,
                 previous_state.and_then(|light| light.state.transitiontime),
             )
         });
 
-        let hue = self.hue.as_ref().and_then(|op| {
+        let hue = self.hue.as_mut().and_then(|op| {
             op.process(
                 previous_states,
                 previous_state.and_then(|light| light.state.hue),
             )
         });
 
-        let sat = self.saturation.as_ref().and_then(|op| {
+        let sat = self.saturation.as_mut().and_then(|op| {
             op.process(
                 previous_states,
                 previous_state.and_then(|light| light.state.sat),
             )
         });
 
-        let bri = self.brightness.as_ref().and_then(|op| {
+        let bri = self.brightness.as_mut().and_then(|op| {
             op.process(
                 previous_states,
                 previous_state.and_then(|light| light.state.bri),

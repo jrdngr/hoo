@@ -5,8 +5,8 @@ use hoo_api::light::LightNumber;
 use hoo_api::ApiConnection;
 
 use crate::animation::dynamic::{
-    DynamicAnimation, DynamicAnimationStep, LightStateTransform, LightStateValue,
-    LightStateValueOperation,
+    ConstantProducer, DynamicAnimation, DynamicAnimationStep, LightStateTransform,
+    LightStateValueOperation, RandomProducer, RandomRangeProducer,
 };
 
 pub fn create_random_animation<'a>(
@@ -25,9 +25,11 @@ pub fn create_random_animation<'a>(
     let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
     for light_num in lights.0.keys() {
         let transform = LightStateTransform {
-            hue: Some(LightStateValueOperation::Set(LightStateValue::Random)),
-            saturation: Some(LightStateValueOperation::Set(LightStateValue::RandomRange(200, 255))),
-            transition_time: Some(LightStateValueOperation::Set(LightStateValue::Constant(
+            hue: Some(LightStateValueOperation::Set(RandomProducer::new())),
+            saturation: Some(LightStateValueOperation::Set(RandomRangeProducer::new(
+                200, 255,
+            ))),
+            transition_time: Some(LightStateValueOperation::Set(ConstantProducer::new(
                 transition_hue_units,
             ))),
             ..Default::default()
@@ -53,7 +55,7 @@ pub fn create_random_animation<'a>(
 //             .hold_time(hold_time)
 //             .transition_time(transition_time)
 //             .all_lights([
-//                 Hue::set(Value::Random), 
+//                 Hue::set(Value::Random),
 //                 Sat::set(Value::RandomRange(200, 255))
 //             ])
 //             .build()

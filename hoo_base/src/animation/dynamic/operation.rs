@@ -5,7 +5,7 @@ use std::ops::{Add, Mul};
 
 use hoo_api::light::LightCollection;
 
-use crate::animation::dynamic::LightStateValue;
+use crate::animation::dynamic::BoxedValueProducer;
 
 pub enum LightOnStateOperation {
     Set(bool),
@@ -28,17 +28,18 @@ impl LightOnStateOperation {
         }
     }
 }
+
 pub type LightStateValueFunction<T> =
-    Box<dyn Fn(&LightCollection, Option<T>) -> Option<LightStateValue<T>>>;
+    Box<dyn Fn(&LightCollection, Option<T>) -> Option<BoxedValueProducer<T>>>;
 
 pub enum LightStateValueOperation<T>
 where
     T: Clone + Add + Mul + SampleUniform,
     Standard: Distribution<T>,
 {
-    Set(LightStateValue<T>),
-    Add(LightStateValue<T>),
-    Multiply(LightStateValue<T>),
+    Set(BoxedValueProducer<T>),
+    Add(BoxedValueProducer<T>),
+    Multiply(BoxedValueProducer<T>),
     Apply(LightStateValueFunction<T>),
 }
 
@@ -48,20 +49,20 @@ where
     Standard: Distribution<T>,
 {
     pub fn process(
-        &self,
+        &mut self,
         previous_states: &LightCollection,
         previous_value: Option<T>,
     ) -> Option<T> {
         match self {
-            LightStateValueOperation::Set(value) => Some(value.generate()),
+            LightStateValueOperation::Set(value) => Some(value.produce()),
             LightStateValueOperation::Add(value) => {
-                previous_value.map(|previous| previous.clone() + value.generate())
+                previous_value.map(|previous| previous.clone() + value.produce())
             }
             LightStateValueOperation::Multiply(value) => {
-                previous_value.map(|previous| previous.clone() * value.generate())
+                previous_value.map(|previous| previous.clone() * value.produce())
             }
             LightStateValueOperation::Apply(func) => {
-                func(previous_states, previous_value).map(|value| value.generate())
+                func(previous_states, previous_value).map(|mut value| value.produce())
             }
         }
     }
