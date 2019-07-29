@@ -5,7 +5,7 @@ use std::ops::{Add, Mul};
 
 use hoo_api::light::LightCollection;
 
-use crate::animation::dynamic::BoxedValueProducer;
+use crate::animation::dynamic::ValueProducer;
 
 pub enum LightOnStateOperation {
     Set(bool),
@@ -30,16 +30,16 @@ impl LightOnStateOperation {
 }
 
 pub type LightStateValueFunction<T> =
-    Box<dyn Fn(&LightCollection, Option<T>) -> Option<BoxedValueProducer<T>>>;
+    Box<dyn Fn(&LightCollection, Option<T>) -> Option<Box<ValueProducer<T>>>>;
 
 pub enum LightStateValueOperation<T>
 where
     T: Clone + Add + Mul + SampleUniform,
     Standard: Distribution<T>,
 {
-    Set(BoxedValueProducer<T>),
-    Add(BoxedValueProducer<T>),
-    Multiply(BoxedValueProducer<T>),
+    Set(Box<ValueProducer<T>>),
+    Add(Box<ValueProducer<T>>),
+    Multiply(Box<ValueProducer<T>>),
     Apply(LightStateValueFunction<T>),
 }
 

@@ -1,10 +1,20 @@
 use rand::distributions::{uniform::SampleUniform, Distribution, Standard};
 use rand::{thread_rng, Rng};
 
-pub type BoxedValueProducer<T> = Box<ValueProducer<T>>;
-
 pub trait ValueProducer<T> {
     fn produce(&mut self) -> T;
+}
+
+pub fn constant<T: Clone>(value: T) -> Box<ConstantProducer<T>> {
+    Box::new(ConstantProducer { value })
+}
+
+pub fn random<T>() -> Box<RandomProducer> {
+    Box::new(RandomProducer)
+}
+
+pub fn random_range<T>(min: T, max: T) -> Box<RandomRangeProducer<T>> {
+    Box::new(RandomRangeProducer { min, max })
 }
 
 #[derive(Debug, Clone)]
@@ -13,8 +23,8 @@ pub struct ConstantProducer<T> {
 }
 
 impl<T> ConstantProducer<T> {
-    pub fn new(value: T) -> Box<Self> {
-        Box::new(Self { value })
+    pub fn new(value: T) -> Self {
+        Self { value }
     }
 }
 
@@ -24,12 +34,12 @@ impl<T: Clone> ValueProducer<T> for ConstantProducer<T> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct RandomProducer;
 
 impl RandomProducer {
-    pub fn new() -> Box<Self> {
-        Box::new(RandomProducer)
+    pub fn new() -> Self {
+        RandomProducer
     }
 }
 
@@ -49,8 +59,8 @@ pub struct RandomRangeProducer<T> {
 }
 
 impl<T> RandomRangeProducer<T> {
-    pub fn new(min: T, max: T) -> Box<Self> {
-        Box::new(Self { min, max })
+    pub fn new(min: T, max: T) -> Self {
+        Self { min, max }
     }
 }
 

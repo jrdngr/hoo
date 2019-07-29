@@ -12,7 +12,7 @@ pub mod transform;
 
 pub use operation::{LightOnStateOperation, LightStateValueFunction, LightStateValueOperation};
 pub use producer::{
-    BoxedValueProducer, ConstantProducer, RandomProducer, RandomRangeProducer, ValueProducer,
+    ConstantProducer, RandomProducer, RandomRangeProducer, ValueProducer,
 };
 pub use transform::LightStateTransform;
 
