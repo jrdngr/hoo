@@ -10,7 +10,7 @@ pub mod operation;
 pub mod producer;
 pub mod transform;
 
-pub use operation::{LightOnStateOperation, LightStateValueFunction, LightStateValueOperation};
+pub use operation::Operation;
 pub use producer::{
     ConstantProducer, RandomProducer, RandomRangeProducer, ValueProducer,
 };

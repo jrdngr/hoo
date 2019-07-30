@@ -6,7 +6,7 @@ use hoo_api::ApiConnection;
 
 use crate::animation::dynamic::{
     DynamicAnimation, DynamicAnimationStep, LightStateTransform,
-    LightStateValueOperation, producer::{constant, random, random_range},
+    Operation, producer::{constant, random, random_range},
 };
 
 pub fn create_random_animation<'a>(
@@ -25,9 +25,9 @@ pub fn create_random_animation<'a>(
     let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
     for light_num in lights.0.keys() {
         let transform = LightStateTransform {
-            hue: Some(LightStateValueOperation::Set(random::<u16>())),
-            saturation: Some(LightStateValueOperation::Set(random_range(200, 255))),
-            transition_time: Some(LightStateValueOperation::Set(constant(transition_hue_units))),
+            hue: Some(Operation::Set(random::<u16>())),
+            saturation: Some(Operation::Set(random_range(200, 255))),
+            transition_time: Some(Operation::Set(constant(transition_hue_units))),
             ..Default::default()
         };
 
