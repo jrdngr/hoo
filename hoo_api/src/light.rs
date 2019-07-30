@@ -5,9 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::color::Color;
 
 pub type LightNumber = u8;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LightCollection(pub HashMap<LightNumber, Light>);
+pub type LightCollection = HashMap<LightNumber, Light>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Light {

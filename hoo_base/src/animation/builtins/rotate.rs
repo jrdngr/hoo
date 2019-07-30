@@ -15,7 +15,7 @@ impl RotateAnimation {
         transition_time: &Duration,
         hold_time: &Duration,
     ) -> Result<Self, failure::Error> {
-        let all_lights = connection.get_active_lights()?.0;
+        let all_lights = connection.get_active_lights()?;
 
         let mut active_lights = Vec::new();
         let mut light_states = Vec::new();

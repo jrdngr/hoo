@@ -33,10 +33,9 @@ impl TestingApiConnection {
                 state: light_state,
             };
 
-            let mut collection_map = HashMap::new();
-            collection_map.insert(1, light);
+            let mut collection = HashMap::new();
+            collection.insert(1, light);
 
-            let collection = LightCollection(collection_map);
             let connection = Self { file_path: path };
 
             connection.set_local_state(collection)?;
@@ -47,7 +46,7 @@ impl TestingApiConnection {
 
     pub fn get_local_state(&self) -> Result<LightCollection, failure::Error> {
         if !self.file_path.exists() {
-            return Ok(LightCollection(HashMap::new()));
+            return Ok(HashMap::new());
         }
 
         let file = File::open(&self.file_path)?;
@@ -74,16 +73,15 @@ impl ApiConnection for TestingApiConnection {
     fn get_active_lights(&self) -> Result<LightCollection, failure::Error> {
         let active_lights: HashMap<u8, Light> = self
             .get_all_lights()?
-            .0
             .into_iter()
             .filter(|(_, l)| l.state.is_on() && l.state.is_reachable())
             .collect();
 
-        Ok(LightCollection(active_lights))
+        Ok(active_lights)
     }
 
     fn get_light(&self, light_number: u8) -> Result<Light, failure::Error> {
-        let all_lights = self.get_all_lights()?.0;
+        let all_lights = self.get_all_lights()?;
         let light = all_lights
             .get(&light_number)
             .ok_or_else(|| format_err!("Light {} not found", &light_number))?;
@@ -96,7 +94,7 @@ impl ApiConnection for TestingApiConnection {
         light.state = LightState::combine(&light.state, state);
 
         let mut all_lights = self.get_local_state()?;
-        all_lights.0.insert(light_number, light);
+        all_lights.insert(light_number, light);
         self.set_local_state(all_lights)?;
 
         Ok(format!("Light number {} state set", &light_number))

@@ -23,7 +23,7 @@ pub fn create_random_animation<'a>(
     let lights = connection.get_active_lights()?.clone();
 
     let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
-    for light_num in lights.0.keys() {
+    for light_num in lights.keys() {
         let transform = LightStateTransform {
             hue: Some(Operation::Set(random::<u16>())),
             saturation: Some(Operation::Set(random_range(200, 255))),

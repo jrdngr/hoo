@@ -81,7 +81,7 @@ impl DynamicAnimationStep {
         let mut states: HashMap<LightNumber, LightState> = HashMap::new();
 
         for (light_num, transform) in &mut self.transforms {
-            if lights.0.contains_key(&light_num) {
+            if lights.contains_key(&light_num) {
                 let new_state = transform.create_light_state(*light_num, lights);
                 states.insert(*light_num, new_state);
             }

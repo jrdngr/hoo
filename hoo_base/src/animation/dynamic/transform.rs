@@ -17,7 +17,7 @@ impl LightStateTransform {
         light_num: LightNumber,
         previous_states: &LightCollection,
     ) -> LightState {
-        let previous_state = previous_states.0.get(&light_num);
+        let previous_state = previous_states.get(&light_num);
 
         let on = self.on.as_mut().and_then(|op| {
             op.apply(

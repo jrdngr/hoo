@@ -36,12 +36,11 @@ impl ApiConnection for StandardApiConnection {
     fn get_active_lights(&self) -> Result<LightCollection, failure::Error> {
         let active_lights: HashMap<u8, Light> = self
             .get_all_lights()?
-            .0
             .into_iter()
             .filter(|(_, l)| l.state.is_on() && l.state.is_reachable())
             .collect();
 
-        Ok(LightCollection(active_lights))
+        Ok(active_lights)
     }
 
     fn get_light(&self, light_number: u8) -> Result<Light, failure::Error> {
