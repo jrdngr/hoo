@@ -1,6 +1,8 @@
 use rand::distributions::{uniform::SampleUniform, Distribution, Standard};
 use rand::{thread_rng, Rng};
 
+pub type BoxedValueProducer<T> = Box<ValueProducer<T>>;
+
 pub trait ValueProducer<T> {
     fn produce(&mut self) -> T;
 }

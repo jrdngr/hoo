@@ -1,20 +1,19 @@
-use std::collections::HashMap;
 use std::time::Duration;
 
 use crate::animation::AnimationFrame;
 
-use hoo_api::light::{LightCollection, LightNumber, LightState};
+use hoo_api::light::{LightCollection, LightNumber};
 use hoo_api::ApiConnection;
 
-pub mod operation;
+pub mod configurable_value;
 pub mod producer;
 pub mod transform;
 
-pub use operation::Operation;
+pub use configurable_value::ConfigurableValue;
 pub use producer::{
-    ConstantProducer, RandomProducer, RandomRangeProducer, ValueProducer,
+    BoxedValueProducer, ConstantProducer, RandomProducer, RandomRangeProducer, ValueProducer,
 };
-pub use transform::LightStateTransform;
+pub use transform::transform;
 
 pub struct DynamicAnimation<'a> {
     connection: &'a ApiConnection,
@@ -28,7 +27,7 @@ impl<'a> Iterator for DynamicAnimation<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.connection.get_active_lights() {
-            Ok(lights) => Some(self.next_frame(&lights)),
+            Ok(lights) => Some(self.next_frame(lights)),
             Err(_) => None,
         }
     }
@@ -52,7 +51,7 @@ impl<'a> DynamicAnimation<'a> {
         self.steps.push(step);
     }
 
-    pub fn next_frame(&mut self, lights: &LightCollection) -> AnimationFrame {
+    pub fn next_frame(&mut self, lights: LightCollection) -> AnimationFrame {
         if self.steps.is_empty() {
             return Default::default();
         }
@@ -69,27 +68,20 @@ impl<'a> DynamicAnimation<'a> {
 }
 
 pub struct DynamicAnimationStep {
-    pub transforms: HashMap<LightNumber, LightStateTransform>,
+    pub operations: Vec<(LightNumber, ConfigurableValue)>,
 }
 
 impl DynamicAnimationStep {
     pub fn as_animation_frame(
         &mut self,
-        lights: &LightCollection,
+        lights: LightCollection,
         hold_time: &Duration,
     ) -> AnimationFrame {
-        let mut states: HashMap<LightNumber, LightState> = HashMap::new();
-
-        for (light_num, transform) in &mut self.transforms {
-            if lights.contains_key(&light_num) {
-                let new_state = transform.create_light_state(*light_num, lights);
-                states.insert(*light_num, new_state);
-            }
-        }
+        let states = transform(lights, &mut self.operations);
 
         AnimationFrame {
             hold_time: *hold_time,
-            transition_time: None,
+            transition_time: Some(Duration::from_secs(5)),
             states,
         }
     }

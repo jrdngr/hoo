@@ -1,66 +1,22 @@
+use std::collections::HashMap;
+
 use hoo_api::{LightCollection, LightNumber, LightState};
 
-use crate::animation::dynamic::Operation;
+use crate::animation::dynamic::ConfigurableValue;
 
-#[derive(Default)]
-pub struct LightStateTransform {
-    pub on: Option<Operation<bool>>,
-    pub transition_time: Option<Operation<u16>>,
-    pub hue: Option<Operation<u16>>,
-    pub saturation: Option<Operation<u8>>,
-    pub brightness: Option<Operation<u8>>,
-}
+pub fn transform(
+    mut lights: LightCollection,
+    operations: &mut [(LightNumber, ConfigurableValue)],
+) -> HashMap<LightNumber, LightState> {
+    let mut result = HashMap::new();
 
-impl LightStateTransform {
-    pub fn create_light_state(
-        &mut self,
-        light_num: LightNumber,
-        previous_states: &LightCollection,
-    ) -> LightState {
-        let previous_state = previous_states.get(&light_num);
-
-        let on = self.on.as_mut().and_then(|op| {
-            op.apply(
-                previous_states,
-                previous_state.and_then(|light| light.state.on),
-            )
-        });
-
-        let transitiontime = self.transition_time.as_mut().and_then(|op| {
-            op.apply(
-                previous_states,
-                previous_state.and_then(|light| light.state.transitiontime),
-            )
-        });
-
-        let hue = self.hue.as_mut().and_then(|op| {
-            op.apply(
-                previous_states,
-                previous_state.and_then(|light| light.state.hue),
-            )
-        });
-
-        let sat = self.saturation.as_mut().and_then(|op| {
-            op.apply(
-                previous_states,
-                previous_state.and_then(|light| light.state.sat),
-            )
-        });
-
-        let bri = self.brightness.as_mut().and_then(|op| {
-            op.apply(
-                previous_states,
-                previous_state.and_then(|light| light.state.bri),
-            )
-        });
-
-        LightState {
-            on,
-            transitiontime,
-            hue,
-            sat,
-            bri,
-            ..Default::default()
-        }
+    for (light_num, operation) in operations {
+        operation.apply(&mut lights, *light_num);
     }
+
+    for (light_num, light) in lights {
+        result.insert(light_num, light.state);
+    }
+
+    result
 }

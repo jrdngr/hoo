@@ -1,19 +1,18 @@
-use std::collections::HashMap;
 use std::time::Duration;
 
 use hoo_api::light::LightNumber;
 use hoo_api::ApiConnection;
 
-use crate::animation::dynamic::{
-    DynamicAnimation, DynamicAnimationStep, LightStateTransform,
-    Operation, producer::{constant, random, random_range},
-};
+use crate::animation::dynamic::producer::{constant, random, random_range};
+use crate::animation::dynamic::{ConfigurableValue, DynamicAnimation, DynamicAnimationStep};
 
 pub fn create_random_animation<'a>(
     connection: &'a ApiConnection,
     transition_time: &Duration,
     hold_time: &Duration,
 ) -> Result<DynamicAnimation<'a>, failure::Error> {
+    use ConfigurableValue::*;
+
     let mut animation = DynamicAnimation::new(connection, hold_time)?;
 
     let transition_millis =
@@ -22,19 +21,14 @@ pub fn create_random_animation<'a>(
 
     let lights = connection.get_active_lights()?.clone();
 
-    let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
+    let mut operations: Vec<(LightNumber, ConfigurableValue)> = Vec::new();
     for light_num in lights.keys() {
-        let transform = LightStateTransform {
-            hue: Some(Operation::Set(random::<u16>())),
-            saturation: Some(Operation::Set(random_range(200, 255))),
-            transition_time: Some(Operation::Set(constant(transition_hue_units))),
-            ..Default::default()
-        };
-
-        transforms.insert(*light_num, transform);
+        operations.push((*light_num, Hue(random::<u16>())));
+        operations.push((*light_num, Saturation(random_range(200, 255))));
+        operations.push((*light_num, TransitionTime(constant(transition_hue_units))));
     }
 
-    let step = DynamicAnimationStep { transforms };
+    let step = DynamicAnimationStep { operations };
 
     animation.animation_step(step);
 
