@@ -5,6 +5,7 @@
     - [ ] Should be easy to run on pi after building
 
 ## Hoo Base
+- [ ] Revert state to previous setting on stop
 - [ ] Add easier ways to build light states and animations
     - [ ] Macro for builder?
 - [ ] Make animations asynchronous
