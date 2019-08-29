@@ -112,6 +112,7 @@ impl<T: ApiConnection> Hoo<T> {
                         let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::State(light_num, state) => {
+                        dbg!(&state);
                         let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::Rotate(tt, ht) => {
@@ -164,8 +165,8 @@ impl<T: ApiConnection> Hoo<T> {
                 if now >= time {
                     match &mut animation {
                         Some(anim) => {
-                            let frame = anim.next();
-                            if let Some(frame) = frame {
+                            if let Some(frame) = anim.next() {
+                                // dbg!(&frame);
                                 let delay = frame.transition_time.unwrap_or(Duration::from_secs(0))
                                     + frame.hold_time;
                                 next_frame_time = Some(now + delay);

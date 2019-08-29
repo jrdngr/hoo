@@ -15,6 +15,8 @@ impl ConfigurableValue {
         use ConfigurableValue::*;
 
         if let Some(light) = lights.get_mut(&light_num) {
+            light.state.reset_colormode();
+
             match self {
                 On(val) => light.state.on = Some(val.produce()),
                 Hue(val) => light.state.hue = Some(val.produce()),
