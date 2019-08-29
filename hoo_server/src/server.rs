@@ -19,6 +19,8 @@ pub struct HooServer;
 
 impl HooServer {
     pub fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<(), std::io::Error> {
+        println!("Running Hoo server at: {}", config.hoo_server_socket_uri);
+
         HttpServer::new(move || {
             App::new()
                 .wrap(

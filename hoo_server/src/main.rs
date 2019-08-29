@@ -12,7 +12,7 @@ pub use server::HooServer;
 pub mod options;
 pub mod server;
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let options = options::Options::from_args();
 
     if let Some(file_path) = options.from_file {
@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<Error>> {
     }
 }
 
-fn run_test_server(file_path: PathBuf) -> Result<(), Box<Error>> {
+fn run_test_server(file_path: PathBuf) -> Result<(), Box<dyn Error>> {
     let (hoo, sender) = Hoo::from_file(file_path);
     let config = hoo.config().clone();
 
@@ -49,7 +49,7 @@ fn run_test_server(file_path: PathBuf) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn write_default_config_file() -> Result<(), Box<Error>> {
+fn write_default_config_file() -> Result<(), Box<dyn Error>> {
     let config = HooConfig::default();
     config.write_default_file()?;
     Ok(())
