@@ -11,7 +11,7 @@ pub struct RotateAnimation {
 impl RotateAnimation {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
-        connection: &ApiConnection,
+        connection: &dyn ApiConnection,
         transition_time: &Duration,
         hold_time: &Duration,
     ) -> Result<Self, failure::Error> {

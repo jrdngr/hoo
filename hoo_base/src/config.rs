@@ -43,7 +43,7 @@ impl HooConfig {
         Self::from_env()
     }
 
-    pub fn from_file<P: AsRef<Path>>(file_path: P) -> Result<Self, Box<Error>> {
+    pub fn from_file<P: AsRef<Path>>(file_path: P) -> Result<Self, Box<dyn Error>> {
         let file = File::open(file_path)?;
         let reader = BufReader::new(file);
 
@@ -52,11 +52,11 @@ impl HooConfig {
         Ok(config)
     }
 
-    pub fn from_default_file() -> Result<Self, Box<Error>> {
+    pub fn from_default_file() -> Result<Self, Box<dyn Error>> {
         Self::from_file(DEFAULT_CONFIG_FILE_PATH)
     }
 
-    pub fn write_file<P: AsRef<Path> + Debug>(&self, file_path: P) -> Result<(), Box<Error>> {
+    pub fn write_file<P: AsRef<Path> + Debug>(&self, file_path: P) -> Result<(), Box<dyn Error>> {
         if file_path.as_ref().exists() {
             println!("File already exists: {:?}", &file_path);
             return Ok(());
@@ -70,7 +70,7 @@ impl HooConfig {
         Ok(())
     }
 
-    pub fn write_default_file(&self) -> Result<(), Box<Error>> {
+    pub fn write_default_file(&self) -> Result<(), Box<dyn Error>> {
         self.write_file(DEFAULT_CONFIG_FILE_PATH)
     }
 }

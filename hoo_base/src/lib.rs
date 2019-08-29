@@ -60,7 +60,7 @@ impl Hoo<StandardApiConnection> {
 
     pub fn with_config_file<P: AsRef<Path>>(
         file_path: P,
-    ) -> Result<(Self, Sender<HooCommand>), Box<Error>> {
+    ) -> Result<(Self, Sender<HooCommand>), Box<dyn Error>> {
         let config = HooConfig::from_file(file_path)?;
         Ok(Self::with_config(config))
     }

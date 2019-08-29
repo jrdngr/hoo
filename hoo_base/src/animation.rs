@@ -10,7 +10,7 @@ pub mod looping;
 pub use self::dynamic::DynamicAnimation;
 pub use self::looping::LoopingAnimation;
 
-pub type Animation = Iterator<Item = AnimationFrame>;
+pub type Animation = dyn Iterator<Item = AnimationFrame>;
 
 #[derive(Debug, Default, Clone)]
 pub struct AnimationFrame {
