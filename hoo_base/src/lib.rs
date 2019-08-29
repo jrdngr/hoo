@@ -4,6 +4,7 @@ use std::path::Path;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
+use crate::animation::builtins::sleepy_random::create_sleepy_random_animation;
 use crate::animation::builtins::random::create_random_animation;
 use crate::animation::builtins::rotate::RotateAnimation;
 use crate::animation::AnimationFrame;
@@ -131,6 +132,15 @@ impl<T: ApiConnection> Hoo<T> {
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());
                     }
+                    HooCommand::SleepyRandom(tt, ht) => {
+                        let transition_time = Duration::from_secs(u64::from(tt));
+                        let hold_time = Duration::from_secs(u64::from(ht));
+                        let anim =
+                            create_sleepy_random_animation(&self.connection, &transition_time, &hold_time)
+                                .unwrap();
+                        animation = Some(Box::new(anim));
+                        next_frame_time = Some(Instant::now());
+                    }
                     HooCommand::StopAnimation => next_frame_time = None,
                     HooCommand::GetLight(light_num, sender) => {
                         let response = self.connection.get_light(light_num);
@@ -190,6 +200,7 @@ pub enum HooCommand {
     Rotate(TransitionTime, HoldTime),
     Rainbow(Duration),
     Random(TransitionTime, HoldTime),
+    SleepyRandom(TransitionTime, HoldTime),
     StopAnimation,
     GetLight(LightNumber, Sender<Light>),
     GetAllLights(Sender<LightCollection>),
