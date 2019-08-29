@@ -41,6 +41,10 @@ impl HooServer {
                             web::resource("/random/{trans_time}/{hold_time}")
                                 .route(web::get().to(random)),
                         )
+                        .service(
+                            web::resource("/sleepy/{trans_time}/{hold_time}")
+                                .route(web::get().to(sleepy)),
+                        )
                         .service(web::resource("/animate").route(web::post().to(animate)))
                         .service(
                             web::resource("/light/{light_num}").route(web::get().to(get_light)),
@@ -102,6 +106,11 @@ fn rotate(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
 
 fn random(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Random(info.0, info.1));
+    HttpResponse::Ok().json(HooResponse::default())
+}
+
+fn sleepy(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
+    let _ = state.sender.send(HooCommand::SleepyRandom(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 

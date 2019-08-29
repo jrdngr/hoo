@@ -3,6 +3,7 @@
     <div class="control">
       <button @click="rotate">Rotate</button>
       <button @click="random">Random</button>
+      <button @click="sleepy">Sleepy Random</button>
       <button @click="stop">Stop</button>
     </div>
     <div class="control">
@@ -38,6 +39,9 @@ export default Vue.extend({
         },
         async random(event: any) {
             await AnimationApi.random(this.transitionTime, this.holdTime);
+        },
+        async sleepy(event: any) {
+            await AnimationApi.sleepy(this.transitionTime, this.holdTime);
         },
         async stop(event: any) {
             await AnimationApi.stop();
