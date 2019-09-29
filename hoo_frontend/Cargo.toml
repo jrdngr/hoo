@@ -8,5 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wasm-bindgen = "^0.2"
+hoo_api_types = { path = "../hoo_api_types" }
+failure = "0.1.5"
 yew = "0.9.0"
+wasm-bindgen = "^0.2"

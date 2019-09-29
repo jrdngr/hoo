@@ -1,3 +1,4 @@
+mod api;
 mod app;
 
 use wasm_bindgen::prelude::*;
