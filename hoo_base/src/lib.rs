@@ -112,7 +112,6 @@ impl<T: ApiConnection> Hoo<T> {
                         let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::State(light_num, state) => {
-                        dbg!(&state);
                         let _ = self.connection.set_state(light_num, &state);
                     }
                     HooCommand::Rotate(tt, ht) => {

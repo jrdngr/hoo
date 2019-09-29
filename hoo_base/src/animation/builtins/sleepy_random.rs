@@ -23,7 +23,7 @@ pub fn create_sleepy_random_animation<'a>(
 
     let mut operations: Vec<(LightNumber, ConfigurableValue)> = Vec::new();
     for light_num in lights.keys() {
-        operations.push((*light_num, Hue(random_range(15000, 65535))));
+        operations.push((*light_num, Hue(random_range(35000, 48000))));
         operations.push((*light_num, Saturation(random_range(200, 255))));
         operations.push((*light_num, TransitionTime(constant(transition_hue_units))));
     }
