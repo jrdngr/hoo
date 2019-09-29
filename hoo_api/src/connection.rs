@@ -1,4 +1,4 @@
-use crate::light::{Light, LightCollection, LightState};
+use hoo_api_types::{Light, LightCollection, LightState};
 
 pub mod standard;
 pub mod testing;

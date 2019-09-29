@@ -9,11 +9,11 @@ use crate::animation::builtins::random::create_random_animation;
 use crate::animation::builtins::rotate::RotateAnimation;
 use crate::animation::AnimationFrame;
 
-use hoo_api::color::Color;
+use hoo_api_types::Color;
 use hoo_api::connection::standard::StandardApiConnection;
 use hoo_api::connection::testing::TestingApiConnection;
 
-use hoo_api::light::{Light, LightCollection, LightState};
+use hoo_api_types::{Light, LightCollection, LightState};
 use hoo_api::ApiConnection;
 
 pub use crate::config::HooConfig;

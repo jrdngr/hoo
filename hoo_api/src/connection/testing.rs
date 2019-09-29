@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use failure::format_err;
 
 use crate::connection::ApiConnection;
-use crate::light::{Light, LightCollection, LightEffect, LightState};
+use hoo_api_types::{Light, LightCollection, LightEffect, LightState};
 
 pub struct TestingApiConnection {
     file_path: PathBuf,

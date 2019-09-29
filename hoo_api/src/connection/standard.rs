@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::connection::ApiConnection;
-use crate::light::{Light, LightCollection, LightEffect, LightState};
+use hoo_api_types::{Light, LightCollection, LightEffect, LightState};
 
 pub struct StandardApiConnection {
     pub client: reqwest::Client,

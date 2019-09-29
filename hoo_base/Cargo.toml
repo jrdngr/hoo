@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 hoo_api = { path = "../hoo_api" }
+hoo_api_types = { path = "../hoo_api_types" }
 actix = "0.7.9"
 chrono = "0.4"
 dotenv = "0.13.0"

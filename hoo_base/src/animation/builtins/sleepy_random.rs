@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use hoo_api::light::LightNumber;
+use hoo_api_types::LightNumber;
 use hoo_api::ApiConnection;
 
 use crate::animation::dynamic::producer::{constant, random_range};

@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::animation::AnimationFrame;
 
-use hoo_api::light::{LightCollection, LightNumber};
+use hoo_api_types::{LightCollection, LightNumber};
 use hoo_api::ApiConnection;
 
 pub mod configurable_value;

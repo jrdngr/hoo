@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::animation::{AnimationFrame, LoopingAnimation};
-use hoo_api::light::LightState;
+use hoo_api_types::LightState;
 use hoo_api::ApiConnection;
 
 pub struct RotateAnimation {

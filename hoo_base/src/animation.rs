@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use hoo_api::light::{LightNumber, LightState};
+use hoo_api_types::{LightNumber, LightState};
 
 pub mod builtins;
 pub mod dynamic;
