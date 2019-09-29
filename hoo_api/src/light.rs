@@ -138,12 +138,8 @@ impl LightState {
     }
 
     pub fn get_color(&self) -> Option<Color> {
-        if self.hue.is_some() && self.sat.is_some() && self.bri.is_some() {
-            Some(Color::from_hsv(
-                self.hue.unwrap(),
-                self.sat.unwrap(),
-                self.bri.unwrap(),
-            ))
+        if let (Some(hue), Some(sat), Some(bri)) = (self.hue, self.sat, self.bri) {
+            Some(Color::from_hsv(hue, sat, bri))
         } else {
             None
         }
