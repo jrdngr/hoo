@@ -166,7 +166,6 @@ impl<T: ApiConnection> Hoo<T> {
                     match &mut animation {
                         Some(anim) => {
                             if let Some(frame) = anim.next() {
-                                // dbg!(&frame);
                                 let delay = frame.transition_time.unwrap_or(Duration::from_secs(0))
                                     + frame.hold_time;
                                 next_frame_time = Some(now + delay);

@@ -117,10 +117,18 @@ impl LightState {
         self.hue(color.hue).sat(color.saturation).bri(color.value)
     }
 
-    pub fn reset_colormode(&mut self) {
+    pub fn reset_advanced(&mut self) {
         self.xy = None;
         self.ct = None;
-        self.colormode = Some(LightColorMode::HS);
+        self.colormode = None;
+        self.alert = None;
+        self.effect = None;
+        self.reachable = None;
+        self.bri_inc = None;
+        self.sat_inc = None;
+        self.hue_inc = None;
+        self.ct_inc = None;
+        self.xy_inc = None;
     }
 
     pub fn is_on(&self) -> bool {
