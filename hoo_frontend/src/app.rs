@@ -33,6 +33,11 @@ impl Component for App {
         }
     }
 
+    fn mounted(&mut self) -> ShouldRender {
+        self.update(Msg::GetAllLights);
+        true
+    }
+
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             Msg::GetAllLights => {
