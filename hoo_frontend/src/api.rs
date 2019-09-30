@@ -5,40 +5,72 @@ use yew::services::ConsoleService;
 use yew::format::{Json, Nothing};
 use hoo_api_types::LightCollection;   
 
+use serde::{Serialize, Deserialize};
+use yew::worker::*;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ApiRequest {
+    GetAllLights,
+}
+
+impl Transferable for ApiRequest {}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ApiResponse {
+    Lights(LightCollection),
+}
+
+impl Transferable for ApiResponse {}
+
+
 pub struct HooApi {
+    link: AgentLink<Self>,
     base_url: String,
     console: ConsoleService,
     fetch_service: FetchService,
 }
 
-impl HooApi {
-    pub fn new(base_url: &str) -> Self {
+impl Agent for HooApi {
+    type Reach = Context;
+    type Message = ();
+    type Input = ApiRequest;
+    type Output = ApiResponse;
+
+    fn create(link: AgentLink<Self>) -> Self {
         Self {
-            base_url: base_url.to_string(),
+            link,
+            base_url: "http://localhost:8000".to_string(),
             console: ConsoleService::new(),
             fetch_service: FetchService:: new(),
         }
     }
 
-    pub fn get_all_lights(&mut self, callback: Callback<Result<LightCollection, Error>>) -> FetchTask {
-        let url = format!("{}/api/lights", self.base_url);
-        let handler = move |response: Response<Json<Result<LightCollection, Error>>>| {
-            let (meta, Json(data)) = response.into_parts();
+    fn update(&mut self, msg: Self::Message) {
+        // Oh hey there
+    }
 
-            if meta.status.is_success() {
-                callback.emit(data)
-            } else {
-                callback.emit(Err(format_err!("{}: Error getting lights", meta.status)))
+    fn handle(&mut self, msg: Self::Input, who: HandlerId) {
+        match msg {
+            ApiRequest::GetAllLights => {
+                let url = format!("{}/api/lights", self.base_url);
+                let handler = move |response: Response<Json<Result<LightCollection, Error>>>| {
+                    let (meta, Json(data)) = response.into_parts();
+
+                    if let Ok(lights) = data {
+                        self.link.response(who, ApiResponse::Lights(lights));
+                    }
+                };
+
+                let request = Request::get(url)
+                    .body(Nothing)
+                    .expect("Failed to build request");
+
+                let response = self.fetch_service.fetch(request, handler.into());
             }
-        };
-
-        let request = Request::get(url)
-            .body(Nothing)
-            .expect("Failed to build request");
-
-        self.fetch_service.fetch(request, handler.into())
+        }
     }
 }
+
 
 // export async function getAllLights(): Promise<HooLight[]> {
 //     const url = `${BASE_URL}/lights`;
