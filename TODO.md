@@ -25,6 +25,7 @@
 - [ ] Look at the warp crate
 
 ## Hoo Frontend
+- [ ] Check out the `iced` crate
 - [ ] Animation editor with previews
 - [ ] General Controls should represent Hoo state
 - [ ] Make everything not ugly
