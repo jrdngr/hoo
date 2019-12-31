@@ -1,15 +1,13 @@
-use hyper::{Body, Request, Response, Server};
-use hyper::service::{make_service_fn, service_fn};
 use structopt::StructOpt;
 
-use std::net::SocketAddr;
-use std::convert::Infallible;
 use std::io::{Result, Error, ErrorKind};
 
 use hoo_base::{Hoo, HooConfig};
 
+// pub use server::HooServer;
+
 pub mod options;
-pub mod service;
+// pub mod server;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -33,20 +31,7 @@ async fn main() -> Result<()> {
         hoo.run().await
     });
 
-    let addr: SocketAddr = config
-        .hoo_server_socket_uri
-        .parse()
-        .expect(&format!("Invalid socket URI: {}", config.hoo_server_socket_uri));
-
-    println!("Running Hoo server at: {}", config.hoo_server_socket_uri);
-
-    let service = service::HooService::new(sender);
-
-    let server = Server::bind(&addr).serve(service);
-
-    if let Err(e) = server.await {
-        eprintln!("Server error: {}", e);
-    }
+    // HooServer::run(&config, sender).await
 
     Ok(())
 }
