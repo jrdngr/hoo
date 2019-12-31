@@ -8,7 +8,6 @@ use std::time::Duration;
 
 pub use app_state::AppState;
 pub use common::{AnimationSettings, HooResponse, RGB};
-pub use common::{AnimationSettings, HooError, HooResponse, RGB};
 use hoo_api_types::{Light, LightCollection, LightState};
 use hoo_base::{HooCommand, HooConfig};
 

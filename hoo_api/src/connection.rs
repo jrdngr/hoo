@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use std::collections::HashMap;
 
-use hoo_api_types::{Light, LightCollection, LightState};
+use hoo_api_types::{Light, LightCollection, LightState, LightEffect};
 
 pub struct ApiConnection {
     pub client: reqwest::Client,

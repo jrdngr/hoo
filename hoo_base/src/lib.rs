@@ -9,9 +9,8 @@ use crate::animation::builtins::random::create_random_animation;
 // use crate::animation::builtins::rotate::RotateAnimation;
 use crate::animation::DynamicAnimation;
 
-use hoo_api::color::Color;
 use hoo_api::connection::ApiConnection;
-use hoo_api_types::{Light, LightCollection, LightState};
+use hoo_api_types::{Light, LightCollection, LightState, Color};
 
 pub use crate::config::HooConfig;
 
