@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::time::Duration;
 
 use crate::animation::{AnimationFrame, LoopingAnimation};
@@ -14,7 +15,7 @@ impl RotateAnimation {
         connection: &dyn ApiConnection,
         transition_time: &Duration,
         hold_time: &Duration,
-    ) -> Result<Self, failure::Error> {
+    ) -> Result<Self> {
         let all_lights = connection.get_active_lights()?;
 
         let mut active_lights = Vec::new();

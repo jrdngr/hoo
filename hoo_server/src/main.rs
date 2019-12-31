@@ -1,7 +1,5 @@
-use actix_web::Result;
+use anyhow::Result;
 use structopt::StructOpt;
-
-use std::error::Error;
 
 use hoo_base::{Hoo, HooConfig};
 use std::path::PathBuf;
@@ -12,7 +10,7 @@ pub use server::HooServer;
 pub mod options;
 pub mod server;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let options = options::Options::from_args();
 
     if let Some(file_path) = options.from_file {
@@ -39,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn run_test_server(file_path: PathBuf) -> Result<(), Box<dyn Error>> {
+fn run_test_server(file_path: PathBuf) -> Result<()> {
     let (hoo, sender) = Hoo::from_file(file_path);
     let config = hoo.config().clone();
 
@@ -49,7 +47,7 @@ fn run_test_server(file_path: PathBuf) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn write_default_config_file() -> Result<(), Box<dyn Error>> {
+fn write_default_config_file() -> Result<()> {
     let config = HooConfig::default();
     config.write_default_file()?;
     Ok(())

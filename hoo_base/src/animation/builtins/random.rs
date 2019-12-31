@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::time::Duration;
 
 use hoo_api::light::LightNumber;
@@ -10,7 +11,7 @@ pub fn create_random_animation<'a>(
     connection: &'a dyn ApiConnection,
     transition_time: &Duration,
     hold_time: &Duration,
-) -> Result<DynamicAnimation<'a>, failure::Error> {
+) -> Result<DynamicAnimation<'a>> {
     use ConfigurableValue::*;
 
     let mut animation = DynamicAnimation::new(connection, hold_time)?;
@@ -39,7 +40,7 @@ pub fn create_random_animation<'a>(
 //     connection: &'a ApiConnection,
 //     transition_time: &Duration,
 //     hold_time: &Duration,
-// ) -> Result<DynamicAnimation<'a>, failure::Error> {
+// ) -> Result<DynamicAnimation<'a>> {
 //     DynamicAnimation::new(connection)
 //         .step(DynamicAnimationStep::new()
 //             .hold_time(hold_time)
