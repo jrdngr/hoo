@@ -48,7 +48,7 @@ async fn run_test_server(file_path: PathBuf) -> anyhow::Result<()> {
     let config = hoo.config().clone();
 
     thread::spawn(move || hoo.run());
-    HooServer::run(&config, sender).await;
+    HooServer::run(&config, sender).await?;
 
     Ok(())
 }

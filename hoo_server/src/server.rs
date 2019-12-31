@@ -1,7 +1,7 @@
 use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
-use actix_web::{web, get, App, Error, HttpResponse, HttpServer};
-use anyhow::{anyhow, Result};
+use actix_web::{web, get, App, HttpResponse, HttpServer};
+use anyhow::Result;
 
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
@@ -25,10 +25,10 @@ impl HooServer {
         HttpServer::new(move || {
             App::new()
                 // .wrap(
-                //     Cors::new()
-                //         .allowed_origin("http://localhost:8080")
-                //         .allowed_origin("http://127.0.0.1:8080")
-                //         .allowed_methods(vec!["GET", "POST"]),
+                    // Cors::new()
+                    //     .allowed_origin("http://localhost:8080")
+                    //     .allowed_origin("http://127.0.0.1:8080")
+                    //     .allowed_methods(vec!["GET", "POST"]),
                 // )
                 .data(AppState::new(&sender))
                 .service(
@@ -128,24 +128,25 @@ async fn stop_animation(state: Data<AppState>) -> HttpResponse {
 }
 
 #[get("/light/{light_num}")]
-async fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<HttpResponse, Error> {
+async fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<HttpResponse, actix_web::Error> {
     let (sender, receiver) = mpsc::channel::<Light>();
     let _ = state.sender.send(HooCommand::GetLight(*light_num, sender));
 
     let light = receiver
         .recv_timeout(TIMEOUT)
-        .map_err(|e| Error::from(anyhow!("Timeout")))?;
-        
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+
     Ok(HttpResponse::Ok().json(light))
 }
 
 #[get("/lights")]
-async fn get_all_lights(state: Data<AppState>) -> Result<HttpResponse, Error> {
+async fn get_all_lights(state: Data<AppState>) -> Result<HttpResponse, actix_web::Error> {
     let (sender, receiver) = mpsc::channel::<LightCollection>();
     let _ = state.sender.send(HooCommand::GetAllLights(sender));
 
     let lights = receiver
         .recv_timeout(TIMEOUT)
-        .map_err(|e| Error::from(anyhow!("Timeout")))?;
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+
     Ok(HttpResponse::Ok().json(lights))
 }
