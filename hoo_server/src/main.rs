@@ -1,5 +1,6 @@
-use anyhow::Result;
 use structopt::StructOpt;
+
+use std::io::{Result, Error, ErrorKind};
 
 use hoo_base::{Hoo, HooConfig};
 use std::path::PathBuf;
@@ -10,11 +11,18 @@ pub use server::HooServer;
 pub mod options;
 pub mod server;
 
-fn main() -> Result<()> {
+#[actix_rt::main]
+async fn main() -> Result<()> {
+    run()
+        .await
+        .map_err(|e| Error::new(ErrorKind::Other, e))
+}
+
+async fn run() -> anyhow::Result<()> {
     let options = options::Options::from_args();
 
     if let Some(file_path) = options.from_file {
-        run_test_server(file_path)
+        run_test_server(file_path).await
     } else {
         if options.create_config {
             write_default_config_file()?;
@@ -31,23 +39,21 @@ fn main() -> Result<()> {
 
         thread::spawn(move || hoo.run());
 
-        HooServer::run(&config, sender)?;
-
-        Ok(())
+        HooServer::run(&config, sender).await
     }
 }
 
-fn run_test_server(file_path: PathBuf) -> Result<()> {
+async fn run_test_server(file_path: PathBuf) -> anyhow::Result<()> {
     let (hoo, sender) = Hoo::from_file(file_path);
     let config = hoo.config().clone();
 
     thread::spawn(move || hoo.run());
-    HooServer::run(&config, sender)?;
+    HooServer::run(&config, sender).await;
 
     Ok(())
 }
 
-fn write_default_config_file() -> Result<()> {
+fn write_default_config_file() -> anyhow::Result<()> {
     let config = HooConfig::default();
     config.write_default_file()?;
     Ok(())

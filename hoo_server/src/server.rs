@@ -1,7 +1,7 @@
 use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
-use actix_web::{web, App, HttpResponse, HttpServer};
-use anyhow::Result;
+use actix_web::{web, get, App, Error, HttpResponse, HttpServer};
+use anyhow::{anyhow, Result};
 
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
@@ -19,45 +19,31 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 pub struct HooServer;
 
 impl HooServer {
-    pub fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<()> {
+    pub async fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<()> {
         println!("Running Hoo server at: {}", config.hoo_server_socket_uri);
 
         HttpServer::new(move || {
             App::new()
-                .wrap(
-                    Cors::new()
-                        .allowed_origin("http://localhost:8080")
-                        .allowed_origin("http://127.0.0.1:8080")
-                        .allowed_methods(vec!["GET", "POST"]),
-                )
+                // .wrap(
+                //     Cors::new()
+                //         .allowed_origin("http://localhost:8080")
+                //         .allowed_origin("http://127.0.0.1:8080")
+                //         .allowed_methods(vec!["GET", "POST"]),
+                // )
                 .data(AppState::new(&sender))
                 .service(
                     web::scope("/api")
-                        .service(web::resource("/stop").route(web::get().to(stop_animation)))
-                        .service(
-                            web::resource("/rotate/{trans_time}/{hold_time}")
-                                .route(web::get().to(rotate)),
-                        )
-                        .service(
-                            web::resource("/random/{trans_time}/{hold_time}")
-                                .route(web::get().to(random)),
-                        )
-                        .service(
-                            web::resource("/sleepy/{trans_time}/{hold_time}")
-                                .route(web::get().to(sleepy)),
-                        )
-                        .service(web::resource("/animate").route(web::post().to(animate)))
-                        .service(
-                            web::resource("/light/{light_num}").route(web::get().to(get_light)),
-                        )
-                        .service(web::resource("/lights").route(web::get().to(get_all_lights)))
-                        .service(
-                            web::scope("/{light_num}")
-                                .service(web::resource("/on").route(web::get().to(on)))
-                                .service(web::resource("/off").route(web::get().to(off)))
-                                .service(web::resource("/color").route(web::get().to(color)))
-                                .service(web::resource("/state").route(web::get().to(light_state))),
-                        ),
+                        .service(stop_animation)
+                        .service(rotate)
+                        .service(random)
+                        .service(sleepy)
+                        .service(animate)
+                        .service(get_light)
+                        .service(get_all_lights)
+                        .service(on)
+                        .service(off)
+                        .service(color)
+                        .service(light_state)
                 )
                 .service(
                     actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
@@ -66,20 +52,26 @@ impl HooServer {
         .bind(&config.hoo_server_socket_uri)?
         .workers(1)
         .run()
+        .await?;
+
+        Ok(())
     }
 }
 
-fn on(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
+#[get("/{light_num}/on")]
+async fn on(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::On(*light_num));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn off(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
+#[get("/{light_num}/off")]
+async fn off(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Off(*light_num));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn color(state: Data<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HttpResponse {
+#[get("/{light_num}/color")]
+async fn color(state: Data<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HttpResponse {
     let r = color.r.unwrap_or(0);
     let g = color.g.unwrap_or(0);
     let b = color.b.unwrap_or(0);
@@ -88,7 +80,8 @@ fn color(state: Data<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HttpR
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn light_state(
+#[get("/{light_num}/state")]
+async fn light_state(
     state: Data<AppState>,
     light_num: Path<u8>,
     light_state: Query<LightState>,
@@ -100,22 +93,26 @@ fn light_state(
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn rotate(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
+#[get("/rotate/{trans_time}/{hold_time}")]
+async fn rotate(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Rotate(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn random(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
+#[get("/random/{trans_time}/{hold_time}")]
+async fn random(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Random(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn sleepy(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
+#[get("/sleepy/{trans_time}/{hold_time}")]
+async fn sleepy(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::SleepyRandom(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpResponse {
+#[get("/animate")]
+async fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpResponse {
     println!("data: {:?}", data);
     let _ = state
         .sender
@@ -124,23 +121,31 @@ fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpResponse
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn stop_animation(state: Data<AppState>) -> HttpResponse {
+#[get("/stop")]
+async fn stop_animation(state: Data<AppState>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::StopAnimation);
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<Json<Light>> {
+#[get("/light/{light_num}")]
+async fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<HttpResponse, Error> {
     let (sender, receiver) = mpsc::channel::<Light>();
     let _ = state.sender.send(HooCommand::GetLight(*light_num, sender));
 
-    let light = receiver.recv_timeout(TIMEOUT)?;
-    Ok(Json(light))
+    let light = receiver
+        .recv_timeout(TIMEOUT)
+        .map_err(|e| Error::from(anyhow!("Timeout")))?;
+        
+    Ok(HttpResponse::Ok().json(light))
 }
 
-fn get_all_lights(state: Data<AppState>) -> Result<Json<LightCollection>> {
+#[get("/lights")]
+async fn get_all_lights(state: Data<AppState>) -> Result<HttpResponse, Error> {
     let (sender, receiver) = mpsc::channel::<LightCollection>();
     let _ = state.sender.send(HooCommand::GetAllLights(sender));
 
-    let lights = receiver.recv_timeout(TIMEOUT)?;
-    Ok(Json(lights))
+    let lights = receiver
+        .recv_timeout(TIMEOUT)
+        .map_err(|e| Error::from(anyhow!("Timeout")))?;
+    Ok(HttpResponse::Ok().json(lights))
 }
