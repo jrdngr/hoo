@@ -24,12 +24,13 @@ impl HooServer {
 
         HttpServer::new(move || {
             App::new()
-                // .wrap(
-                    // Cors::new()
-                    //     .allowed_origin("http://localhost:8080")
-                    //     .allowed_origin("http://127.0.0.1:8080")
-                    //     .allowed_methods(vec!["GET", "POST"]),
-                // )
+                .wrap(
+                    Cors::new()
+                        .allowed_origin("http://localhost:8080")
+                        .allowed_origin("http://127.0.0.1:8080")
+                        .allowed_methods(vec!["GET", "POST"])
+                        .finish(),
+                )
                 .data(AppState::new(&sender))
                 .service(
                     web::scope("/api")
