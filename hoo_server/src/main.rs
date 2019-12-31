@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
         return Ok(());
     }
 
-    let (hoo, sender) = if let Some(config_file) = options.config_file {
+    let (mut hoo, sender) = if let Some(config_file) = options.config_file {
         Hoo::with_config_file(config_file)
             .map_err(|e| Error::new(ErrorKind::Other, e))?
     } else {
@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
 
     let config = hoo.config().clone();
 
-    // std::thread::spawn(move || hoo.run());
+    actix_rt::spawn(async move { hoo.run().await });
 
     HooServer::run(&config, sender).await
 }
