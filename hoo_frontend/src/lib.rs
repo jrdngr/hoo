@@ -1,36 +1,47 @@
 use seed::{*, prelude::*};
+use seed::browser::service::fetch;
+use hoo_api_types::LightCollection;
 
+use std::collections::HashMap;
 
 struct Model {
-    pub val: i32,
+    pub lights: LightCollection,
 }
 
 impl Default for Model {
     fn default() -> Self {
         Self {
-            val: 0,
+            lights: HashMap::new(),
         }
     }
 }
 
-
 #[derive(Clone)]
 enum Msg {
-    Increment,
+    GetAllLights,
+    GetAllLightsFetched(fetch::ResponseDataResult<LightCollection>),
 }
 
-fn update(msg: Msg, model: &mut Model, _: &mut impl Orders<Msg>) {
+fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::Increment => model.val += 1,
-    }
+        Msg::GetAllLights => orders.skip().perform_cmd(get_all_lights()),
+        Msg::GetAllLightsFetched(Ok(lights)) => orders.skip(),
+        Msg::GetAllLightsFetched(Err(e)) => orders.skip(),
+    };
 }
-
 
 fn view(model: &Model) -> impl View<Msg> {
     button![
-        simple_ev(Ev::Click, Msg::Increment),
-        format!("Hello, World × {}", model.val)
+        simple_ev(Ev::Click, Msg::GetAllLights),
+        format!("Hello, World × {}", model.lights.len())
     ]
+}
+
+async fn get_all_lights() -> Result<Msg, Msg> {
+    Request::new("http://localhost:8000/api/lights")
+        .method(Method::Get)
+        .fetch_json_data(Msg::GetAllLightsFetched)
+        .await
 }
 
 #[wasm_bindgen(start)]
