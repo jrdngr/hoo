@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::path::Path;
 
-use tokio::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
 use crate::animation::builtins::sleepy_random::create_sleepy_random_animation;
@@ -34,7 +34,7 @@ pub struct Hoo {
 
 impl Hoo {
     pub fn with_config(config: HooConfig) -> (Self, Sender<HooCommand>) {
-        let (sender, receiver) = mpsc::channel(100);
+        let (sender, receiver) = mpsc::channel();
         let connection = ApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
 
         (
@@ -108,13 +108,13 @@ impl Hoo {
                         next_frame_time = Some(Instant::now());
                     }
                     HooCommand::StopAnimation => next_frame_time = None,
-                    HooCommand::GetLight(light_num, mut sender) => {
+                    HooCommand::GetLight(light_num, sender) => {
                         let response = self.connection.get_light(light_num).await;
                         if let Ok(light) = response {
                             let _ = sender.send(light);
                         }
                     }
-                    HooCommand::GetAllLights(mut sender) => {
+                    HooCommand::GetAllLights(sender) => {
                         let response = self.connection.get_all_lights().await;
                         if let Ok(lights) = response {
                             let _ = sender.send(lights);

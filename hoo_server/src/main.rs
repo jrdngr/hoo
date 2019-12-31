@@ -4,12 +4,12 @@ use std::io::{Result, Error, ErrorKind};
 
 use hoo_base::{Hoo, HooConfig};
 
-// pub use server::HooServer;
+pub use server::HooServer;
 
 pub mod options;
-// pub mod server;
+pub mod server;
 
-#[tokio::main]
+#[actix_rt::main]
 async fn main() -> Result<()> {
     let options = options::Options::from_args();
 
@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
         return Ok(());
     }
 
-    let (mut hoo, sender) = if let Some(config_file) = options.config_file {
+    let (hoo, sender) = if let Some(config_file) = options.config_file {
         Hoo::with_config_file(config_file)
             .map_err(|e| Error::new(ErrorKind::Other, e))?
     } else {
@@ -27,13 +27,9 @@ async fn main() -> Result<()> {
 
     let config = hoo.config().clone();
 
-    tokio::spawn(async move { 
-        hoo.run().await
-    });
+    // std::thread::spawn(move || hoo.run());
 
-    // HooServer::run(&config, sender).await
-
-    Ok(())
+    HooServer::run(&config, sender).await
 }
 
 fn write_default_config_file() -> Result<()> {
