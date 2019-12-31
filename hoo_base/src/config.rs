@@ -1,7 +1,7 @@
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use core::fmt::Debug;
-use std::error::Error;
 use std::fs::File;
 use std::io::{BufReader, Write};
 use std::path::Path;
@@ -43,7 +43,7 @@ impl HooConfig {
         Self::from_env()
     }
 
-    pub fn from_file<P: AsRef<Path>>(file_path: P) -> Result<Self, Box<dyn Error>> {
+    pub fn from_file<P: AsRef<Path>>(file_path: P) -> Result<Self> {
         let file = File::open(file_path)?;
         let reader = BufReader::new(file);
 
@@ -52,11 +52,11 @@ impl HooConfig {
         Ok(config)
     }
 
-    pub fn from_default_file() -> Result<Self, Box<dyn Error>> {
+    pub fn from_default_file() -> Result<Self> {
         Self::from_file(DEFAULT_CONFIG_FILE_PATH)
     }
 
-    pub fn write_file<P: AsRef<Path> + Debug>(&self, file_path: P) -> Result<(), Box<dyn Error>> {
+    pub fn write_file<P: AsRef<Path> + Debug>(&self, file_path: P) -> Result<()> {
         if file_path.as_ref().exists() {
             println!("File already exists: {:?}", &file_path);
             return Ok(());
@@ -70,7 +70,7 @@ impl HooConfig {
         Ok(())
     }
 
-    pub fn write_default_file(&self) -> Result<(), Box<dyn Error>> {
+    pub fn write_default_file(&self) -> Result<()> {
         self.write_file(DEFAULT_CONFIG_FILE_PATH)
     }
 }

@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::path::Path;
 
 use std::sync::mpsc::{self, Receiver, Sender};
@@ -59,7 +60,7 @@ impl Hoo<StandardApiConnection> {
 
     pub fn with_config_file<P: AsRef<Path>>(
         file_path: P,
-    ) -> Result<(Self, Sender<HooCommand>), Box<dyn Error>> {
+    ) -> Result<(Self, Sender<HooCommand>)> {
         let config = HooConfig::from_file(file_path)?;
         Ok(Self::with_config(config))
     }

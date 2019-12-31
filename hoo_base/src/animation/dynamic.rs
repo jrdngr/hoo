@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::time::Duration;
 
 use crate::animation::AnimationFrame;
@@ -38,7 +39,7 @@ impl<'a> DynamicAnimation<'a> {
     pub fn new(
         connection: &'a dyn ApiConnection,
         hold_time: &Duration,
-    ) -> Result<Self, failure::Error> {
+    ) -> Result<Self> {
         Ok(Self {
             connection,
             hold_time: *hold_time,
