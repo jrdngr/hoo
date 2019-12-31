@@ -19,7 +19,7 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 pub struct HooServer;
 
 impl HooServer {
-    pub async fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<()> {
+    pub async fn run(config: &HooConfig, sender: Sender<HooCommand>) -> std::io::Result<()> {
         println!("Running Hoo server at: {}", config.hoo_server_socket_uri);
 
         HttpServer::new(move || {
@@ -53,9 +53,7 @@ impl HooServer {
         .bind(&config.hoo_server_socket_uri)?
         .workers(1)
         .run()
-        .await?;
-
-        Ok(())
+        .await
     }
 }
 

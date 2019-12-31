@@ -13,12 +13,6 @@ pub mod server;
 
 #[actix_rt::main]
 async fn main() -> Result<()> {
-    run()
-        .await
-        .map_err(|e| Error::new(ErrorKind::Other, e))
-}
-
-async fn run() -> anyhow::Result<()> {
     let options = options::Options::from_args();
 
     if let Some(file_path) = options.from_file {
@@ -30,7 +24,8 @@ async fn run() -> anyhow::Result<()> {
         }
 
         let (hoo, sender) = if let Some(config_file) = options.config_file {
-            Hoo::with_config_file(config_file)?
+            Hoo::with_config_file(config_file)
+                .map_err(|e| Error::new(ErrorKind::Other, e))?
         } else {
             Hoo::new()
         };
@@ -43,7 +38,7 @@ async fn run() -> anyhow::Result<()> {
     }
 }
 
-async fn run_test_server(file_path: PathBuf) -> anyhow::Result<()> {
+async fn run_test_server(file_path: PathBuf) -> Result<()> {
     let (hoo, sender) = Hoo::from_file(file_path);
     let config = hoo.config().clone();
 
@@ -53,8 +48,10 @@ async fn run_test_server(file_path: PathBuf) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn write_default_config_file() -> anyhow::Result<()> {
+fn write_default_config_file() -> Result<()> {
     let config = HooConfig::default();
-    config.write_default_file()?;
+    config.write_default_file()
+        .map_err(|e| Error::new(ErrorKind::Other, e))?;
+
     Ok(())
 }
