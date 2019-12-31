@@ -1,6 +1,6 @@
 use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
-use actix_web::{web, get, App, HttpResponse, HttpServer};
+use actix_web::{web, get, put, App, HttpResponse, HttpServer};
 use anyhow::Result;
 
 use std::sync::mpsc::{self, Sender};
@@ -57,19 +57,19 @@ impl HooServer {
     }
 }
 
-#[get("/{light_num}/on")]
+#[put("/{light_num}/on")]
 async fn on(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::On(*light_num));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/{light_num}/off")]
+#[put("/{light_num}/off")]
 async fn off(state: Data<AppState>, light_num: Path<u8>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Off(*light_num));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/{light_num}/color")]
+#[put("/{light_num}/color")]
 async fn color(state: Data<AppState>, light_num: Path<u8>, color: Query<RGB>) -> HttpResponse {
     let r = color.r.unwrap_or(0);
     let g = color.g.unwrap_or(0);
@@ -79,7 +79,7 @@ async fn color(state: Data<AppState>, light_num: Path<u8>, color: Query<RGB>) ->
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/{light_num}/state")]
+#[put("/{light_num}/state")]
 async fn light_state(
     state: Data<AppState>,
     light_num: Path<u8>,
@@ -92,25 +92,25 @@ async fn light_state(
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/rotate/{trans_time}/{hold_time}")]
+#[put("/rotate/{trans_time}/{hold_time}")]
 async fn rotate(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Rotate(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/random/{trans_time}/{hold_time}")]
+#[put("/random/{trans_time}/{hold_time}")]
 async fn random(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::Random(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/sleepy/{trans_time}/{hold_time}")]
+#[put("/sleepy/{trans_time}/{hold_time}")]
 async fn sleepy(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::SleepyRandom(info.0, info.1));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/animate")]
+#[put("/animate")]
 async fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpResponse {
     println!("data: {:?}", data);
     let _ = state
@@ -120,7 +120,7 @@ async fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpRe
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-#[get("/stop")]
+#[put("/stop")]
 async fn stop_animation(state: Data<AppState>) -> HttpResponse {
     let _ = state.sender.send(HooCommand::StopAnimation);
     HttpResponse::Ok().json(HooResponse::default())
