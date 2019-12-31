@@ -10,7 +10,7 @@ pub struct Options {
     pub config_file: Option<String>,
 
     /// Creates a default config file. Does not run the server.
-    #[structopt(long, raw(conflicts_with = "\"config_file\""))]
+    #[structopt(long, conflicts_with = "config_file")]
     pub create_config: bool,
 
     // Runs the server using a fake api with state stored in the given file.

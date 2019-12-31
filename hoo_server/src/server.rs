@@ -1,12 +1,13 @@
 use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
-use actix_web::{web, App, HttpResponse, HttpServer, Result};
+use actix_web::{web, App, HttpResponse, HttpServer};
+use anyhow::Result;
 
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
 
 pub use app_state::AppState;
-pub use common::{AnimationSettings, HooError, HooResponse, RGB};
+pub use common::{AnimationSettings, HooResponse, RGB};
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_base::{HooCommand, HooConfig};
 
@@ -18,7 +19,7 @@ const TIMEOUT: Duration = Duration::from_secs(5);
 pub struct HooServer;
 
 impl HooServer {
-    pub fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<(), std::io::Error> {
+    pub fn run(config: &HooConfig, sender: Sender<HooCommand>) -> Result<()> {
         println!("Running Hoo server at: {}", config.hoo_server_socket_uri);
 
         HttpServer::new(move || {
@@ -132,20 +133,14 @@ fn get_light(state: Data<AppState>, light_num: Path<u8>) -> Result<Json<Light>> 
     let (sender, receiver) = mpsc::channel::<Light>();
     let _ = state.sender.send(HooCommand::GetLight(*light_num, sender));
 
-    let response = receiver.recv_timeout(TIMEOUT);
-    match response {
-        Ok(light) => Ok(Json(light)),
-        Err(_) => Err(HooError::default().into()),
-    }
+    let light = receiver.recv_timeout(TIMEOUT)?;
+    Ok(Json(light))
 }
 
 fn get_all_lights(state: Data<AppState>) -> Result<Json<LightCollection>> {
     let (sender, receiver) = mpsc::channel::<LightCollection>();
     let _ = state.sender.send(HooCommand::GetAllLights(sender));
 
-    let response = receiver.recv_timeout(TIMEOUT);
-    match response {
-        Ok(lights) => Ok(Json(lights)),
-        Err(_) => Err(HooError::default().into()),
-    }
+    let lights = receiver.recv_timeout(TIMEOUT)?;
+    Ok(Json(lights))
 }

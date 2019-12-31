@@ -1,5 +1,4 @@
-use actix_web::{error, http, HttpResponse};
-use failure::Fail;
+use actix_web::{http, HttpResponse};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize)]
@@ -25,21 +24,5 @@ impl Default for HooResponse {
         HooResponse {
             message: "success".to_string(),
         }
-    }
-}
-
-#[derive(Fail, Debug)]
-#[fail(display = "Internal server error")]
-pub struct HooError {}
-
-impl Default for HooError {
-    fn default() -> Self {
-        HooError {}
-    }
-}
-
-impl error::ResponseError for HooError {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::new(http::StatusCode::INTERNAL_SERVER_ERROR)
     }
 }
