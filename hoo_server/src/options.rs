@@ -1,7 +1,5 @@
 use structopt::StructOpt;
 
-use std::path::PathBuf;
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "options")]
 pub struct Options {

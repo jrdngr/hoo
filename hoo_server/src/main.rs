@@ -3,14 +3,13 @@ use structopt::StructOpt;
 use std::io::{Result, Error, ErrorKind};
 
 use hoo_base::{Hoo, HooConfig};
-use std::thread;
 
-pub use server::HooServer;
+// pub use server::HooServer;
 
 pub mod options;
-pub mod server;
+// pub mod server;
 
-#[actix_rt::main]
+#[tokio::main]
 async fn main() -> Result<()> {
     let options = options::Options::from_args();
 
@@ -28,9 +27,13 @@ async fn main() -> Result<()> {
 
     let config = hoo.config().clone();
 
-    thread::spawn(move || hoo.run());
+    tokio::spawn(async move { 
+        hoo.run().await
+    });
 
-    HooServer::run(&config, sender).await
+    // HooServer::run(&config, sender).await
+
+    Ok(())
 }
 
 fn write_default_config_file() -> Result<()> {
