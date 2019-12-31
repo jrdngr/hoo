@@ -1,15 +1,12 @@
 [package]
 name = "hoo_frontend"
 version = "0.1.0"
-authors = ["picklenerd <jordan.t.grace@gmail.com>"]
+authors = ["jordan"]
 edition = "2018"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-hoo_api_types = { path = "../hoo_api_types" }
-failure = "0.1.5"
-serde = { version = "1.0", features = ["derive"] }
-wasm-bindgen = "^0.2"
-yew = "0.9.0"
+seed = "0.5"
+wasm-bindgen = "0.2"
