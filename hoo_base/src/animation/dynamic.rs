@@ -23,17 +23,6 @@ pub struct DynamicAnimation<'a> {
     current_index: usize,
 }
 
-impl<'a> Iterator for DynamicAnimation<'a> {
-    type Item = AnimationFrame;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self.connection.get_active_lights() {
-            Ok(lights) => Some(self.next_frame(lights)),
-            Err(_) => None,
-        }
-    }
-}
-
 impl<'a> DynamicAnimation<'a> {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
@@ -50,6 +39,14 @@ impl<'a> DynamicAnimation<'a> {
 
     pub fn animation_step(&mut self, step: DynamicAnimationStep) {
         self.steps.push(step);
+    }
+
+    pub async fn next(&mut self) -> Option<AnimationFrame> {
+        self.connection
+            .get_active_lights()
+            .await
+            .ok()
+            .map(|lights| self.next_frame(lights))
     }
 
     pub fn next_frame(&mut self, lights: LightCollection) -> AnimationFrame {

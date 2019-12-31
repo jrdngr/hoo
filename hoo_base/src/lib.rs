@@ -6,8 +6,8 @@ use std::time::{Duration, Instant};
 
 use crate::animation::builtins::sleepy_random::create_sleepy_random_animation;
 use crate::animation::builtins::random::create_random_animation;
-use crate::animation::builtins::rotate::RotateAnimation;
-use crate::animation::AnimationFrame;
+// use crate::animation::builtins::rotate::RotateAnimation;
+use crate::animation::DynamicAnimation;
 
 use hoo_api::color::Color;
 use hoo_api::connection::ApiConnection;
@@ -66,7 +66,7 @@ impl Hoo {
 
     pub async fn run(&self) {
         let mut next_frame_time: Option<Instant> = None;
-        let mut animation: Option<Box<dyn Iterator<Item = AnimationFrame>>> = None;
+        let mut animation: Option<DynamicAnimation> = None;
 
         loop {
             if let Ok(msg) = self.receiver.try_recv() {
@@ -89,31 +89,22 @@ impl Hoo {
                     HooCommand::State(light_num, state) => {
                         let _ = self.connection.set_state(light_num, &state).await;
                     }
-                    HooCommand::Rotate(tt, ht) => {
-                        let transition_time = Duration::from_secs(u64::from(tt));
-                        let hold_time = Duration::from_secs(u64::from(ht));
-                        let anim =
-                            RotateAnimation::new(&self.connection, &transition_time, &hold_time)
-                                .unwrap();
-                        animation = Some(Box::new(anim));
-                        next_frame_time = Some(Instant::now());
-                    }
+                    // HooCommand::Rotate(tt, ht) => {
+                    //     let transition_time = Duration::from_secs(u64::from(tt));
+                    //     let hold_time = Duration::from_secs(u64::from(ht));
+                    //     animation = RotateAnimation::new(&self.connection, &transition_time, &hold_time).ok();
+                    //     next_frame_time = Some(Instant::now());
+                    // }
                     HooCommand::Random(tt, ht) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
-                        let anim =
-                            create_random_animation(&self.connection, &transition_time, &hold_time)
-                                .unwrap();
-                        animation = Some(Box::new(anim));
+                        animation = create_random_animation(&self.connection, &transition_time, &hold_time).await.ok();
                         next_frame_time = Some(Instant::now());
                     }
                     HooCommand::SleepyRandom(tt, ht) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
-                        let anim =
-                            create_sleepy_random_animation(&self.connection, &transition_time, &hold_time)
-                                .unwrap();
-                        animation = Some(Box::new(anim));
+                        animation = create_sleepy_random_animation(&self.connection, &transition_time, &hold_time).await.ok();
                         next_frame_time = Some(Instant::now());
                     }
                     HooCommand::StopAnimation => next_frame_time = None,
@@ -139,7 +130,7 @@ impl Hoo {
                 if now >= time {
                     match &mut animation {
                         Some(anim) => {
-                            if let Some(frame) = anim.next() {
+                            if let Some(frame) = anim.next().await {
                                 let delay = frame.transition_time.unwrap_or(Duration::from_secs(0))
                                     + frame.hold_time;
                                 next_frame_time = Some(now + delay);
