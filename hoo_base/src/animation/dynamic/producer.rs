@@ -1,7 +1,7 @@
 use rand::distributions::{uniform::SampleUniform, Distribution, Standard};
 use rand::{thread_rng, Rng};
 
-pub type BoxedValueProducer<T> = Box<dyn ValueProducer<T>>;
+pub type BoxedValueProducer<T> = Box<dyn ValueProducer<T> + Send>;
 
 pub trait ValueProducer<T> {
     fn produce(&mut self) -> T;
