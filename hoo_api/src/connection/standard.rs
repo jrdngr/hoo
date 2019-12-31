@@ -1,10 +1,12 @@
+use anyhow::Result;
+
 use std::collections::HashMap;
 
 use crate::connection::ApiConnection;
 use crate::light::{Light, LightCollection, LightEffect, LightState};
 
 pub struct StandardApiConnection {
-    pub client: reqwest::Client,
+    pub client: reqwest::blocking::Client,
     base_uri: String,
 }
 
@@ -12,7 +14,7 @@ impl StandardApiConnection {
     pub fn new(base_uri: &str, user_id: &str) -> Self {
         let base_uri = format!("{}/api/{}", base_uri, user_id);
         Self {
-            client: reqwest::Client::new(),
+            client: reqwest::blocking::Client::new(),
             base_uri: base_uri.to_string(),
         }
     }
@@ -23,7 +25,7 @@ impl StandardApiConnection {
 }
 
 impl ApiConnection for StandardApiConnection {
-    fn get_all_lights(&self) -> Result<LightCollection, failure::Error> {
+    fn get_all_lights(&self) -> Result<LightCollection> {
         let uri = format!("{}/lights", self.base());
 
         let response = self.client.get(&uri).send()?.text()?;
@@ -33,7 +35,7 @@ impl ApiConnection for StandardApiConnection {
         Ok(lights)
     }
 
-    fn get_active_lights(&self) -> Result<LightCollection, failure::Error> {
+    fn get_active_lights(&self) -> Result<LightCollection> {
         let active_lights: HashMap<u8, Light> = self
             .get_all_lights()?
             .into_iter()
@@ -43,7 +45,7 @@ impl ApiConnection for StandardApiConnection {
         Ok(active_lights)
     }
 
-    fn get_light(&self, light_number: u8) -> Result<Light, failure::Error> {
+    fn get_light(&self, light_number: u8) -> Result<Light> {
         let uri = format!("{}/lights/{}", self.base(), light_number);
         let response = self.client.get(&uri).send()?.text()?;
 
@@ -52,7 +54,7 @@ impl ApiConnection for StandardApiConnection {
         Ok(light)
     }
 
-    fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, failure::Error> {
+    fn set_state(&self, light_number: u8, state: &LightState) -> Result<String> {
         let body = serde_json::to_string(state)?;
 
         let uri = format!("{}/lights/{}/state", self.base(), light_number);
@@ -62,17 +64,17 @@ impl ApiConnection for StandardApiConnection {
         Ok(response)
     }
 
-    fn on(&self, light_number: u8) -> Result<String, failure::Error> {
+    fn on(&self, light_number: u8) -> Result<String> {
         let state = LightState::new().on(true);
         self.set_state(light_number, &state)
     }
 
-    fn off(&self, light_number: u8) -> Result<String, failure::Error> {
+    fn off(&self, light_number: u8) -> Result<String> {
         let state = LightState::new().on(false);
         self.set_state(light_number, &state)
     }
 
-    fn colorloop(&self, light_number: u8, enabled: bool) -> Result<String, failure::Error> {
+    fn colorloop(&self, light_number: u8, enabled: bool) -> Result<String> {
         let effect = if enabled {
             LightEffect::ColorLoop
         } else {
@@ -86,7 +88,7 @@ impl ApiConnection for StandardApiConnection {
         &self,
         light_number: u8,
         transition_time: u16,
-    ) -> Result<String, failure::Error> {
+    ) -> Result<String> {
         let state = LightState::new().transitiontime(transition_time);
         self.set_state(light_number, &state)
     }
