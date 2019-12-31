@@ -8,7 +8,8 @@ use std::time::Duration;
 
 pub use app_state::AppState;
 pub use common::{AnimationSettings, HooResponse, RGB};
-use hoo_api::light::{Light, LightCollection, LightState};
+pub use common::{AnimationSettings, HooError, HooResponse, RGB};
+use hoo_api_types::{Light, LightCollection, LightState};
 use hoo_base::{HooCommand, HooConfig};
 
 pub mod app_state;
@@ -47,7 +48,7 @@ impl HooServer {
                         .service(light_state)
                 )
                 .service(
-                    actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
+                    actix_files::Files::new("/", "./hoo_frontend/").index_file("index.html"),
                 )
         })
         .bind(&config.hoo_server_socket_uri)?

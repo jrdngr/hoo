@@ -11,7 +11,7 @@ use crate::animation::DynamicAnimation;
 
 use hoo_api::color::Color;
 use hoo_api::connection::ApiConnection;
-use hoo_api::light::{Light, LightCollection, LightState};
+use hoo_api_types::{Light, LightCollection, LightState};
 
 pub use crate::config::HooConfig;
 

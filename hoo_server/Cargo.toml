@@ -5,6 +5,7 @@ authors = ["picklenerd <jordan.t.grace@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+hoo_api_types = { path = "../hoo_api_types" }
 hoo_base = { path = "../hoo_base" }
 hoo_api = { path = "../hoo_api" }
 actix-cors = "0.2.0"

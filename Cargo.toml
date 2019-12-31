@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "hoo_base",
+    "hoo_frontend",
     "hoo_server",
     "hoo_api",
 ]

@@ -1,6 +1,6 @@
 #!/bin/bash
 
 cd hoo_frontend
-npm run build
+wasm-pack build --target web
 cd ..
 cargo run --bin hoo_server 
