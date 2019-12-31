@@ -12,8 +12,4 @@ pub struct Options {
     /// Creates a default config file. Does not run the server.
     #[structopt(long, conflicts_with = "config_file")]
     pub create_config: bool,
-
-    // Runs the server using a fake api with state stored in the given file.
-    #[structopt(long, short, parse(from_os_str))]
-    pub from_file: Option<PathBuf>,
 }
