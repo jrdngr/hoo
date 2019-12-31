@@ -17,7 +17,7 @@ pub use producer::{
 pub use transform::transform;
 
 pub struct DynamicAnimation<'a> {
-    connection: &'a dyn ApiConnection,
+    connection: &'a ApiConnection,
     hold_time: Duration,
     steps: Vec<DynamicAnimationStep>,
     current_index: usize,
@@ -37,7 +37,7 @@ impl<'a> Iterator for DynamicAnimation<'a> {
 impl<'a> DynamicAnimation<'a> {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
-        connection: &'a dyn ApiConnection,
+        connection: &'a ApiConnection,
         hold_time: &Duration,
     ) -> Result<Self> {
         Ok(Self {

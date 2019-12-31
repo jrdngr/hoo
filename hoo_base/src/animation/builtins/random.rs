@@ -8,7 +8,7 @@ use crate::animation::dynamic::producer::{constant, random, random_range};
 use crate::animation::dynamic::{ConfigurableValue, DynamicAnimation, DynamicAnimationStep};
 
 pub fn create_random_animation<'a>(
-    connection: &'a dyn ApiConnection,
+    connection: &ApiConnection,
     transition_time: &Duration,
     hold_time: &Duration,
 ) -> Result<DynamicAnimation<'a>> {

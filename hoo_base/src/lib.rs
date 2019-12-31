@@ -10,18 +10,13 @@ use crate::animation::builtins::rotate::RotateAnimation;
 use crate::animation::AnimationFrame;
 
 use hoo_api::color::Color;
-use hoo_api::connection::standard::StandardApiConnection;
-use hoo_api::connection::testing::TestingApiConnection;
-
+use hoo_api::connection::ApiConnection;
 use hoo_api::light::{Light, LightCollection, LightState};
-use hoo_api::ApiConnection;
 
 pub use crate::config::HooConfig;
 
 pub mod animation;
 pub mod config;
-// Some day I'll play with actix
-// pub mod light_controller;
 
 type LightNumber = u8;
 type RgbValue = u8;
@@ -31,16 +26,16 @@ type BrightnessValue = u8;
 type TransitionTime = u16;
 type HoldTime = u16;
 
-pub struct Hoo<T: ApiConnection> {
+pub struct Hoo {
     config: HooConfig,
     receiver: Receiver<HooCommand>,
-    connection: T,
+    connection: ApiConnection,
 }
 
-impl Hoo<StandardApiConnection> {
+impl Hoo {
     pub fn with_config(config: HooConfig) -> (Self, Sender<HooCommand>) {
         let (sender, receiver) = mpsc::channel();
-        let connection = StandardApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
+        let connection = ApiConnection::new(&config.hue_hub_uri, &config.hue_user_id);
 
         (
             Hoo {
@@ -64,32 +59,12 @@ impl Hoo<StandardApiConnection> {
         let config = HooConfig::from_file(file_path)?;
         Ok(Self::with_config(config))
     }
-}
 
-impl Hoo<TestingApiConnection> {
-    pub fn from_file<P: AsRef<std::path::Path>>(file_path: P) -> (Self, Sender<HooCommand>) {
-        let config = HooConfig::default();
-
-        let (sender, receiver) = mpsc::channel();
-        let connection = TestingApiConnection::new(file_path).unwrap();
-
-        (
-            Hoo {
-                config,
-                receiver,
-                connection,
-            },
-            sender,
-        )
-    }
-}
-
-impl<T: ApiConnection> Hoo<T> {
     pub fn config(&self) -> &HooConfig {
         &self.config
     }
 
-    pub fn run(&self) {
+    pub async fn run(&self) {
         let mut next_frame_time: Option<Instant> = None;
         let mut animation: Option<Box<dyn Iterator<Item = AnimationFrame>>> = None;
 
@@ -98,10 +73,10 @@ impl<T: ApiConnection> Hoo<T> {
                 println!("{:?}", msg);
                 match msg {
                     HooCommand::On(light_num) => {
-                        let _ = self.connection.on(light_num);
+                        let _ = self.connection.on(light_num).await;
                     }
                     HooCommand::Off(light_num) => {
-                        let _ = self.connection.off(light_num);
+                        let _ = self.connection.off(light_num).await;
                     }
                     HooCommand::RgbColor(light_num, r, g, b) => {
                         let r = f64::from(r) / f64::from(std::u8::MAX);
@@ -109,10 +84,10 @@ impl<T: ApiConnection> Hoo<T> {
                         let b = f64::from(b) / f64::from(std::u8::MAX);
 
                         let state = LightState::new().color(&Color::from_rgb(r, g, b)).sat(255);
-                        let _ = self.connection.set_state(light_num, &state);
+                        let _ = self.connection.set_state(light_num, &state).await;
                     }
                     HooCommand::State(light_num, state) => {
-                        let _ = self.connection.set_state(light_num, &state);
+                        let _ = self.connection.set_state(light_num, &state).await;
                     }
                     HooCommand::Rotate(tt, ht) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
@@ -143,13 +118,13 @@ impl<T: ApiConnection> Hoo<T> {
                     }
                     HooCommand::StopAnimation => next_frame_time = None,
                     HooCommand::GetLight(light_num, sender) => {
-                        let response = self.connection.get_light(light_num);
+                        let response = self.connection.get_light(light_num).await;
                         if let Ok(light) = response {
                             let _ = sender.send(light);
                         }
                     }
                     HooCommand::GetAllLights(sender) => {
-                        let response = self.connection.get_all_lights();
+                        let response = self.connection.get_all_lights().await;
                         if let Ok(lights) = response {
                             let _ = sender.send(lights);
                         }
@@ -169,7 +144,7 @@ impl<T: ApiConnection> Hoo<T> {
                                     + frame.hold_time;
                                 next_frame_time = Some(now + delay);
                                 for state in frame.states {
-                                    let _ = self.connection.set_state(state.0, &state.1);
+                                    let _ = self.connection.set_state(state.0, &state.1).await;
                                 }
                             }
                         }
