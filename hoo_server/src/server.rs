@@ -47,7 +47,7 @@ impl HooServer {
                         .service(light_state)
                 )
                 .service(
-                    actix_files::Files::new("/", "./hoo_frontend/").index_file("index.html"),
+                    actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
                 )
         })
         .bind(&config.hoo_server_socket_uri)?
