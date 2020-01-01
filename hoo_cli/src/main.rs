@@ -21,13 +21,13 @@ async fn main() -> anyhow::Result<()> {
             };
             connection.set_state(light_num, &new_state).await?;
         },
-        TransitionTime{ light_num, value } => todo!(),
+        TransitionTime{ light_num, value } => { connection.transition_time(light_num, value).await?; },
         Red{ light_num, value } => todo!(),
         Green{ light_num, value } => todo!(),
         Blue{ light_num, value } => todo!(),
-        Hue { light_num, value } => todo!(),
-        Saturation{ light_num, value } => todo!(),
-        Brightness{ light_num, value } => todo!(),
+        Hue { light_num, value } => { connection.set_state(light_num, &LightState::new().hue(value)).await?; },
+        Saturation{ light_num, value } => { connection.set_state(light_num, &LightState::new().sat(value)).await?; },
+        Brightness{ light_num, value } => { connection.set_state(light_num, &LightState::new().bri(value)).await?; },
         List { active, light_num } => {
             if let Some(light_num) = light_num {
                 let light = connection.get_light(light_num).await?;
