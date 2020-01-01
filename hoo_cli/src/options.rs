@@ -23,9 +23,8 @@ pub enum Command {
     Saturation{ light_num: u8, value: u8 },
     Brightness{ light_num: u8, value: u8 },
     List {
+        light_num: Option<u8>,
         #[structopt(long)]
-        active: bool,
-        #[structopt(long, short = "n")]
-        light_num: Option<u8>,        
+        active: bool,     
     },
 }

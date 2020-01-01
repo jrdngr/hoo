@@ -1,5 +1,5 @@
 use structopt::StructOpt;
-use hoo_api::ApiConnection;
+use hoo_api::{ApiConnection, LightState};
 
 mod options;
 
@@ -13,7 +13,14 @@ async fn main() -> anyhow::Result<()> {
     match options.command {
         On{ light_num } => { connection.on(light_num).await?; },
         Off{ light_num } => { connection.off(light_num).await?; },
-        Toggle{ light_num } => todo!(),
+        Toggle{ light_num } => {
+            let light = connection.get_light(light_num).await?;
+            let new_state = match light.state.on {
+                Some(is_on) => LightState::new().on(!is_on),
+                None => LightState::new().on(true),
+            };
+            connection.set_state(light_num, &new_state).await?;
+        },
         TransitionTime{ light_num, value } => todo!(),
         Red{ light_num, value } => todo!(),
         Green{ light_num, value } => todo!(),
