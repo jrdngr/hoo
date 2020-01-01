@@ -28,7 +28,7 @@ impl HooServer {
                     Cors::new()
                         .allowed_origin("http://localhost:8080")
                         .allowed_origin("http://127.0.0.1:8080")
-                        .allowed_methods(vec!["GET", "POST"])
+                        .allowed_methods(vec!["GET", "POST", "PUT"])
                         .finish(),
                 )
                 .data(AppState::new(&sender))
