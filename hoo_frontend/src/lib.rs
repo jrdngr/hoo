@@ -22,11 +22,11 @@ enum Msg {
     GetAllLightsFetched(fetch::ResponseDataResult<LightCollection>),
 }
 
-fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
+fn update(msg: Msg, _model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::GetAllLights => orders.skip().perform_cmd(get_all_lights()),
-        Msg::GetAllLightsFetched(Ok(lights)) => orders.skip(),
-        Msg::GetAllLightsFetched(Err(e)) => orders.skip(),
+        Msg::GetAllLightsFetched(Ok(_lights)) => orders.skip(),
+        Msg::GetAllLightsFetched(Err(_e)) => orders.skip(),
     };
 }
 
