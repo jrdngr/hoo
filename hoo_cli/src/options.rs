@@ -12,16 +12,18 @@ pub struct Options {
 
 #[derive(StructOpt, Debug)]
 pub enum Command {
-    On{ light_num: u8 },
-    Off{ light_num: u8 },
-    Toggle{ light_num: u8 },
-    TransitionTime{ light_num: u8, value: u16 },
-    Red{ light_num: u8, value: u8 },
-    Green{ light_num: u8, value: u8 },
-    Blue{ light_num: u8, value: u8 },
+    On { light_num: u8 },
+    Off { light_num: u8 },
+    Toggle { light_num: u8 },
+    TransitionTime { light_num: u8, value: u16 },
+    Red { light_num: u8, value: f64 },
+    Green { light_num: u8, value: f64 },
+    Blue { light_num: u8, value: f64 },
+    RGB { light_num: u8, red: f64, green: f64, blue: f64},
     Hue { light_num: u8, value: u16 },
-    Saturation{ light_num: u8, value: u8 },
-    Brightness{ light_num: u8, value: u8 },
+    Sat { light_num: u8, value: u8 },
+    Bri { light_num: u8, value: u8 },
+    HSB { light_num: u8, hue: u16, sat: u8, bri: u8 },
     List {
         light_num: Option<u8>,
         #[structopt(long)]
