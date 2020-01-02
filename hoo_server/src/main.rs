@@ -1,5 +1,4 @@
 mod endpoints;
-mod hue_client;
 mod options;
 mod utils;
 
@@ -8,7 +7,7 @@ use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use structopt::StructOpt;
 
-pub use hue_client::HueClient;
+use hoo_hue_client::HueClient;
 
 #[tokio::main]
 async fn main() -> Result<()> {
