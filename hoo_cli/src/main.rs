@@ -1,5 +1,5 @@
 use structopt::StructOpt;
-use hoo_hue_api::{Color, LightState};
+use hoo_api::{ApiConnection, Color, LightState};
 
 mod options;
 

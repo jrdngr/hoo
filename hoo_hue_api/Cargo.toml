@@ -1,9 +1,0 @@
-[package]
-name = "hoo_hue_api"
-version = "0.1.0"
-authors = ["Jordan Grace <jordan.t.grace@gmail.com>"]
-edition = "2018"
-
-[dependencies]
-http = "0.2"
-serde = { version = "1.0", features = ["derive"] }

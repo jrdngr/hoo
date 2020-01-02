@@ -5,6 +5,7 @@ authors = ["Jordan Grace <jordan.t.grace@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+hoo_api = { path = "../hoo_api" }
 anyhow = "1.0"
 dotenv = "0.15"
 hyper = "0.13"
