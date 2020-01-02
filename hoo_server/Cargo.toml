@@ -1,0 +1,14 @@
+[package]
+name = "hoo_server"
+version = "0.1.0"
+authors = ["Jordan Grace <jordan.t.grace@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hoo_api = { path = "../hoo_api" }
+anyhow = "1.0"
+dotenv = "0.15"
+hyper = "0.13"
+regex = "1.3"
+structopt = "0.3"
+tokio = { version = "0.2", features = ["full"] }
