@@ -9,7 +9,7 @@ name = "hoo"
 path = "src/main.rs"
 
 [dependencies]
-hoo_api = { path = "../hoo_api" }
+hoo_hue_api = { path = "../hoo_hue_api" }
 anyhow = "1.0"
 structopt = "0.3"
 tokio = { version = "0.2", features = ["macros"] }
