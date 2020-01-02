@@ -1,14 +1,11 @@
-mod endpoints;
-mod hue_client;
 mod options;
 mod utils;
-
-pub use hue_client::HueClient;
 
 use anyhow::Result;
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use structopt::StructOpt;
+use hoo_api::HueClient;
 
 use utils::next_path_component;
 
@@ -52,12 +49,12 @@ async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>>
 
 async fn handle_api(method: &Method, endpoint: &str, client: HueClient) -> Result<Response<Body>> {
     match (method, endpoint) {
-        (&Method::GET, "lights") => endpoints::get_all_lights(&client).await,
+        (&Method::GET, "lights") => client.get_all_lights_response().await,
         (&Method::GET, "light") => {
             match next_path_component(endpoint) {
                 Some((light_num, "")) => {
                     let light_num = light_num.parse().expect("Invalid light number");
-                    endpoints::get_light(&client, light_num).await
+                    client.get_light_response(light_num).await
                 },
                 Some((light_num, path)) => handle_light_state(method, light_num, path, client).await,
                 None => Ok(not_found()),
@@ -69,10 +66,10 @@ async fn handle_api(method: &Method, endpoint: &str, client: HueClient) -> Resul
 
 async fn handle_light_state(method: &Method, light_num: &str, path: &str, client: HueClient) -> Result<Response<Body>> {
     let light_num: u8 = light_num.parse().expect("Invalid light number");
-    let (command, _) = next_path_component(path).expect(format!("Invalid path: {}", path));
+    let (command, _) = next_path_component(path).expect(&format!("Invalid path: {}", path));
     match (method, command) {
-        (&Method::PUT, "on") => todo!(),
-        (&Method::PUT, "off") => todo!(),
+        (&Method::PUT, "on") => client.on(light_num).await,
+        (&Method::PUT, "off") => client.off(light_num).await,
         _ => Ok(not_found())
     }
 }

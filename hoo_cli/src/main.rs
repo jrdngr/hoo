@@ -1,5 +1,5 @@
 use structopt::StructOpt;
-use hoo_api::{ApiConnection, Color, LightState};
+use hoo_api::{HueClient, Color, LightState};
 
 mod options;
 
@@ -7,7 +7,7 @@ mod options;
 async fn main() -> anyhow::Result<()> {
     let options = options::Options::from_args();
     
-    let connection = ApiConnection::new(&options.hue_base_uri, &options.hue_user_id);
+    let connection = HueClient::new(&options.hue_base_uri, &options.hue_user_id);
 
     use options::Command::*;
     match options.command {
