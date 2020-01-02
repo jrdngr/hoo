@@ -38,13 +38,26 @@ async fn main() -> Result<()> {
 }
 
 async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>> {
-    match (req.method(), req.uri().path()) {
-        (&Method::GET, "/api/lights") => endpoints::get_all_lights(&client).await,
-        _ => {
-            Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .body("Not Found".into())
-                .unwrap())
-        }
+    use utils::next_path_component;
+
+    let path = req.uri().path();
+
+    match next_path_component(path) {
+        Some(("api", endpoint)) => handle_api(req.method(), endpoint, client).await,
+        _ => Ok(not_found())
     }
+}
+
+async fn handle_api(method: &Method, endpoint: &str, client: HueClient) -> Result<Response<Body>> {
+    match (method, endpoint) {
+        (&Method::GET, "lights") => endpoints::get_all_lights(&client).await,
+        _ => Ok(not_found())
+    }
+}
+
+fn not_found() -> Response<Body> {
+    Response::builder()
+        .status(StatusCode::NOT_FOUND)
+        .body("Not Found".into())
+        .unwrap()
 }
