@@ -24,10 +24,6 @@ impl HueClient {
         }
     }
 
-    pub fn base(&self) -> String {
-        self.base_uri.clone()
-    }
-
     pub async fn get(&self, endpoint: &str) -> Result<Response<Body>> {
         let uri = Uri::from_str(&format!("{}/{}", self.base_uri, endpoint))?;
         Ok(self.client.get(uri).await?)
@@ -38,6 +34,7 @@ impl HueClient {
     {
         let uri = Uri::from_str(&format!("{}/{}", self.base_uri, endpoint))?;
         let request = Request::builder()
+            .method("PUT")
             .uri(uri)
             .body(body.into())
             .unwrap();
@@ -50,8 +47,7 @@ impl HueClient {
     }
 
     pub async fn get_all_lights_response(&self) -> Result<Response<Body>> {
-        let uri = format!("{}/lights", self.base());
-        self.get(&uri).await
+        self.get("lights").await
     }
 
     pub async fn get_all_lights(&self) -> Result<LightCollection> {
@@ -72,7 +68,7 @@ impl HueClient {
     }
 
     pub async fn get_light_response(&self, light_number: u8) -> Result<Response<Body>> {
-        let uri = format!("{}/lights/{}", self.base(), light_number);
+        let uri = format!("lights/{}", light_number);
         self.get(&uri).await
     }
 
@@ -83,8 +79,8 @@ impl HueClient {
 
     pub async fn set_state(&self, light_number: u8, state: &LightState) -> Result<Response<Body>> {
         let body = serde_json::to_string(state)?;
-        let uri = format!("{}/lights/{}/state", self.base(), light_number);
-         self.put(&uri, body).await
+        let uri = format!("lights/{}/state", light_number);
+        self.put(&uri, body).await
     }
 
     pub async fn on(&self, light_number: u8) -> Result<Response<Body>> {

@@ -37,8 +37,6 @@ async fn main() -> Result<()> {
 }
 
 async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>> {
-    
-
     let path = req.uri().path();
 
     match next_path_component(path) {
@@ -48,10 +46,11 @@ async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>>
 }
 
 async fn handle_api(method: &Method, endpoint: &str, client: HueClient) -> Result<Response<Body>> {
+    let (endpoint, rest) = next_path_component(endpoint).expect(&format!("Invalid path: {}", endpoint));
     match (method, endpoint) {
         (&Method::GET, "lights") => client.get_all_lights_response().await,
         (&Method::GET, "light") => {
-            match next_path_component(endpoint) {
+            match next_path_component(rest) {
                 Some((light_num, "")) => {
                     let light_num = light_num.parse().expect("Invalid light number");
                     client.get_light_response(light_num).await

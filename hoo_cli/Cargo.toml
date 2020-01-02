@@ -11,5 +11,6 @@ path = "src/main.rs"
 [dependencies]
 hoo_api = { path = "../hoo_api" }
 anyhow = "1.0"
+dotenv = "0.15"
 structopt = "0.3"
 tokio = { version = "0.2", features = ["macros"] }

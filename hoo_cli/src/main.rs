@@ -5,6 +5,7 @@ mod options;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    dotenv::dotenv()?;
     let options = options::Options::from_args();
     
     let connection = HueClient::new(&options.hue_base_uri, &options.hue_user_id);
