@@ -79,6 +79,10 @@ impl HueClient {
 
     pub async fn set_state(&self, light_number: u8, state: &LightState) -> Result<Response<Body>> {
         let body = serde_json::to_string(state)?;
+        self.set_state_from_body(light_number, body.into()).await
+    }
+
+    pub async fn set_state_from_body(&self, light_number: u8, body: Body) -> Result<Response<Body>> {
         let uri = format!("lights/{}/state", light_number);
         self.put(&uri, body).await
     }

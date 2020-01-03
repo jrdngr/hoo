@@ -34,41 +34,38 @@ async fn main() -> Result<()> {
 }
 
 async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>> {
-    let mut path = req.uri()
-        .path()
+    let path = req.uri().path().to_string();
+
+    let mut path = path
         .trim_start_matches('/')
         .split('/')
         .into_iter();
     
     match path.next() {
-        Some("api") => handle_api(req.method(), path, client).await,
+        Some("api") => handle_api(req, path, client).await,
         _ => Ok(not_found())
     }
 }
 
-async fn handle_api(method: &Method, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
+async fn handle_api(req: Request<Body>, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
     match path.next() {
         None => Ok(not_found()),
-        Some(endpoint) => match (method, endpoint) {
+        Some(endpoint) => match (req.method(), endpoint) {
             (&Method::GET, "lights") => client.get_all_lights_response().await,
-            (&Method::GET, "light") => {
-                match path.next() {
-                    Some(light_num) => handle_light_state(method, light_num, path, client).await,
-                    None => Ok(not_found()),
-                }
-            },
+            (&Method::GET, "light") =>  handle_light_state(req, path, client).await,
             _ => Ok(not_found())
         }
     }
 }
 
-async fn handle_light_state(method: &Method, light_num: &str, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
-    let light_num: u8 = light_num.parse().expect("Invalid light number");
+async fn handle_light_state(req: Request<Body>, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
+    let light_num: u8 = path.next().expect("Missing light number").parse().expect("Invalid light number");
     match path.next() {
         None => client.get_light_response(light_num).await,
-        Some(command) => match (method, command) {
-            (&Method::GET/*PUT*/, "on") => client.on(light_num).await,
-            (&Method::GET/*PUT*/, "off") => client.off(light_num).await,
+        Some(command) => match (req.method(), command) {
+            (&Method::PUT, "on") => client.on(light_num).await,
+            (&Method::PUT, "off") => client.off(light_num).await,
+            (&Method::PUT, "state") => client.set_state_from_body(light_num, req.into_body()).await,
             _ => Ok(not_found())
         }
     }
