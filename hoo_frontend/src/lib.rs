@@ -38,7 +38,7 @@ fn view(model: &Model) -> impl View<Msg> {
 }
 
 async fn get_all_lights() -> Result<Msg, Msg> {
-    Request::new("http://localhost:8000/api/lights")
+    Request::new("http://localhost:3000/api/lights")
         .method(Method::Get)
         .fetch_json_data(Msg::GetAllLightsFetched)
         .await
