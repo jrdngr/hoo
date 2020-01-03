@@ -28,15 +28,17 @@ dependencies = ["build_frontend", "run_server"]
 # ---- BUILD & CREATE WASMS ----
 [tasks.compile_frontend]
 description = "Build"
+cwd = "./hoo_frontend"
 workspace = false
 command = "cargo"
 args = ["build"]
 
 [tasks.compile_frontend_release]
 description = "Build, with the --release flag"
+cwd = "./hoo_frontend"
 workspace = false
 command = "cargo"
-args = ["build", "--release"]
+args = ["build"]
 
 [tasks.create_wasm]
 description = "Build with wasm-pack"
