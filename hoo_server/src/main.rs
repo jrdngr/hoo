@@ -1,6 +1,6 @@
 mod options;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use hyper::service::{make_service_fn, service_fn};
 use hyper::{Body, Method, Request, Response, Server, StatusCode};
 use structopt::StructOpt;
@@ -67,7 +67,10 @@ async fn handle_api(req: Request<Body>, mut path: impl Iterator<Item = &str>, cl
 }
 
 async fn handle_light_state(req: Request<Body>, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
-    let light_num: u8 = path.next().expect("Missing light number").parse().expect("Invalid light number");
+    let light_num: u8 = path.next()
+        .ok_or(anyhow!("Missing light number"))?
+        .parse()?;
+        
     match path.next() {
         None => client.get_light_response(light_num).await,
         Some(command) => match (req.method(), command) {
