@@ -41,9 +41,17 @@ async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>>
         .split('/')
         .into_iter();
     
-    match path.next() {
+    let result = match path.next() {
         Some("api") => handle_api(req, path, client).await,
         _ => Ok(not_found())
+    };
+
+    match result {
+        Ok(response) => Ok(response),
+        Err(e) => { 
+            dbg!(e);
+            Ok(internal_server_error())
+        },
     }
 }
 
@@ -75,5 +83,12 @@ fn not_found() -> Response<Body> {
     Response::builder()
         .status(StatusCode::NOT_FOUND)
         .body("Not Found".into())
+        .unwrap()
+}
+
+fn internal_server_error() -> Response<Body> {
+    Response::builder()
+        .status(StatusCode::INTERNAL_SERVER_ERROR)
+        .body("Internal Server Error".into())
         .unwrap()
 }
