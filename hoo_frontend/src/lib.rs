@@ -55,11 +55,21 @@ fn view(model: &Model) -> impl View<Msg> {
 
 fn light_component((light_num, light): (&LightNumber, &Light)) -> Node<Msg> {
     div![
-        light.name,
-        button![
-            simple_ev(Ev::Click, Msg::ToggleLight(*light_num)),
-            "Toggle",
-        ]
+        style![
+            St::Margin => "20px 10px",
+        ],
+        attrs!{At::Class => "light-component"},
+        div![
+            attrs!{At::Class => "light-info"},
+            light.name,
+        ],
+        div![
+            attrs!{At::Class => "light-controls"},
+            button![
+                simple_ev(Ev::Click, Msg::ToggleLight(*light_num)),
+                "Toggle",
+            ],    
+        ],
     ]
 }
 
