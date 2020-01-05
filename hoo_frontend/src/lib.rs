@@ -1,6 +1,6 @@
 use seed::{*, prelude::*};
 use seed::browser::service::fetch;
-use hoo_api_types::LightCollection;
+use hoo_api_types::{Light, LightNumber, LightCollection};
 
 use std::collections::HashMap;
 
@@ -20,7 +20,7 @@ impl Default for Model {
 enum Msg {
     GetAllLights,
     GetAllLightsFetched(fetch::ResponseDataResult<LightCollection>),
-    ToggleLight(u8),
+    ToggleLight(LightNumber),
     ToggleLightSent(fetch::ResponseDataResult<String>),
 }
 
@@ -47,15 +47,19 @@ fn view(model: &Model) -> impl View<Msg> {
             simple_ev(Ev::Click, Msg::GetAllLights),
             "Refresh",
         ],
-        model.lights.iter().map(|(num, light)| { 
-            div![
-                light.name,
-                button![
-                    simple_ev(Ev::Click, Msg::ToggleLight(*num)),
-                    "Toggle",
-                ]
-            ]
-        })
+        model.lights
+            .iter()
+            .map(light_component),
+    ]
+}
+
+fn light_component((light_num, light): (&LightNumber, &Light)) -> Node<Msg> {
+    div![
+        light.name,
+        button![
+            simple_ev(Ev::Click, Msg::ToggleLight(*light_num)),
+            "Toggle",
+        ]
     ]
 }
 
@@ -66,7 +70,7 @@ async fn get_all_lights() -> Result<Msg, Msg> {
         .await
 }
 
-async fn toggle_light(light_num: u8) -> Result<Msg, Msg> {
+async fn toggle_light(light_num: LightNumber) -> Result<Msg, Msg> {
     let uri = format!("http://localhost:3000/api/light/{}/toggle", light_num);
     Request::new(uri)
         .method(Method::Put)
