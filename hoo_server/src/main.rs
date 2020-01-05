@@ -44,7 +44,7 @@ async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>>
     
     let result = match path.next() {
         Some("api") => handle_api(req, path, client).await,
-        Some("index.html") => Ok(static_files::index()),
+        Some("index.html") | Some("") => Ok(static_files::index()),
         Some("pkg") => {
             match path.next() {
                 Some("package.js") => Ok(static_files::package_js()),

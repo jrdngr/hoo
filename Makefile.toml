@@ -9,7 +9,7 @@ workspace = false
 command = "cargo"
 args = ["build", "--bin", "hoo_server"]
 
-[tasks.build_server]
+[tasks.build]
 description = "Build hoo server"
 workspace = false
 dependencies = ["build_frontend", "compile_server"]
