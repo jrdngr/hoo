@@ -73,7 +73,7 @@ description = "Start server"
 install_crate = { crate_name = "microserver", binary = "microserver", test_arg = "-h" }
 workspace = false
 command = "microserver"
-args = ["./dist", "--port", "${PORT}"]
+args = ["./hoo_frontend/dist", "--port", "${PORT}"]
 
 [tasks.start]
 description = "Combine the build and serve tasks"

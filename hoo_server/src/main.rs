@@ -36,6 +36,7 @@ async fn main() -> Result<()> {
 
 async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>> {
     let path = req.uri().path().to_string();
+    println!("Routing: {}", path);
 
     let mut path = path
         .trim_start_matches('/')
@@ -68,8 +69,15 @@ async fn handle_api(req: Request<Body>, mut path: impl Iterator<Item = &str>, cl
     match path.next() {
         None => Ok(not_found()),
         Some(endpoint) => match (req.method(), endpoint) {
+            (&Method::OPTIONS, _) => Ok(preflight()),
             (&Method::GET, "lights") => client.get_all_lights_response().await,
-            (&Method::GET, "light") =>  handle_light_state(req, path, client).await,
+            (&Method::GET, "light") =>  { 
+                let light_num: u8 = path.next()
+                    .ok_or(anyhow!("Missing light number"))?
+                    .parse()?;
+                client.get_light_response(light_num).await 
+            },
+            (&Method::PUT, "light") =>  handle_light_state(req, path, client).await,
             _ => Ok(not_found())
         }
     }
@@ -79,16 +87,27 @@ async fn handle_light_state(req: Request<Body>, mut path: impl Iterator<Item = &
     let light_num: u8 = path.next()
         .ok_or(anyhow!("Missing light number"))?
         .parse()?;
-        
+
     match path.next() {
-        None => client.get_light_response(light_num).await,
         Some(command) => match (req.method(), command) {
             (&Method::PUT, "on") => client.on(light_num).await,
             (&Method::PUT, "off") => client.off(light_num).await,
+            (&Method::PUT, "toggle") => client.toggle(light_num).await,
             (&Method::PUT, "state") => client.set_state_from_body(light_num, req.into_body()).await,
             _ => Ok(not_found())
         }
+        _ => Ok(not_found())
     }
+}
+
+fn preflight() -> Response<Body> {
+    Response::builder()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Headers", "*")
+        .header("Access-Control-Allow-Methods", "*")
+        .status(StatusCode::OK)
+        .body("".into())
+        .unwrap()
 }
 
 fn not_found() -> Response<Body> {

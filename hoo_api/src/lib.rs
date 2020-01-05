@@ -97,6 +97,14 @@ impl HueClient {
         self.set_state(light_number, &state).await
     }
 
+    pub async fn toggle(&self, light_number: u8) -> Result<Response<Body>> {
+        let light = self.get_light(light_number).await?;
+        match light.state.on {
+            Some(is_on) if is_on => self.off(light_number).await,
+            _ => self.on(light_number).await,
+        }
+    }
+
     pub async fn colorloop(&self, light_number: u8, enabled: bool) -> Result<Response<Body>> {
         let effect = if enabled {
             LightEffect::ColorLoop
