@@ -1,9 +1,9 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use yew::{html, Component, ComponentLink, Html, ShouldRender};
+use yew::callback::Callback;
+use yew::format::{Json, Nothing};
+use yew::services::fetch::{FetchService, FetchTask, Request, Response};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{Request, RequestInit, RequestMode, Response, Window};
 
 use hoo_api_types::{Light, LightNumber, LightCollection};
 
@@ -11,6 +11,8 @@ use std::collections::HashMap;
 
 struct App {
     lights: LightCollection,
+    fetch_service: FetchService,
+    link: ComponentLink<Self>,
 }
 
 enum AppMessage {
@@ -40,12 +42,13 @@ impl Component for LightComponent {
             LightMessage::ToggleLight(light_num) => {
                 true // Indicate that the Component should re-render
             }
+            _ => false,
         }
     }
 
     fn view(&self) -> Html<Self> {
         html! {
-            <h1>Hey there</h1>
+            <h1>{"Hey there"}</h1>
         }
     }
 }
@@ -54,43 +57,52 @@ impl Component for App {
     type Message = AppMessage;
     type Properties = ();
 
-    fn create(_: Self::Properties, _: ComponentLink<Self>) -> Self {
-        Self { lights: HashMap::new() }
+    fn create(_: Self::Properties, mut link: ComponentLink<Self>) -> Self {
+        link.send_self(AppMessage::GetAllLights);
+        
+        Self { 
+            lights: HashMap::new(),
+            fetch_service: FetchService::new(),
+            link,
+        }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
             AppMessage::GetAllLights => {
 
+                false
+            },
+            AppMessage::GetAllLightsResult(lights)=> {
+                self.lights = lights;
                 true
-            }
+            },
         }
     }
 
     fn view(&self) -> Html<Self> {
         html! {
-            <h2>"Ho there!"</h2>
+            <h2>{"Ho there!"}</h2>
         }
     }
 }
 
-async fn get_all_lights() -> Result<LightCollection> {
-    let mut options = RequestInit::new();
-    options.method("GET");
-    let request = Request::new_with_str_and_init(
-        "http://localhost:3000/api/lights",
-        &options,
-    ).unwrap();
+fn get_all_lights(fetch_service: &FetchService, callback: Callback<Result<LightCollection>>) -> FetchTask {
+    let url = "http://localhost:3000/api/lights";
 
-    let window: Window = web_sys::window().unwrap();
-    let resp_value = JsFuture::from(window.fetch_with_request(&request)).await.unwrap();
-
-    let resp: Response = resp_value.dyn_into().unwrap();
-
-    let text = JsFuture::from(resp.text().unwrap()).await.unwrap();
-    let text = text.as_string().unwrap();
-
-    Ok(serde_json::from_str(&text)?)
+    let handler = move |response: Response<Json<Result<LightCollection>>>| {
+        let (meta, Json(data)) = response.into_parts();
+        if meta.status.is_success() {
+            callback.emit(data)
+        } else {
+            callback.emit(Err(anyhow!(
+                "{}: error getting lights",
+                meta.status
+            )))
+        }
+    };
+    let request = Request::get(url).body(Nothing).unwrap();
+    fetch_service.fetch(request, handler.into())
 }
 
 #[wasm_bindgen]
