@@ -43,13 +43,26 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 fn view(model: &Model) -> impl View<Msg> {
     div![
-        button![
-            simple_ev(Ev::Click, Msg::GetAllLights),
-            "Refresh",
+        div![
+            style![
+                St::Margin => "20px 10px",
+            ],
+            attrs![At::Class => "all-light-controls"],
+            h3!["All Lights"],
+            button![
+                simple_ev(Ev::Click, Msg::GetAllLights),
+                "Refresh",
+            ],    
         ],
-        model.lights
-            .iter()
-            .map(light_component),
+        div![
+            style![
+                St::Border => "1px solid black"
+            ],
+            attrs![At::Class => "light-list"],
+            model.lights
+                .iter()
+                .map(light_component),
+        ],
     ]
 }
 
@@ -58,17 +71,27 @@ fn light_component((light_num, light): (&LightNumber, &Light)) -> Node<Msg> {
         style![
             St::Margin => "20px 10px",
         ],
-        attrs!{At::Class => "light-component"},
+        attrs![At::Class => "light-component"],
         div![
-            attrs!{At::Class => "light-info"},
-            light.name,
-        ],
-        div![
-            attrs!{At::Class => "light-controls"},
-            button![
-                simple_ev(Ev::Click, Msg::ToggleLight(*light_num)),
-                "Toggle",
-            ],    
+            style![St::Display => "flex"],
+            div![
+                input![
+                    attrs![At::Type => "checkbox"]
+                ]
+            ],
+            div![
+                div![
+                    attrs![At::Class => "light-info"],
+                    light.name,
+                ],
+                div![
+                    attrs![At::Class => "light-controls"],
+                    button![
+                        simple_ev(Ev::Click, Msg::ToggleLight(*light_num)),
+                        "Toggle",
+                    ],    
+                ],    
+            ],
         ],
     ]
 }
