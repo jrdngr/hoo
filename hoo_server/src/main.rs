@@ -50,6 +50,7 @@ async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>>
             match path.next() {
                 Some("package.js") => Ok(static_files::package_js()),
                 Some("package_bg.wasm") => Ok(static_files::package_wasm()),
+                Some("bundle.js") => Ok(static_files::bundle()),
                 _ => Ok(not_found()),
             }
         },
