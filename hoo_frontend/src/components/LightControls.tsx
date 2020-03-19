@@ -58,7 +58,7 @@ export default class LightControls extends React.Component<LightControlsProps, L
                 type="range"
                 min="0"
                 max="65535"
-                value={this.state.light.hue}
+                // value={this.state.light.hue}
                 onChange={this.setHue}
               />
               <label htmlFor="hue">Hue</label>
@@ -69,7 +69,7 @@ export default class LightControls extends React.Component<LightControlsProps, L
                 type="range"
                 min="0"
                 max="255"
-                value={this.state.light.saturation}
+                // value={this.state.light.saturation}
                 onChange={this.setSat}
               />
               <label htmlFor="sat">Saturation</label>
@@ -80,7 +80,7 @@ export default class LightControls extends React.Component<LightControlsProps, L
                 type="range"
                 min="0"
                 max="255"
-                value={this.state.light.brightness}
+                // value={this.state.light.brightness}
                 onChange={this.setBri}
               />
               <label htmlFor="bri">Brightness</label>
@@ -97,31 +97,31 @@ export default class LightControls extends React.Component<LightControlsProps, L
         return `hsl(${h}, ${s}%, ${l}%)`;
     }
 
-    async created() {
-        this.updateState();
+    async componentDidMount() {
+        await this.updateState();
     }
 
-    async on() {
+    on = async () => {
         await this.state.light.on();
     }
 
-    async off() {
+    off = async () => {
         await this.state.light.off();
     }
 
-    async setBri(event: any) {
-        await this.state.light.setBrightness(event.srcElement.value);
+    setBri = async (event: any) => {
+        await this.state.light.setBrightness(event.target.value);
     }
 
-    async setSat(event: any) {
-        await this.state.light.setSaturation(event.srcElement.value);
+    setSat = async (event: any) => {
+        await this.state.light.setSaturation(event.target.value);
     }
 
-    async setHue(event: any) {
-        await this.state.light.setHue(event.srcElement.value);
+    setHue = async (event: any) => {
+        await this.state.light.setHue(event.target.value);
     }
 
-    async updateState() {
+    updateState = async () => {
         await this.state.light.update();
     }
 }

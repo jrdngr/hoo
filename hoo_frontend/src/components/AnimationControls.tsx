@@ -36,15 +36,15 @@ export default class AnimationControls extends React.Component<{}, AnimationCont
         );
     }
 
-    async rotate() {
+    rotate = async () => {
         await AnimationApi.rotate(this.state.transitionTime, this.state.holdTime);
     }
     
-    async random() {
+    random = async () => {
         await AnimationApi.random(this.state.transitionTime, this.state.holdTime);
     }
     
-    async stop() {
+    stop = async () => {
         await AnimationApi.stop();
     }
 }
