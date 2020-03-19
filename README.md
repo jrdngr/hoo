@@ -6,4 +6,4 @@ This is me learning Rust, REST API design, various frontend frameworks, concurre
 
 I'm in the middle of rewriting the server and Hue client with `hyper` to take advantage of `async/.await` and to get myself a little bit closer to dealing with HTTP.
 
-I'm also rewriting the frontend with `Seed`. It was originally written in Vue back before I used Vue at work. Now that it's part of my job, I wanted to move to something Rust-based and new to me.
+I'm also rewriting the frontend in a bunch of different ways to figure out which I like best. It was originally written in Vue back before I used Vue at work. Now that it's part of my job, I wanted to move to something Rust-based and new to me. Or React.
