@@ -6,7 +6,7 @@ use structopt::StructOpt;
 use warp::Filter;
 
 use hoo_api::HueClient;
-use hoo_api_types::LightState;
+use hoo_api_types::LightStateQuery;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
     
     let client_clone = client.clone();
     let light_state = warp::path!("light" / u8 / "state")
-        .and(warp::body::json())
+        .and(warp::query::query())
         .and_then(move |light_num, state| set_state(client_clone.clone(), light_num, state));
 
     let put_light = warp::put().and(
@@ -66,6 +66,7 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
+
 
 async fn get_all_lights(client: HueClient) -> Result<impl warp::Reply, Infallible> {
     match client.get_all_lights().await {
@@ -102,8 +103,8 @@ async fn toggle(client: HueClient, light_num: u8) -> Result<impl warp::Reply, In
     }
 }
 
-async fn set_state(client: HueClient, light_num: u8, state: LightState) -> Result<impl warp::Reply, Infallible> {
-    match client.set_state(light_num, &state).await {
+async fn set_state(client: HueClient, light_num: u8, state: LightStateQuery) -> Result<impl warp::Reply, Infallible> {
+    match client.set_state(light_num, &state.into()).await {
         Ok(_) => Ok(warp::reply::json(&format!("Light {} state set to\n{:?}", light_num, &state))),
         Err(e) => Ok(warp::reply::json(&format!("{}", e))),
     }

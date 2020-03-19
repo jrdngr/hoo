@@ -215,6 +215,24 @@ impl Default for LightState {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+pub struct LightStateQuery {
+    hue: Option<u16>,
+    sat: Option<u8>,
+    bri: Option<u8>,
+}
+
+impl From<LightStateQuery> for LightState {
+    fn from(query: LightStateQuery) -> LightState {
+        LightState {
+            hue: query.hue,
+            sat: query.sat,
+            bri: query.bri,
+            ..LightState::default()
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum LightEffect {
