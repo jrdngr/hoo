@@ -1,0 +1,55 @@
+ul {
+    list-style-type: none;
+}
+
+button {
+    font-size: 1.5em;
+    margin: 10px;
+}
+
+input {
+    font-size: 1.5em;
+}
+
+label {
+    font-size: 1.5em;
+    margin-left: 10px;
+}
+
+.control {
+    margin: 10px;
+}
+
+.Hoo {
+  margin: 10px;
+}
+
+#AnimationControls {
+    display: inline-block;
+    border: 1px solid gray;
+    padding: 10px;
+    width: 400px;
+}
+
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#header svg {
+    width: 30%;
+    height: 50px;
+}
+
+#light {
+    display: inline-block;
+    border: 1px solid gray;
+    padding: 10px;
+    width: 400px;
+}
+
+#hue-rainbow {
+    display: block;
+}

@@ -1,4 +1,4 @@
-import { BASE_URL } from '@/common/constants';
+import { BASE_URL } from '../constants';
 
 export async function rotate(transitionTime: number, holdTime: number): Promise<void> {
     const url = `${BASE_URL}/rotate/${transitionTime}/${holdTime}`;

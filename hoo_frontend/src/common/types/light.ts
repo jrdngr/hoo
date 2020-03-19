@@ -1,5 +1,5 @@
-import * as LightApi from "@/common/api/lights";
-import { randomInt } from "@/common/utils/random";
+import * as LightApi from "../api/lights";
+import { randomInt } from "../utils/random";
 
 export interface Light {
     readonly name: string;
