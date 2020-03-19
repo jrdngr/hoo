@@ -1,6 +1,7 @@
 mod options;
 
-use anyhow::{anyhow, Result};
+use std::convert::Infallible;
+use anyhow::Result;
 use structopt::StructOpt;
 use warp::Filter;
 
@@ -12,57 +13,90 @@ async fn main() -> Result<()> {
     dotenv::dotenv()?;
     let options = options::Options::from_args();
 
-    let addr = "127.0.0.1:8000".parse().unwrap();
+    let addr: std::net::SocketAddr = "127.0.0.1:8000".parse().unwrap();
 
     let client = HueClient::new(&options.hue_base_uri, &options.hue_user_id);
     println!("Hoo server listening on http://{}", addr);
 
-    let preflight = warp::options().map(|| preflight());
-    let all_lights = warp::get().and(warp::path("lights").map(|| client.get_all_lights_response()));
+    let all_lights = warp::get().and(warp::path("lights").and_then(|| get_all_lights(&client)));
     
-    let light =
-        warp::get().and(warp::path!("light" / u8).map(|light_num| client.get_light_response(light_num)))
-        .or(
-            warp::put().and(
-                warp::path!(u8/ "on").map(|light_num| client.on(light_num))
-                .or(warp::path!(u8 / "off").map(|light_num| client.off(light_num)))
-                .or(warp::path!(u8 / "toggle").map(|light_num| client.toggle(light_num)))
-                .or(warp::path!(u8 / "state").and(warp::body::json()).map(|light_num, state: LightState| client.set_state(light_num, &state)))
-            )
+    let light = warp::path!("light" / u8);
+    
+    let get_light = warp::get().and(light).and_then(|light_num| get_light(&client, light_num));
+
+    let light_on = light.and(warp::path("on"))
+        .and_then(|light_num| on(&client, light_num));
+
+    let light_off = light.and(warp::path("off"))
+        .and_then(|light_num| off(&client, light_num));
+
+    let light_toggle = light.and(warp::path("toggle"))
+        .and_then(|light_num| toggle(&client, light_num));
+    
+    let light_state = light.and(warp::path("state"))
+        .and(warp::body::json())
+        .and_then(|light_num, state| set_state(&client, light_num, state));
+
+    let put_light = warp::put().and(
+        light_on
+        .or(light_off)
+        .or(light_toggle)
+        .or(light_state)
     );
+
+    let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET", "PUT"]);
 
     let routes = warp::path("api")
         .and(
-            preflight
-            // .or(all_lights)
-            // .or(light)
-        );
+            all_lights
+            .or(get_light)
+            .or(put_light)
+        )
+        .with(cors);
     
     warp::serve(routes).run(addr).await;
 
     Ok(())
 }
 
-fn preflight() -> Response<Body> {
-    Response::builder()
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Headers", "*")
-        .header("Access-Control-Allow-Methods", "*")
-        .status(StatusCode::OK)
-        .body("".into())
-        .unwrap()
+async fn get_all_lights(client: &HueClient) -> Result<impl warp::Reply, Infallible> {
+    match client.get_all_lights().await {
+        Ok(lights) => Ok(warp::reply::json(&lights)),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
 }
 
-fn not_found() -> Response<Body> {
-    Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body("Not Found".into())
-        .unwrap()
+async fn get_light(client: &HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.get_light(light_num).await {
+        Ok(light) => Ok(warp::reply::json(&light)),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
 }
 
-fn internal_server_error() -> Response<Body> {
-    Response::builder()
-        .status(StatusCode::INTERNAL_SERVER_ERROR)
-        .body("Internal Server Error".into())
-        .unwrap()
+async fn on(client: &HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.on(light_num).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} turned on", light_num))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
+}
+
+async fn off(client: &HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.off(light_num).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} turned off", light_num))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
+}
+
+async fn toggle(client: &HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.toggle(light_num).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} toggled", light_num))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
+}
+
+async fn set_state(client: &HueClient, light_num: u8, state: LightState) -> Result<impl warp::Reply, Infallible> {
+    match client.set_state(light_num, &state).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} state set to\n{:?}", light_num, &state))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
 }
