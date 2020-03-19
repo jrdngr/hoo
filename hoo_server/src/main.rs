@@ -1,5 +1,4 @@
 mod options;
-mod static_files;
 
 use anyhow::{anyhow, Result};
 use hyper::service::{make_service_fn, service_fn};
@@ -12,7 +11,7 @@ async fn main() -> Result<()> {
     dotenv::dotenv()?;
     let options = options::Options::from_args();
 
-    let addr = "127.0.0.1:3000".parse().unwrap();
+    let addr = "127.0.0.1:8000".parse().unwrap();
 
     let client = HueClient::new(&options.hue_base_uri, &options.hue_user_id);
 
@@ -45,14 +44,6 @@ async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>>
     
     let result = match path.next() {
         Some("api") => handle_api(req, path, client).await,
-        Some("index.html") | Some("") => Ok(static_files::index()),
-        Some("pkg") => {
-            match path.next() {
-                Some("package.js") => Ok(static_files::package_js()),
-                Some("package_bg.wasm") => Ok(static_files::package_wasm()),
-                _ => Ok(not_found()),
-            }
-        },
         _ => Ok(not_found()),
     };
 

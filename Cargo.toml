@@ -3,6 +3,5 @@ members = [
     "hoo_api",
     "hoo_api_types",
     "hoo_cli",
-    "hoo_frontend",
     "hoo_server",
 ]
