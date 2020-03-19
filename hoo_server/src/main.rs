@@ -1,116 +1,111 @@
 mod options;
 
-use anyhow::{anyhow, Result};
-use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Method, Request, Response, Server, StatusCode};
+use std::convert::Infallible;
+use anyhow::Result;
 use structopt::StructOpt;
+use warp::Filter;
+
 use hoo_api::HueClient;
+use hoo_api_types::LightStateQuery;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv::dotenv()?;
     let options = options::Options::from_args();
 
-    let addr = "127.0.0.1:8000".parse().unwrap();
+    let addr: std::net::SocketAddr = "127.0.0.1:8000".parse().unwrap();
 
     let client = HueClient::new(&options.hue_base_uri, &options.hue_user_id);
 
-    let new_service = make_service_fn(move |_| {
-        let client = client.clone();
-        async {
-            Ok::<_, anyhow::Error>(service_fn(move |req| {
-                handle(req, client.to_owned())
-            }))
-        }
-    });
+    let client_clone = client.clone();
+    let all_lights = warp::get()
+        .and(warp::path("lights")
+        .and_then(move || get_all_lights(client_clone.clone())));
+    
+    let client_clone = client.clone();
+    let get_light = warp::get()
+        .and(warp::path!("light" / u8))
+        .and_then(move |light_num| get_light(client_clone.clone(), light_num));
 
-    let server = Server::bind(&addr).serve(new_service);
+    let client_clone = client.clone();
+    let light_on = warp::path!("light" / u8 / "on")
+        .and_then(move |light_num| on(client_clone.clone(), light_num));
 
+    let client_clone = client.clone();
+    let light_off = warp::path!("light" / u8 / "off")
+        .and_then(move |light_num| off(client_clone.clone(), light_num));
+
+    let client_clone = client.clone();
+    let light_toggle = warp::path!("light" / u8 / "toggle")
+        .and_then(move |light_num| toggle(client_clone.clone(), light_num));
+    
+    let client_clone = client.clone();
+    let light_state = warp::path!("light" / u8 / "state")
+        .and(warp::query::query())
+        .and_then(move |light_num, state| set_state(client_clone.clone(), light_num, state));
+
+    let put_light = warp::put().and(
+        light_on
+        .or(light_off)
+        .or(light_toggle)
+        .or(light_state)
+    );
+
+    let cors = warp::cors().allow_any_origin().allow_methods(vec!["GET", "PUT", "OPTIONS"]);
+
+    let routes = warp::path("api")
+        .and(
+            all_lights
+            .or(get_light)
+            .or(put_light)
+        )
+        .with(cors);
+    
     println!("Hoo server listening on http://{}", addr);
-
-    server.await?;
+    warp::serve(routes).run(addr).await;
 
     Ok(())
 }
 
-async fn handle(req: Request<Body>, client: HueClient) -> Result<Response<Body>> {
-    let path = req.uri().path().to_string();
-    println!("Routing: {}", path);
 
-    let mut path = path
-        .trim_start_matches('/')
-        .split('/')
-        .into_iter();
-    
-    let result = match path.next() {
-        Some("api") => handle_api(req, path, client).await,
-        _ => Ok(not_found()),
-    };
-
-    match result {
-        Ok(response) => Ok(response),
-        Err(e) => { 
-            dbg!(e);
-            Ok(internal_server_error())
-        },
+async fn get_all_lights(client: HueClient) -> Result<impl warp::Reply, Infallible> {
+    match client.get_all_lights().await {
+        Ok(lights) => Ok(warp::reply::json(&lights)),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
     }
 }
 
-async fn handle_api(req: Request<Body>, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
-    match path.next() {
-        None => Ok(not_found()),
-        Some(endpoint) => match (req.method(), endpoint) {
-            (&Method::OPTIONS, _) => Ok(preflight()),
-            (&Method::GET, "lights") => client.get_all_lights_response().await,
-            (&Method::GET, "light") =>  { 
-                let light_num: u8 = path.next()
-                    .ok_or(anyhow!("Missing light number"))?
-                    .parse()?;
-                client.get_light_response(light_num).await 
-            },
-            (&Method::PUT, "light") =>  handle_light_state(req, path, client).await,
-            _ => Ok(not_found())
-        }
+async fn get_light(client: HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.get_light(light_num).await {
+        Ok(light) => Ok(warp::reply::json(&light)),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
     }
 }
 
-async fn handle_light_state(req: Request<Body>, mut path: impl Iterator<Item = &str>, client: HueClient) -> Result<Response<Body>> {
-    let light_num: u8 = path.next()
-        .ok_or(anyhow!("Missing light number"))?
-        .parse()?;
-
-    match path.next() {
-        Some(command) => match (req.method(), command) {
-            (&Method::PUT, "on") => client.on(light_num).await,
-            (&Method::PUT, "off") => client.off(light_num).await,
-            (&Method::PUT, "toggle") => client.toggle(light_num).await,
-            (&Method::PUT, "state") => client.set_state_from_body(light_num, req.into_body()).await,
-            _ => Ok(not_found())
-        }
-        _ => Ok(not_found())
+async fn on(client: HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.on(light_num).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} turned on", light_num))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
     }
 }
 
-fn preflight() -> Response<Body> {
-    Response::builder()
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Headers", "*")
-        .header("Access-Control-Allow-Methods", "*")
-        .status(StatusCode::OK)
-        .body("".into())
-        .unwrap()
+async fn off(client: HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.off(light_num).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} turned off", light_num))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
 }
 
-fn not_found() -> Response<Body> {
-    Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body("Not Found".into())
-        .unwrap()
+async fn toggle(client: HueClient, light_num: u8) -> Result<impl warp::Reply, Infallible> {
+    match client.toggle(light_num).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} toggled", light_num))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
 }
 
-fn internal_server_error() -> Response<Body> {
-    Response::builder()
-        .status(StatusCode::INTERNAL_SERVER_ERROR)
-        .body("Internal Server Error".into())
-        .unwrap()
+async fn set_state(client: HueClient, light_num: u8, state: LightStateQuery) -> Result<impl warp::Reply, Infallible> {
+    match client.set_state(light_num, &state.into()).await {
+        Ok(_) => Ok(warp::reply::json(&format!("Light {} state set to\n{:?}", light_num, &state))),
+        Err(e) => Ok(warp::reply::json(&format!("{}", e))),
+    }
 }

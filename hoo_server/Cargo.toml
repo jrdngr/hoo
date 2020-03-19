@@ -6,9 +6,10 @@ edition = "2018"
 
 [dependencies]
 hoo_api = { path = "../hoo_api" }
+hoo_api_types = { path = "../hoo_api_types" }
 anyhow = "1.0"
 dotenv = "0.15"
-hyper = "0.13"
 regex = "1.3"
 structopt = "0.3"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "0.2", features = ["macros"] }
+warp = "^0.2"
