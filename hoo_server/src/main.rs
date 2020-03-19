@@ -17,28 +17,30 @@ async fn main() -> Result<()> {
 
     let client = HueClient::new(&options.hue_base_uri, &options.hue_user_id);
 
-    let light = warp::path!("light" / u8);
+    let client_clone = client.clone();
+    let all_lights = warp::get()
+        .and(warp::path("lights")
+        .and_then(move || get_all_lights(client_clone.clone())));
     
     let client_clone = client.clone();
-    let all_lights = warp::get().and(warp::path("lights").and_then(move || get_all_lights(client_clone.clone())));
-    
-    let client_clone = client.clone();
-    let get_light = warp::get().and(light).and_then(move |light_num| get_light(client_clone.clone(), light_num));
+    let get_light = warp::get()
+        .and(warp::path!("light" / u8))
+        .and_then(move |light_num| get_light(client_clone.clone(), light_num));
 
     let client_clone = client.clone();
-    let light_on = light.and(warp::path("on"))
+    let light_on = warp::path!("light" / u8 / "on")
         .and_then(move |light_num| on(client_clone.clone(), light_num));
 
     let client_clone = client.clone();
-    let light_off = light.and(warp::path("off"))
+    let light_off = warp::path!("light" / u8 / "off")
         .and_then(move |light_num| off(client_clone.clone(), light_num));
 
     let client_clone = client.clone();
-    let light_toggle = light.and(warp::path("toggle"))
+    let light_toggle = warp::path!("light" / u8 / "toggle")
         .and_then(move |light_num| toggle(client_clone.clone(), light_num));
     
     let client_clone = client.clone();
-    let light_state = light.and(warp::path("state"))
+    let light_state = warp::path!("light" / u8 / "state")
         .and(warp::body::json())
         .and_then(move |light_num, state| set_state(client_clone.clone(), light_num, state));
 

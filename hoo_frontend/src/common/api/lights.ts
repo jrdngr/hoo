@@ -17,25 +17,25 @@ export async function getLight(lightNumber: number): Promise<HooLight> {
 
 export async function on(lightNumber: number) {
     const url = `${BASE_URL}/light/${lightNumber}/on`;
-    await fetch(url);
+    await fetch(url, { method: 'PUT' });
 }
 
 export async function off(lightNumber: number) {
     const url = `${BASE_URL}/light/${lightNumber}/off`;
-    await fetch(url);
+    await fetch(url, { method: 'PUT' });
 }
 
 export async function setBrightness(lightNumber: number, brightness: number) {
     const url = `${BASE_URL}/light/${lightNumber}/state?bri=${brightness}`;
-    await fetch(url);
+    await fetch(url, { method: 'PUT' });
 }
 
 export async function setSaturation(lightNumber: number, saturation: number) {
     const url = `${BASE_URL}/light/${lightNumber}/state?sat=${saturation}`;
-    await fetch(url);
+    await fetch(url, { method: 'PUT' });
 }
 
 export async function setHue(lightNumber: number, hue: number) {
     const url = `${BASE_URL}/light/${lightNumber}/state?hue=${hue}`;
-    await fetch(url);
+    await fetch(url, { method: 'PUT' });
 }
