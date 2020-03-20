@@ -13,6 +13,10 @@
       <input id="hold-time" type="number" min="0" max="65535" v-model="holdTime" />
       <label for="hold-time">Hold time</label>
     </div>
+    <div class="control">
+        <input id="light-numbers" type="text" v-model="lightNumbers" />
+        <label for="light-numbers">Light Numbers</label>
+    </div>
   </div>
 </template>
 
@@ -26,18 +30,20 @@ export default Vue.extend({
     data() {
         const transitionTime: number = 10;
         const holdTime: number = 0;
+        const lightNumbers: string = "";
 
         return {
             transitionTime,
             holdTime,
+            lightNumbers,
         };
     },
     methods: {
         async rotate(event: any) {
-            await AnimationApi.rotate(this.transitionTime, this.holdTime);
+            await AnimationApi.rotate(this.transitionTime, this.holdTime, this.lightNumbers);
         },
         async random(event: any) {
-            await AnimationApi.random(this.transitionTime, this.holdTime);
+            await AnimationApi.random(this.transitionTime, this.holdTime, this.lightNumbers);
         },
         async stop(event: any) {
             await AnimationApi.stop();
@@ -51,6 +57,6 @@ export default Vue.extend({
     display: inline-block;
     border: 1px solid gray;
     padding: 10px;
-    width: 400px;
+    width: 500px;
 }
 </style>
