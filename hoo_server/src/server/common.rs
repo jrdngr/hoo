@@ -18,16 +18,32 @@ pub struct AnimationSettings {
 #[derive(Debug, Deserialize)]
 pub struct AnimationQuery {
     pub lights: String,
+    pub hues: Option<String>,
 }
 
 impl AnimationQuery {
-    pub fn as_light_vec(&self) -> Vec<u8> {
+    pub fn light_vec(&self) -> Vec<u8> {
         use std::str::FromStr;
 
         self.lights.split(',')
             .map(u8::from_str)
             .filter_map(Result::ok)
             .collect()
+    }
+
+    pub fn hue_vec(&self) -> Option<Vec<u16>> {
+        match &self.hues {
+            Some(hues) => Some({
+                use std::str::FromStr;
+
+                hues.split(',')
+                    .map(u16::from_str)
+                    .filter_map(Result::ok)
+                    .collect()
+        
+            }),
+            None => None,
+        }
     }
 }
 

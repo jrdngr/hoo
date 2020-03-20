@@ -113,11 +113,11 @@ impl<T: ApiConnection> Hoo<T> {
                     HooCommand::State(light_num, state) => {
                         let _ = self.connection.set_state(light_num, &state);
                     }
-                    HooCommand::Rotate(tt, ht, light_numbers) => {
+                    HooCommand::Rotate(tt, ht, light_numbers, hues) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            RotateAnimation::new(&self.connection, transition_time, hold_time, &light_numbers)
+                            RotateAnimation::new(&self.connection, transition_time, hold_time, &light_numbers, hues)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());
@@ -187,7 +187,7 @@ pub enum HooCommand {
     ColorLoop(LightNumber, bool),
     TransitionTime(LightNumber, TransitionTime),
     State(LightNumber, LightState),
-    Rotate(TransitionTime, HoldTime, Vec<LightNumber>),
+    Rotate(TransitionTime, HoldTime, Vec<LightNumber>, Option<Vec<u16>>),
     Rainbow(Duration),
     Random(TransitionTime, HoldTime, Vec<LightNumber>),
     StopAnimation,

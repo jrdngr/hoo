@@ -16,6 +16,7 @@ impl RotateAnimation {
         transition_time: Duration,
         hold_time: Duration,
         light_numbers: &[LightNumber],
+        hues: Option<Vec<u16>>,
     ) -> Result<Self, failure::Error> {
         let all_lights = connection.get_active_lights()?.0;
 
@@ -26,11 +27,32 @@ impl RotateAnimation {
         let mut active_lights = Vec::new();
         let mut light_states = Vec::new();
 
-        for (light_num, light) in selected_lights {
-            if let Some(color) = light.state.get_color() {
-                active_lights.push(light_num);
-                light_states.push(LightState::new().color(&color));
-            }
+        for (light_num, light) in &selected_lights {
+            active_lights.push(*light_num);
+        }
+
+        match hues {
+            Some(hues) => {
+                let brightness_sum: u8 = selected_lights
+                    .iter()
+                    .flat_map(|(_, light)| light.state.bri)
+                    .sum();
+
+                let average_brightness = brightness_sum / selected_lights.len() as u8;
+
+                for hue in hues {
+                    light_states.push(
+                        LightState::new().hue(hue).sat(255).bri(average_brightness)
+                    )
+                }
+            },
+            None => {
+                for (light_num, light) in selected_lights {
+                    if let Some(color) = light.state.get_color() {
+                        light_states.push(LightState::new().color(&color));
+                    }
+                }
+            },
         }
 
         let mut frames = Vec::new();
