@@ -1,7 +1,11 @@
 import { BASE_URL } from '@/common/constants';
 
-export async function rotate(transitionTime: number, holdTime: number, lightNumbers: string): Promise<void> {
-    const url = `${BASE_URL}/rotate/${transitionTime}/${holdTime}?lights=${lightNumbers}`;
+export async function rotate(transitionTime: number, holdTime: number, lightNumbers: string, hues: number[]): Promise<void> {
+    let hueString = "";
+    if (hues.length > 0) {
+        hueString = `&hues=${hues.join(',')}`;
+    }
+    const url = `${BASE_URL}/rotate/${transitionTime}/${holdTime}?lights=${lightNumbers}${hueString}`;
     await fetch(url);
 }
 

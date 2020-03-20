@@ -33,16 +33,17 @@ impl RotateAnimation {
 
         match hues {
             Some(hues) => {
-                let brightness_sum: u8 = selected_lights
+                let brightness_sum: usize = selected_lights
                     .iter()
                     .flat_map(|(_, light)| light.state.bri)
+                    .map(|bri| bri as usize)
                     .sum();
 
-                let average_brightness = brightness_sum / selected_lights.len() as u8;
+                let average_brightness = brightness_sum / selected_lights.len();
 
                 for hue in hues {
                     light_states.push(
-                        LightState::new().hue(hue).sat(255).bri(average_brightness)
+                        LightState::new().hue(hue).sat(255).bri(average_brightness as u8)
                     )
                 }
             },
