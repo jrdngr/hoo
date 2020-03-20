@@ -17,7 +17,18 @@ pub struct AnimationSettings {
 
 #[derive(Debug, Deserialize)]
 pub struct AnimationQuery {
-    pub lights: Vec<u8>,
+    pub lights: String,
+}
+
+impl AnimationQuery {
+    pub fn as_light_vec(&self) -> Vec<u8> {
+        use std::str::FromStr;
+
+        self.lights.split(',')
+            .map(u8::from_str)
+            .filter_map(Result::ok)
+            .collect()
+    }
 }
 
 #[derive(Debug, Serialize)]

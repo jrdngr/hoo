@@ -94,12 +94,12 @@ fn light_state(
 }
 
 fn rotate(state: Data<AppState>, info: Path<(u16, u16)>, query: Query<AnimationQuery>) -> HttpResponse {
-    let _ = state.sender.send(HooCommand::Rotate(info.0, info.1, query.lights.clone()));
+    let _ = state.sender.send(HooCommand::Rotate(info.0, info.1, query.as_light_vec()));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
 fn random(state: Data<AppState>, info: Path<(u16, u16)>, query: Query<AnimationQuery>) -> HttpResponse {
-    let _ = state.sender.send(HooCommand::Random(info.0, info.1, query.lights.clone()));
+    let _ = state.sender.send(HooCommand::Random(info.0, info.1, query.as_light_vec()));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
@@ -107,7 +107,7 @@ fn animate(state: Data<AppState>, data: Json<AnimationSettings>, query: Query<An
     println!("data: {:?}", data);
     let _ = state
         .sender
-        .send(HooCommand::Rotate(data.transition_time, data.hold_time, query.lights.clone()));
+        .send(HooCommand::Rotate(data.transition_time, data.hold_time, query.as_light_vec()));
 
     HttpResponse::Ok().json(HooResponse::default())
 }
