@@ -13,8 +13,8 @@ impl RotateAnimation {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         connection: &ApiConnection,
-        transition_time: &Duration,
-        hold_time: &Duration,
+        transition_time: Duration,
+        hold_time: Duration,
         light_numbers: &[LightNumber],
     ) -> Result<Self, failure::Error> {
         let all_lights = connection.get_active_lights()?.0;
@@ -44,8 +44,8 @@ impl RotateAnimation {
             let light_states_copy = light_states.clone();
 
             let frame = AnimationFrame {
-                hold_time: *hold_time,
-                transition_time: Some(*transition_time),
+                hold_time: hold_time,
+                transition_time: Some(transition_time),
                 states: active_lights_copy
                     .into_iter()
                     .zip(light_states_copy)

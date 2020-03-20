@@ -11,11 +11,11 @@ use crate::animation::dynamic::{
 
 pub fn create_random_animation<'a>(
     connection: &'a ApiConnection,
-    transition_time: &Duration,
-    hold_time: &Duration,
+    transition_time: Duration,
+    hold_time: Duration,
     light_numbers: &[LightNumber],
 ) -> Result<DynamicAnimation<'a>, failure::Error> {
-    let mut animation = DynamicAnimation::new(connection, hold_time)?;
+    let mut animation = DynamicAnimation::new(connection, hold_time + transition_time)?;
 
     let transition_millis =
         transition_time.as_secs() * 1000 + u64::from(transition_time.subsec_millis());
@@ -26,7 +26,6 @@ pub fn create_random_animation<'a>(
     let selected_lights: HashMap<LightNumber, Light> = all_lights.into_iter()
         .filter(|(light_num, _)| light_numbers.contains(light_num))
         .collect();
-
 
     let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
     for light_num in selected_lights.keys() {

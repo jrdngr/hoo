@@ -117,7 +117,7 @@ impl<T: ApiConnection> Hoo<T> {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            RotateAnimation::new(&self.connection, &transition_time, &hold_time, &light_numbers)
+                            RotateAnimation::new(&self.connection, transition_time, hold_time, &light_numbers)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());
@@ -126,7 +126,7 @@ impl<T: ApiConnection> Hoo<T> {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            create_random_animation(&self.connection, &transition_time, &hold_time, &light_numbers)
+                            create_random_animation(&self.connection, transition_time, hold_time, &light_numbers)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());

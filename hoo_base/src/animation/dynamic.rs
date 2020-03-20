@@ -36,11 +36,11 @@ impl<'a> DynamicAnimation<'a> {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         connection: &'a ApiConnection,
-        hold_time: &Duration,
+        hold_time: Duration,
     ) -> Result<Self, failure::Error> {
         Ok(Self {
             connection,
-            hold_time: *hold_time,
+            hold_time: hold_time,
             steps: Vec::new(),
             current_index: 0,
         })
@@ -62,7 +62,7 @@ impl<'a> DynamicAnimation<'a> {
         let next_step = &self.steps[self.current_index];
         self.current_index += 1;
 
-        next_step.as_animation_frame(lights, &self.hold_time)
+        next_step.as_animation_frame(lights, self.hold_time)
     }
 }
 
@@ -74,7 +74,7 @@ impl DynamicAnimationStep {
     pub fn as_animation_frame(
         &self,
         lights: &LightCollection,
-        hold_time: &Duration,
+        hold_time: Duration,
     ) -> AnimationFrame {
         let mut states: HashMap<LightNumber, LightState> = HashMap::new();
 
@@ -86,7 +86,7 @@ impl DynamicAnimationStep {
         }
 
         AnimationFrame {
-            hold_time: *hold_time,
+            hold_time: hold_time,
             transition_time: None,
             states,
         }
