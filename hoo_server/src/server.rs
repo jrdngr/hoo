@@ -6,7 +6,7 @@ use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
 
 pub use app_state::AppState;
-pub use common::{AnimationSettings, HooError, HooResponse, RGB};
+pub use common::{AnimationSettings, AnimationQuery, HooError, HooResponse, RGB};
 use hoo_api::light::{Light, LightCollection, LightState};
 use hoo_base::{HooCommand, HooConfig};
 
@@ -93,21 +93,21 @@ fn light_state(
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn rotate(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
-    let _ = state.sender.send(HooCommand::Rotate(info.0, info.1));
+fn rotate(state: Data<AppState>, info: Path<(u16, u16)>, query: Query<AnimationQuery>) -> HttpResponse {
+    let _ = state.sender.send(HooCommand::Rotate(info.0, info.1, query.lights.clone()));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn random(state: Data<AppState>, info: Path<(u16, u16)>) -> HttpResponse {
-    let _ = state.sender.send(HooCommand::Random(info.0, info.1));
+fn random(state: Data<AppState>, info: Path<(u16, u16)>, query: Query<AnimationQuery>) -> HttpResponse {
+    let _ = state.sender.send(HooCommand::Random(info.0, info.1, query.lights.clone()));
     HttpResponse::Ok().json(HooResponse::default())
 }
 
-fn animate(state: Data<AppState>, data: Json<AnimationSettings>) -> HttpResponse {
+fn animate(state: Data<AppState>, data: Json<AnimationSettings>, query: Query<AnimationQuery>) -> HttpResponse {
     println!("data: {:?}", data);
     let _ = state
         .sender
-        .send(HooCommand::Rotate(data.transition_time, data.hold_time));
+        .send(HooCommand::Rotate(data.transition_time, data.hold_time, query.lights.clone()));
 
     HttpResponse::Ok().json(HooResponse::default())
 }

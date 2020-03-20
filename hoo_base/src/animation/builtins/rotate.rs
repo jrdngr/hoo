@@ -1,7 +1,8 @@
+use std::collections::HashMap;
 use std::time::Duration;
 
 use crate::animation::{AnimationFrame, LoopingAnimation};
-use hoo_api::light::LightState;
+use hoo_api::light::{Light, LightNumber, LightState};
 use hoo_api::ApiConnection;
 
 pub struct RotateAnimation {
@@ -14,13 +15,18 @@ impl RotateAnimation {
         connection: &ApiConnection,
         transition_time: &Duration,
         hold_time: &Duration,
+        light_numbers: &[LightNumber],
     ) -> Result<Self, failure::Error> {
         let all_lights = connection.get_active_lights()?.0;
+
+        let selected_lights: HashMap<LightNumber, Light> = all_lights.into_iter()
+            .filter(|(light_num, _)| light_numbers.contains(light_num))
+            .collect();
 
         let mut active_lights = Vec::new();
         let mut light_states = Vec::new();
 
-        for (light_num, light) in all_lights {
+        for (light_num, light) in selected_lights {
             if let Some(color) = light.state.get_color() {
                 active_lights.push(light_num);
                 light_states.push(LightState::new().color(&color));

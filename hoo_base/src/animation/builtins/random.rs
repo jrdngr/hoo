@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use hoo_api::light::LightNumber;
+use hoo_api::light::{Light, LightNumber};
 use hoo_api::ApiConnection;
 
 use crate::animation::dynamic::{
@@ -13,6 +13,7 @@ pub fn create_random_animation<'a>(
     connection: &'a ApiConnection,
     transition_time: &Duration,
     hold_time: &Duration,
+    light_numbers: &[LightNumber],
 ) -> Result<DynamicAnimation<'a>, failure::Error> {
     let mut animation = DynamicAnimation::new(connection, hold_time)?;
 
@@ -20,10 +21,15 @@ pub fn create_random_animation<'a>(
         transition_time.as_secs() * 1000 + u64::from(transition_time.subsec_millis());
     let transition_hue_units = (transition_millis / 100) as u16;
 
-    let lights = connection.get_active_lights()?.clone();
+    let all_lights = connection.get_active_lights()?.0;
+
+    let selected_lights: HashMap<LightNumber, Light> = all_lights.into_iter()
+        .filter(|(light_num, _)| light_numbers.contains(light_num))
+        .collect();
+
 
     let mut transforms: HashMap<LightNumber, LightStateTransform> = HashMap::new();
-    for light_num in lights.0.keys() {
+    for light_num in selected_lights.keys() {
         let transform = LightStateTransform {
             hue: Some(LightStateValueOperation::Set(LightStateValue::Random)),
             saturation: Some(LightStateValueOperation::Set(LightStateValue::RandomRange(200, 255))),

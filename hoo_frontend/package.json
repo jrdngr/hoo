@@ -12,6 +12,7 @@
         "vue": "^2.6.10"
     },
     "devDependencies": {
+        "@vue/cli": "^4.2.3",
         "@vue/cli-plugin-babel": "^3.9.2",
         "@vue/cli-plugin-typescript": "^3.9.0",
         "@vue/cli-service": "^3.9.2",

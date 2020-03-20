@@ -113,20 +113,20 @@ impl<T: ApiConnection> Hoo<T> {
                     HooCommand::State(light_num, state) => {
                         let _ = self.connection.set_state(light_num, &state);
                     }
-                    HooCommand::Rotate(tt, ht) => {
+                    HooCommand::Rotate(tt, ht, light_numbers) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            RotateAnimation::new(&self.connection, &transition_time, &hold_time)
+                            RotateAnimation::new(&self.connection, &transition_time, &hold_time, &light_numbers)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());
                     }
-                    HooCommand::Random(tt, ht) => {
+                    HooCommand::Random(tt, ht, light_numbers) => {
                         let transition_time = Duration::from_secs(u64::from(tt));
                         let hold_time = Duration::from_secs(u64::from(ht));
                         let anim =
-                            create_random_animation(&self.connection, &transition_time, &hold_time)
+                            create_random_animation(&self.connection, &transition_time, &hold_time, &light_numbers)
                                 .unwrap();
                         animation = Some(Box::new(anim));
                         next_frame_time = Some(Instant::now());
@@ -187,9 +187,9 @@ pub enum HooCommand {
     ColorLoop(LightNumber, bool),
     TransitionTime(LightNumber, TransitionTime),
     State(LightNumber, LightState),
-    Rotate(TransitionTime, HoldTime),
+    Rotate(TransitionTime, HoldTime, Vec<LightNumber>),
     Rainbow(Duration),
-    Random(TransitionTime, HoldTime),
+    Random(TransitionTime, HoldTime, Vec<LightNumber>),
     StopAnimation,
     GetLight(LightNumber, Sender<Light>),
     GetAllLights(Sender<LightCollection>),

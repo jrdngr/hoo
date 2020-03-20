@@ -15,6 +15,11 @@ pub struct AnimationSettings {
     pub hold_time: u16,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct AnimationQuery {
+    pub lights: Vec<u8>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct HooResponse {
     pub message: String,
