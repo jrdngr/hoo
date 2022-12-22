@@ -1,6 +1,7 @@
 use actix_cors::Cors;
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{web, App, HttpResponse, HttpServer, Result};
+use hoo_api::Motion;
 
 use std::sync::mpsc::{self, Sender};
 use std::time::Duration;
@@ -44,13 +45,14 @@ impl HooServer {
                             web::resource("/light/{light_num}").route(web::get().to(get_light)),
                         )
                         .service(web::resource("/lights").route(web::get().to(get_all_lights)))
+                        .service(web::resource("/motion").route(web::get().to(get_all_motion_sensors)))
                         .service(
                             web::scope("/{light_num}")
                                 .service(web::resource("/on").route(web::get().to(on)))
                                 .service(web::resource("/off").route(web::get().to(off)))
                                 .service(web::resource("/color").route(web::get().to(color)))
                                 .service(web::resource("/state").route(web::get().to(light_state))),
-                        ),
+                        )
                 )
                 .service(
                     actix_files::Files::new("/", "./hoo_frontend/dist/").index_file("index.html"),
@@ -135,6 +137,17 @@ fn get_all_lights(state: Data<AppState>) -> Result<Json<LightCollection>> {
     let response = receiver.recv_timeout(TIMEOUT);
     match response {
         Ok(lights) => Ok(Json(lights)),
+        Err(_) => Err(HooError::default().into()),
+    }
+}
+
+fn get_all_motion_sensors(state: Data<AppState>) -> Result<Json<Vec<Motion>>> {
+    let (sender, receiver) = mpsc::channel::<Vec<Motion>>();
+    let _ = state.sender.send(HooCommand::GetAllMotionSensors(sender));
+
+    let response = receiver.recv_timeout(TIMEOUT);
+    match response {
+        Ok(motion) => Ok(Json(motion)),
         Err(_) => Err(HooError::default().into()),
     }
 }

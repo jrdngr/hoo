@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::Motion;
 use crate::connection::ApiConnection;
 use crate::light::{Light, LightCollection, LightEffect, LightState};
 
@@ -51,6 +52,23 @@ impl ApiConnection for StandardApiConnection {
         let light = serde_json::from_str(&response)?;
 
         Ok(light)
+    }
+
+    fn get_all_motion_sensors(&self) -> Result<Vec<Motion>, failure::Error> {
+        let uri = format!("{}/sensors", self.base());
+
+        let response = self.client.get(&uri).send()?.text()?;
+
+        let sensors: HashMap<u32, serde_json::Value> = serde_json::from_str(&response)?;
+        
+        let mut motion_sensors = Vec::new();
+        for (_, sensor) in sensors {
+            if let Ok(motion_sensor) = serde_json::from_value(sensor) {
+                motion_sensors.push(motion_sensor);
+            }
+        }
+
+        Ok(motion_sensors)
     }
 
     fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, failure::Error> {

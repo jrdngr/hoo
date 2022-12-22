@@ -15,7 +15,7 @@ pub use operation::{LightOnStateOperation, LightStateValueOperation, LightStateV
 pub use transform::LightStateTransform;
 
 pub struct DynamicAnimation<'a> {
-    connection: &'a ApiConnection,
+    connection: &'a dyn ApiConnection,
     hold_time: Duration,
     steps: Vec<DynamicAnimationStep>,
     current_index: usize,
@@ -35,7 +35,7 @@ impl<'a> Iterator for DynamicAnimation<'a> {
 impl<'a> DynamicAnimation<'a> {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
-        connection: &'a ApiConnection,
+        connection: &'a dyn ApiConnection,
         hold_time: Duration,
     ) -> Result<Self, failure::Error> {
         Ok(Self {

@@ -15,6 +15,13 @@ export async function getLight(lightNumber: number): Promise<HooLight> {
     return light;
 }
 
+export async function getAllMotionSensors(): Promise<HooMotionSensor[]> {
+    const url = `${BASE_URL}/motion`;
+    const response = await fetch(url);
+    const lights: HooMotionSensor[] = await response.json();
+    return lights;
+}
+
 export async function on(lightNumber: number) {
     const url = `${BASE_URL}/${lightNumber}/on`;
     await fetch(url);

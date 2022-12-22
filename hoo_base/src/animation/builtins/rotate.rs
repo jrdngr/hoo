@@ -12,7 +12,7 @@ pub struct RotateAnimation {
 impl RotateAnimation {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
-        connection: &ApiConnection,
+        connection: &dyn ApiConnection,
         transition_time: Duration,
         hold_time: Duration,
         light_numbers: &[LightNumber],
@@ -27,7 +27,7 @@ impl RotateAnimation {
         let mut active_lights = Vec::new();
         let mut light_states = Vec::new();
 
-        for (light_num, light) in &selected_lights {
+        for (light_num, _light) in &selected_lights {
             active_lights.push(*light_num);
         }
 
@@ -48,7 +48,7 @@ impl RotateAnimation {
                 }
             },
             None => {
-                for (light_num, light) in selected_lights {
+                for (_light_num, light) in selected_lights {
                     if let Some(color) = light.state.get_color() {
                         light_states.push(LightState::new().color(&color));
                     }

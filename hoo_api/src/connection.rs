@@ -1,3 +1,4 @@
+use crate::Motion;
 use crate::light::{Light, LightCollection, LightState};
 
 pub mod standard;
@@ -10,6 +11,7 @@ pub trait ApiConnection {
     fn get_all_lights(&self) -> Result<LightCollection, failure::Error>;
     fn get_active_lights(&self) -> Result<LightCollection, failure::Error>;
     fn get_light(&self, light_number: u8) -> Result<Light, failure::Error>;
+    fn get_all_motion_sensors(&self) -> Result<Vec<Motion>, failure::Error>;
     fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, failure::Error>;
     fn on(&self, light_number: u8) -> Result<String, failure::Error>;
     fn off(&self, light_number: u8) -> Result<String, failure::Error>;

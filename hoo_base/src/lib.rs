@@ -13,7 +13,7 @@ use hoo_api::connection::standard::StandardApiConnection;
 use hoo_api::connection::testing::TestingApiConnection;
 
 use hoo_api::light::{Light, LightCollection, LightState};
-use hoo_api::ApiConnection;
+use hoo_api::{ApiConnection, Motion};
 
 pub use crate::config::HooConfig;
 
@@ -59,7 +59,7 @@ impl Hoo<StandardApiConnection> {
 
     pub fn with_config_file<P: AsRef<Path>>(
         file_path: P,
-    ) -> Result<(Self, Sender<HooCommand>), Box<Error>> {
+    ) -> Result<(Self, Sender<HooCommand>), Box<dyn Error>> {
         let config = HooConfig::from_file(file_path)?;
         Ok(Self::with_config(config))
     }
@@ -144,6 +144,12 @@ impl<T: ApiConnection> Hoo<T> {
                             let _ = sender.send(lights);
                         }
                     }
+                    HooCommand::GetAllMotionSensors(sender) => {
+                        let response = self.connection.get_all_motion_sensors();
+                        if let Ok(lights) = response {
+                            let _ = sender.send(lights);
+                        }
+                    }
                     HooCommand::Quit => return,
                     _ => println!("Not implemented"),
                 }
@@ -193,5 +199,6 @@ pub enum HooCommand {
     StopAnimation,
     GetLight(LightNumber, Sender<Light>),
     GetAllLights(Sender<LightCollection>),
+    GetAllMotionSensors(Sender<Vec<Motion>>),
     Quit,
 }

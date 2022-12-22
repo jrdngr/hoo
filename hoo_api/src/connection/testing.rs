@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 
 use failure::format_err;
 
+use crate::Motion;
 use crate::connection::ApiConnection;
 use crate::light::{Light, LightCollection, LightEffect, LightState};
 
@@ -89,6 +90,10 @@ impl ApiConnection for TestingApiConnection {
             .ok_or_else(|| format_err!("Light {} not found", &light_number))?;
 
         Ok(light.clone())
+    }
+
+    fn get_all_motion_sensors(&self) -> Result<Vec<Motion>, failure::Error> {
+        unimplemented!()
     }
 
     fn set_state(&self, light_number: u8, state: &LightState) -> Result<String, failure::Error> {

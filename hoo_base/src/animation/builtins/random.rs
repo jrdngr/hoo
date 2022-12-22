@@ -10,7 +10,7 @@ use crate::animation::dynamic::{
 };
 
 pub fn create_random_animation<'a>(
-    connection: &'a ApiConnection,
+    connection: &'a dyn ApiConnection,
     transition_time: Duration,
     hold_time: Duration,
     light_numbers: &[LightNumber],
