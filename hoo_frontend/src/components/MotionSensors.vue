@@ -1,5 +1,9 @@
 <template>
-  <p>hi!</p>
+  <ul>
+    <li v-for="sensor in sensors" :key="sensor.name">
+      <h1 :class="{ red: sensor.state.presence}">{{ sensor.name }}</h1>
+    </li>
+  </ul>
 </template>
 
 <script lang="ts">
@@ -23,7 +27,14 @@ export default Vue.extend({
     },
     methods: {
         async updateState() {
-          this.sensors = await LightApi.getAllMotionSensors();
+          while (this.sensors.length > 0) {
+            this.sensors.pop();
+          }
+          const sensors = await LightApi.getAllMotionSensors();
+          sensors.forEach(sensor => this.sensors.push(sensor))
+          console.log(this.sensors);
+
+          await setTimeout(() => this.updateState(), POLLING_DELAY_MS);
         },
     },
 });
@@ -32,5 +43,11 @@ export class MotionSensors extends Vue {}
 </script>
 
 <style scoped>
+.red {
+  color: red;
+}
 
+h1 {
+  color: black;
+}
 </style>

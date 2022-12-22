@@ -6,6 +6,10 @@ export class HooMotionSensor {
         this.name = name;
         this.state = state;
     }
+
+    public triggered(): boolean {
+        return this.state.presence;
+    }
 }
 
 export interface MotionState {
