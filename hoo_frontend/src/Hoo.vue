@@ -1,11 +1,12 @@
 <template>
   <div id="hoo">
-    <animation-controls />
+    <MotionSensors />
+    <!-- <animation-controls />
     <ul>
       <li v-for="light in lights" :key="light.number">
         <LightControls v-bind:light="light" />
       </li>
-    </ul>
+    </ul> -->
   </div>
 </template>
 
@@ -14,11 +15,12 @@ import Vue from 'vue';
 import { Light, HooLight, FakeLight } from '@/common/types/light';
 import LightControls from '@/components/LightControls.vue';
 import AnimationControls from '@/components/AnimationControls.vue';
+import MotionSensors from '@/components/MotionSensors.vue';
 import * as LightApi from '@/common/api/lights';
 
 export default Vue.extend({
     name: 'hoo',
-    components: { LightControls, AnimationControls },
+    components: { LightControls, AnimationControls, MotionSensors },
     data() {
         const lights: Light[] = [];
         return {

@@ -1,5 +1,6 @@
 import { BASE_URL } from '@/common/constants';
 import { Light, HooLight } from '@/common/types/light';
+import { HooMotionSensor } from '../types/motion';
 
 export async function getAllLights(): Promise<HooLight[]> {
     const url = `${BASE_URL}/lights`;
